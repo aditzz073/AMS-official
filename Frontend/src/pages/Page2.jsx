@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../helper/axiosInstance";
 import toast from "react-hot-toast";
 import { generateSimpleFPMIPDF } from "../utils/simplePdfGenerator";
+import { useRoleBasedData } from "../hooks/useRoleBasedData";
 
-const Page2 = ({ formData, setFormData, onNext, onPrevious }) => {
+const Page2 = ({ formData, setFormData, onNext, onPrevious, userRole, isReadOnly }) => {
+  const { canViewColumn } = useRoleBasedData(userRole, formData);
   const categories = [
     { key: "TLP", title: "Teaching Learning Process (TLP)", max: 80 },
     { key: "PDRC", title: "Professional Development and Research Contribution (PDRC)", max: 90 },
@@ -162,19 +164,31 @@ const Page2 = ({ formData, setFormData, onNext, onPrevious }) => {
               <tr key={idx}>
                 <td className="border px-4 py-2">{row.title}</td>
                 <td className="border px-4 py-2">{row.max}</td>
-                {["Self", "HoD", "External"].map((field) => (
-                  <td key={field} className="border px-4 py-2">
-                    {categoriesTotal[`${row.key}${field}`] || "0"}
-                  </td>
-                ))}
+                {["Self", "HoD", "External"].map((field, fieldIdx) => {
+                  const columnType = field.toLowerCase() === 'hod' ? 'hod' : field.toLowerCase();
+                  const shouldShow = canViewColumn(columnType);
+                  const value = categoriesTotal[`${row.key}${field}`] || "0";
+                  
+                  return (
+                    <td key={field} className="border px-4 py-2">
+                      {shouldShow ? value : "—"}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
             <tr className="font-bold">
               <td className="border px-4 py-2">Total</td>
               <td className="border px-4 py-2">300</td>
-              <td className="border px-4 py-2">{totalSelf || "0"}</td>
-              <td className="border px-4 py-2">{totalHoD || "0"}</td>
-              <td className="border px-4 py-2">{totalExternal || "0"}</td>
+              <td className="border px-4 py-2">
+                {canViewColumn('self') ? (totalSelf || "0") : "—"}
+              </td>
+              <td className="border px-4 py-2">
+                {canViewColumn('hod') ? (totalHoD || "0") : "—"}
+              </td>
+              <td className="border px-4 py-2">
+                {canViewColumn('external') ? (totalExternal || "0") : "—"}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -204,7 +218,11 @@ const Page2 = ({ formData, setFormData, onNext, onPrevious }) => {
                   name="HODName"
                   value={formData.HODName}
                   onChange={handleChangeSignature}
-                  className="border border-gray-400 rounded px-2 py-1 w-full"
+                  readOnly={userRole !== 'hod' && userRole !== 'admin'}
+                  disabled={userRole !== 'hod' && userRole !== 'admin'}
+                  className={`border border-gray-400 rounded px-2 py-1 w-full ${
+                    userRole !== 'hod' && userRole !== 'admin' ? 'bg-gray-100 text-gray-600' : ''
+                  }`}
                 />
               </td>
             </tr>
@@ -218,7 +236,11 @@ const Page2 = ({ formData, setFormData, onNext, onPrevious }) => {
                   name="externalEvaluatorName"
                   value={formData.externalEvaluatorName}
                   onChange={handleChangeSignature}
-                  className="border border-gray-400 rounded px-2 py-1 w-full"
+                  readOnly={userRole !== 'external' && userRole !== 'admin'}
+                  disabled={userRole !== 'external' && userRole !== 'admin'}
+                  className={`border border-gray-400 rounded px-2 py-1 w-full ${
+                    userRole !== 'external' && userRole !== 'admin' ? 'bg-gray-100 text-gray-600' : ''
+                  }`}
                 />
               </td>
               <td className="border border-gray-300 px-4 py-2">Signature Name of the Principal</td>
@@ -228,7 +250,11 @@ const Page2 = ({ formData, setFormData, onNext, onPrevious }) => {
                   name="principleName"
                   value={formData.principleName}
                   onChange={handleChangeSignature}
-                  className="border border-gray-400 rounded px-2 py-1 w-full"
+                  readOnly={userRole !== 'principal' && userRole !== 'admin'}
+                  disabled={userRole !== 'principal' && userRole !== 'admin'}
+                  className={`border border-gray-400 rounded px-2 py-1 w-full ${
+                    userRole !== 'principal' && userRole !== 'admin' ? 'bg-gray-100 text-gray-600' : ''
+                  }`}
                 />
               </td>
             </tr>

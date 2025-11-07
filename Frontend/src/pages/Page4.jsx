@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import RoleBasedInput from "../components/RoleBasedInput";
+import useRoleBasedData from "../hooks/useRoleBasedData";
+import { FormProvider } from "../contexts/FormContext";
 
 const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole }) => {
     const [previewImages, setPreviewImages] = useState({});
+    const { canEditColumn } = useRoleBasedData(userRole, formData);
   
   const handleInputChange = (e, key) => {
     const { value } = e.target;
@@ -156,6 +160,7 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
   };
   console.log(formData);
     return (
+    <FormProvider userRole={userRole} formData={formData} handleInputChange={handleInputChange}>
     <div className="p-6  min-h-screen">
       <h3 className="text-xl font-bold text-center" id="head_pdrc">
         2. Professional Development and Research Contribution (PDRC)
@@ -194,17 +199,14 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td>
             <td className="border px-4 py-2">
             <div className="flex flex-col items-center space-y-2">
-              <input
-                type="number"
-                value={formData["PDRC211Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "PDRC211Self")}
-                min="0"
-                max="10"
+              <RoleBasedInput
+                fieldKey="PDRC211Self"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
                 className="border p-2 w-full"
               />
-              {userRole === "faculty" ? (
+              {canEditColumn('self') ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -229,26 +231,20 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
               </div>
             </td>
               <td className="border px-4 py-2">
-              <input
-                type="number"
-                value={userRole === "external" ? "" :formData["PDRC211HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "PDRC211HoD")}
-                min="0"
-                max="10"
+              <RoleBasedInput
+                fieldKey="PDRC211HoD"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
                 className="border p-2 w-full"
               />
             </td>
             <td className="border px-4 py-2">
-              <input
-                type="number"
-                value={userRole === "hod" ? "" :formData["PDRC211External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "PDRC211External")}
-                min="0"
-                max="10"
+              <RoleBasedInput
+                fieldKey="PDRC211External"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
                 className="border p-2 w-full"
               />
             </td>
@@ -265,17 +261,14 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td>
             <td className="border px-4 py-2">
             <div className="flex flex-col items-center space-y-2">
-              <input
-                type="number"
-                value={formData["PDRC212Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "PDRC212Self")}
-                min="0"
-                max="10"
+              <RoleBasedInput
+                fieldKey="PDRC212Self"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
                 className="border p-2 w-full"
               />
-              {userRole === "faculty" ? (
+              {canEditColumn('self') ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -292,7 +285,7 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   
                   ):<><button
-                  onClick={() => showImagePreview("TLP111Self")}
+                  onClick={() => showImagePreview("PDRC212Self")}
                   className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
                 >
                   View Evidence
@@ -300,26 +293,20 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
               </div>
             </td>
             <td className="border px-4 py-2">
-              <input
-                type="number"
-                value={userRole === "external" ? "" :formData["PDRC212HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "PDRC212HoD")}
-                min="0"
-                max="10"
+              <RoleBasedInput
+                fieldKey="PDRC212HoD"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
                 className="border p-2 w-full"
               />
             </td>
             <td className="border px-4 py-2">
-              <input
-                type="number"
-                value={userRole === "hod" ? "" :formData["PDRC212External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "PDRC212External")}
-                min="0"
-                max="10"
+              <RoleBasedInput
+                fieldKey="PDRC212External"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
                 className="border p-2 w-full"
               />
             </td>
@@ -337,17 +324,14 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td>
             <td className="border px-4 py-2">
             <div className="flex flex-col items-center space-y-2">
-              <input
-                type="number"
-                value={formData["PDRC213Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "PDRC213Self")}
-                min="0"
-                max="10"
+              <RoleBasedInput
+                fieldKey="PDRC213Self"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
                 className="border p-2 w-full"
               />
-              {userRole === "faculty" ? (
+              {canEditColumn('self') ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -364,7 +348,7 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   
                   ):<><button
-                  onClick={() => showImagePreview("TLP111Self")}
+                  onClick={() => showImagePreview("PDRC213Self")}
                   className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
                 >
                   View Evidence
@@ -372,26 +356,20 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
               </div>
             </td>
             <td className="border px-4 py-2">
-              <input
-                type="number"
-                value={userRole === "external" ? "" :formData["PDRC213HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "PDRC213HoD")}
-                min="0"
-                max="10"
+              <RoleBasedInput
+                fieldKey="PDRC213HoD"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
                 className="border p-2 w-full"
               />
             </td>
             <td className="border px-4 py-2">
-              <input
-                type="number"
-                value={userRole === "hod" ? "" :formData["PDRC213External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "PDRC213External")}
-                min="0"
-                max="10"
+              <RoleBasedInput
+                fieldKey="PDRC213External"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
                 className="border p-2 w-full"
               />
             </td>
@@ -413,12 +391,10 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td>
             <td className="border px-4 py-2">
             <div className="flex flex-col items-center space-y-2">
-              <input
+              <RoleBasedInput
+                fieldName="PDRC214Self"
                 type="number"
-                value={formData["PDRC214Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "PDRC214Self")}
+                columnType="self"
                 min="0"
                 max="10"
                 className="border p-2 w-full"
@@ -448,24 +424,20 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
               </div>
             </td>
             <td className="border px-4 py-2">
-              <input
+              <RoleBasedInput
+                fieldName="PDRC214HoD"
                 type="number"
-                value={userRole === "external" ? "" :formData["PDRC214HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "PDRC214HoD")}
+                columnType="hod"
                 min="0"
                 max="10"
                 className="border p-2 w-full"
               />
             </td>
             <td className="border px-4 py-2">
-              <input
+              <RoleBasedInput
+                fieldName="PDRC214External"
                 type="number"
-                value={userRole === "hod" ? "" :formData["PDRC214External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "PDRC214External")}
+                columnType="external"
                 min="0"
                 max="10"
                 className="border p-2 w-full"
@@ -513,12 +485,10 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td> */}
             <td className="border px-4 py-2">
             <div className="flex flex-col items-center space-y-2">
-              <input
+              <RoleBasedInput
+                fieldName="PDRC221Self"
                 type="number"
-                value={formData["PDRC221Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "PDRC221Self")}
+                columnType="self"
                 min="0"
                 max="10"
                 className="border p-2 w-full"
@@ -548,24 +518,20 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
               </div>
             </td>
             <td className="border px-4 py-2">
-              <input
+              <RoleBasedInput
+                fieldName="PDRC221HoD"
                 type="number"
-                value={userRole === "external" ? "" :formData["PDRC221HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "PDRC221HoD")}
+                columnType="hod"
                 min="0"
                 max="10"
                 className="border p-2 w-full"
               />
             </td>
             <td className="border px-4 py-2">
-              <input
+              <RoleBasedInput
+                fieldName="PDRC221External"
                 type="number"
-                value={userRole === "hod" ? "" :formData["PDRC221External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "PDRC221External")}
+                columnType="external"
                 min="0"
                 max="10"
                 className="border p-2 w-full"
@@ -590,12 +556,10 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td>
             <td className="border px-4 py-2">
             <div className="flex flex-col items-center space-y-2">
-              <input
+              <RoleBasedInput
+                fieldName="PDRC222Self"
                 type="number"
-                value={formData["PDRC222Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "PDRC222Self")}
+                columnType="self"
                 min="0"
                 max="10"
                 className="border p-2 w-full"
@@ -625,24 +589,20 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
               </div>
             </td>
             <td className="border px-4 py-2">
-              <input
+              <RoleBasedInput
+                fieldName="PDRC222HoD"
                 type="number"
-                value={userRole === "external" ? "" :formData["PDRC222HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "PDRC222HoD")}
+                columnType="hod"
                 min="0"
                 max="10"
                 className="border p-2 w-full"
               />
             </td>
             <td className="border px-4 py-2">
-              <input
+              <RoleBasedInput
+                fieldName="PDRC222External"
                 type="number"
-                value={userRole === "hod" ? "" :formData["PDRC222External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "PDRC222External")}
+                columnType="external"
                 min="0"
                 max="10"
                 className="border p-2 w-full"
@@ -668,6 +628,7 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
         </button>
       </div>
     </div>
+    </FormProvider>
   );
 };
 

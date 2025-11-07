@@ -1,8 +1,11 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import RoleBasedInput from "../components/RoleBasedInput";
+import useRoleBasedData from "../hooks/useRoleBasedData";
 
 const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole }) => {
         const [previewImages, setPreviewImages] = useState({});
+        const { getFieldValue, isFieldEditable, getSubmissionData } = useRoleBasedData(userRole, formData, setFormData);
     
     const handleInputChange = (e, key) => {
         const { value } = e.target;
@@ -208,14 +211,12 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                             <td className="border p-2">
                             <div className="flex flex-col items-center space-y-2">
 
-                                <input
+                                <RoleBasedInput
+                                    fieldName={`CDL${row.no}Self`}
                                     type="number"
+                                    columnType="self"
                                     min="0"
                                     max="10"
-                                    value={formData[`CDL${row.no}Self`] || ""}
-                                    readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, `CDL${row.no}Self`)}
                                     className="w-full p-2 border"
                                 />
                                 {userRole === "faculty" ? (
@@ -243,27 +244,22 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                                 </div>
                             </td>
                             <td className="border p-2">
-                                <input
+                                <RoleBasedInput
+                                    fieldName={`CDL${row.no}HoD`}
                                     type="number"
+                                    columnType="hod"
                                     min="0"
                                     max="10"
-                                    readOnly={userRole==="faculty"}
-                                    value={userRole === "external" ? "" :formData[`CDL${row.no}HoD`] || ""}
-                                    disabled={userRole === "external"}
-
-                onChange={(e) => handleInputChange(e, `CDL${row.no}HoD`)}
                                     className="w-full p-2 border"
                                 />
                             </td>
                             <td className="border p-2">
-                                <input
+                                <RoleBasedInput
+                                    fieldName={`CDL${row.no}External`}
                                     type="number"
+                                    columnType="external"
                                     min="0"
                                     max="10"
-                                    value={userRole === "hod" ? "" :formData[`CDL${row.no}External`] || ""}
-                                    disabled={userRole === "hod"}
-                                    readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, `CDL${row.no}External`)}
                                     className="w-full p-2 border"
                                 />
                             </td>
@@ -292,14 +288,12 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                         </td>
                         <td className="border p-2">
                         <div className="flex flex-col items-center space-y-2">
-                            <input
+                            <RoleBasedInput
+                                fieldName="CIL4Self"
                                 type="number"
+                                columnType="self"
                                 min="0"
                                 max="10"
-                                value={formData[`CIL4Self`] || ""}
-                                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, `CIL4Self`)}
                                 className="w-full p-2 border"
                             />
                             {userRole === "faculty" ? (
@@ -327,26 +321,22 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                             </div>
                         </td>
                         <td className="border p-2">
-                            <input
+                            <RoleBasedInput
+                                fieldName="CIL4HoD"
                                 type="number"
+                                columnType="hod"
                                 min="0"
                                 max="10"
-                                value={userRole === "external" ? "" :formData[`CIL4HoD`] || ""}
-                                disabled={userRole === "external"}
-                                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, `CIL4HoD`)}
                                 className="w-full p-2 border"
                             />
                         </td>
                         <td className="border p-2">
-                            <input
+                            <RoleBasedInput
+                                fieldName="CIL4External"
                                 type="number"
+                                columnType="external"
                                 min="0"
                                 max="10"
-                                value={userRole === "hod" ? "" :formData[`CIL4External`] || ""}
-                                disabled={userRole === "hod"}
-                                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, `CIL4External`)}
                                 className="w-full p-2 border"
                             />
                         </td>

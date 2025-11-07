@@ -3,9 +3,13 @@ import axiosInstance from '../helper/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { generateSimpleFPMIPDF } from '../utils/simplePdfGenerator';
 import toast from 'react-hot-toast';
+import { useRoleBasedData } from '../hooks/useRoleBasedData';
+import RoleBasedTextarea from '../components/RoleBasedTextarea';
 
 const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
   const navigate=useNavigate()
+  const { getSubmissionData } = useRoleBasedData(userRole, formData);
+  
   const handleInputChange = (e) => {
     const {name, value } = e.target;
     
@@ -26,10 +30,15 @@ const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
     const confirmSubmit = window.confirm("This action will submit the form data. Do you want to proceed?");
     if (!confirmSubmit) return;
     
+    // Filter form data based on role permissions before submission
+    const filteredFormData = getSubmissionData(formData);
+    console.log("Original formData:", formData);
+    console.log("Filtered formData for submission:", filteredFormData);
+    
     const evaluationData = new FormData();
     
 
-    for (const [key, value] of Object.entries(formData)) {
+    for (const [key, value] of Object.entries(filteredFormData)) {
       if (value === null || value === undefined) continue;
       
       if (key === 'categoriesTotal' && typeof value === 'object') {
@@ -161,33 +170,33 @@ const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
 
       <div className="mt-4">
         <label className="block text-lg font-semibold">Remarks by HoD:</label>
-        <textarea
+        <RoleBasedTextarea
           name="RemarksHoD"
-          value={userRole==="hod" || userRole==="faculty" ?formData["RemarksHoD"] || "" : ""}
-          readOnly={userRole==="faculty"}
-          disabled={userRole === "external" ||  userRole=="principle"}
-          onChange={(e) => handleInputChange(e)}
-          className="w-full p-2 mt-2 border border-gray-300 rounded-md"
+          userRole={userRole}
+          formData={formData}
+          handleInputChange={handleInputChange}
+          allowedRoles={['hod', 'external', 'principal']}
+          editableRoles={['hod']}
         />
 
         <label className="block text-lg font-semibold mt-4">Remarks by External Auditor:</label>
-        <textarea
+        <RoleBasedTextarea
           name="RemarksExternal"
-          value={userRole==="external" || userRole==="faculty"  ? formData["RemarksExternal"] || "":""}
-          readOnly={userRole==="faculty"}
-          disabled={userRole === "hod" ||  userRole=="principle"}
-          onChange={(e) => handleInputChange(e)}
-          className="w-full p-2 mt-2 border border-gray-300 rounded-md"
+          userRole={userRole}
+          formData={formData}
+          handleInputChange={handleInputChange}
+          allowedRoles={['external', 'principal']}
+          editableRoles={['external']}
         />
 
         <label className="block text-lg font-semibold mt-4">Remarks by Principal:</label>
-        <textarea
+        <RoleBasedTextarea
           name="RemarksPrincipal"
-          value={userRole==="principle" || userRole==="faculty"  ? formData["RemarksPrincipal"] || "" :""}
-          readOnly={userRole==="faculty"}
-          disabled={userRole === "hod" || userRole=="external"}
-          onChange={(e) => handleInputChange(e)}
-          className="w-full p-2 mt-2 border border-gray-300 rounded-md"
+          userRole={userRole}
+          formData={formData}
+          handleInputChange={handleInputChange}
+          allowedRoles={['principal']}
+          editableRoles={['principal']}
         />
       </div>
       <div className="flex justify-between mt-6">
