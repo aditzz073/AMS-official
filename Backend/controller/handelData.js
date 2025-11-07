@@ -2,6 +2,85 @@ import Evaluation from "../model/data.js"
 import fs from 'fs';
 import cloudinary from "../server.js";
 
+// Role-based access control configuration
+const roleAccess = {
+  faculty: { 
+    editable: ['self'], 
+    visible: ['self'] 
+  },
+  hod: { 
+    editable: ['hod'], 
+    visible: ['self', 'hod'] 
+  },
+  external: { 
+    editable: ['external'], 
+    visible: ['self', 'hod', 'external'] 
+  },
+  principal: { 
+    editable: [], 
+    visible: ['self', 'hod', 'external'] 
+  },
+  admin: { 
+    editable: ['self', 'hod', 'external'], 
+    visible: ['self', 'hod', 'external'] 
+  },
+};
+
+// Validate if user can edit specific fields based on role
+const validateRoleBasedFields = (userRole, updateData) => {
+  const permissions = roleAccess[userRole?.toLowerCase()] || roleAccess.faculty;
+  const validatedData = { ...updateData };
+  
+  // List of field patterns to check
+  const fieldPatterns = [
+    { pattern: /Self$/, type: 'self' },
+    { pattern: /HoD$/, type: 'hod' },
+    { pattern: /External$/, type: 'external' }
+  ];
+  
+  // Remove fields that the user role cannot edit
+  Object.keys(validatedData).forEach(key => {
+    for (const { pattern, type } of fieldPatterns) {
+      if (pattern.test(key)) {
+        if (!permissions.editable.includes(type)) {
+          console.log(`Removing field ${key} - user role ${userRole} cannot edit ${type} fields`);
+          delete validatedData[key];
+        }
+        break;
+      }
+    }
+  });
+  
+  return validatedData;
+};
+
+// Filter data for role-based visibility
+const filterDataForRole = (data, userRole) => {
+  const permissions = roleAccess[userRole?.toLowerCase()] || roleAccess.faculty;
+  const filteredData = { ...data.toObject() };
+  
+  // List of field patterns to check
+  const fieldPatterns = [
+    { pattern: /Self$/, type: 'self' },
+    { pattern: /HoD$/, type: 'hod' },
+    { pattern: /External$/, type: 'external' }
+  ];
+  
+  // Replace non-visible field values with empty string
+  Object.keys(filteredData).forEach(key => {
+    for (const { pattern, type } of fieldPatterns) {
+      if (pattern.test(key)) {
+        if (!permissions.visible.includes(type)) {
+          filteredData[key] = '';
+        }
+        break;
+      }
+    }
+  });
+  
+  return filteredData;
+};
+
 // Function to upload file to Cloudinary
 const uploadToCloudinary = async (filePath, employeeCode, fieldName) => {
   try {
@@ -29,22 +108,40 @@ const uploadToCloudinary = async (filePath, employeeCode, fieldName) => {
 const createOrUpdateEmployee = async (req, res) => {
   try {
     const { employeeCode } = req.body;    
-    
+    const userRole = req.user?.role; // Get user role from authenticated user
     
     if (!employeeCode) {
       return res.status(400).json({ success: false, message: 'Employee code is required' });
     }
     
-    const updateData = { ...req.body };
+    let updateData = { ...req.body };
+    
+    // Validate role-based field access
+    if (userRole) {
+      updateData = validateRoleBasedFields(userRole, updateData);
+    }
     
     // Process uploaded files (if any)
     if (req.files) {      
       // Process each uploaded file and upload to Cloudinary
       for (const [fieldName, files] of Object.entries(req.files)) {
         if (files && files.length > 0) {
-          const file = files[0];
-          const cloudinaryUrl = await uploadToCloudinary(file.path, employeeCode, fieldName);
-          updateData[fieldName] = cloudinaryUrl;
+          // Check if user can edit this field type
+          let canUpload = true;
+          if (userRole) {
+            const permissions = roleAccess[userRole.toLowerCase()] || roleAccess.faculty;
+            if (fieldName.endsWith('Self') && !permissions.editable.includes('self')) canUpload = false;
+            else if (fieldName.endsWith('HoD') && !permissions.editable.includes('hod')) canUpload = false;
+            else if (fieldName.endsWith('External') && !permissions.editable.includes('external')) canUpload = false;
+          }
+          
+          if (canUpload) {
+            const file = files[0];
+            const cloudinaryUrl = await uploadToCloudinary(file.path, employeeCode, fieldName);
+            updateData[fieldName] = cloudinaryUrl;
+          } else {
+            console.log(`User role ${userRole} cannot upload to field ${fieldName}`);
+          }
         }
       }
     }
@@ -74,14 +171,21 @@ const createOrUpdateEmployee = async (req, res) => {
 const getEmployeeById = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log(id);
+        const userRole = req.user?.role; // Get user role from authenticated user
+        console.log(`Fetching employee ${id} for role: ${userRole}`);
         
         const employee = await Evaluation.findOne({employeeCode:id});
         if (!employee) {
             return res.status(200).json({success:false, message: 'Employee not found' });
         }
 
-        return res.status(200).json({success:true, data: employee });
+        // Filter data based on user role
+        let responseData = employee;
+        if (userRole) {
+            responseData = filterDataForRole(employee, userRole);
+        }
+
+        return res.status(200).json({success:true, data: responseData });
     } catch (error) {
         console.error('Error fetching employee:', error);
         return res.status(500).json({success:false, message: 'Internal server error', error: error.message });

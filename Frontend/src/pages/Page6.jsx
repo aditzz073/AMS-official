@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import axiosInstance from '../helper/axiosInstance';
 import toast from 'react-hot-toast';
+import RoleBasedInput from "../components/RoleBasedInput";
+import useRoleBasedData from "../hooks/useRoleBasedData";
 
 const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole }) => {
     const [previewImages, setPreviewImages] = useState({});
+    const { getFieldValue, isFieldEditable, getSubmissionData } = useRoleBasedData(userRole, formData, setFormData);
 
   const handleInputChange = (e, key) => {
     const { value } = e.target;
@@ -237,13 +240,14 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">Invited as speaker</td>
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
-              <input type="number"
-                value={formData["IOW511Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "IOW511Self")}
+              <RoleBasedInput
+                fieldName="IOW511Self"
+                type="number"
+                columnType="self"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
                 {userRole === "faculty" ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
@@ -269,22 +273,24 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 </div>
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "external" ? "" :formData["IOW511HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW511HoD")}
+              <RoleBasedInput
+                fieldName="IOW511HoD"
+                type="number"
+                columnType="hod"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "hod" ? "" :formData["IOW511External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW511External")}
+              <RoleBasedInput
+                fieldName="IOW511External"
+                type="number"
+                columnType="external"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
           </tr>
           <tr>
@@ -292,13 +298,14 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">Live Industrial Projects</td>
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
-              <input type="number"
-                value={formData["IOW512Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "IOW512Self")}
+              <RoleBasedInput
+                fieldName="IOW512Self"
+                type="number"
+                columnType="self"
                 min="0"
-                max="10"  className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
                 {userRole === "faculty" ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
@@ -324,22 +331,24 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 </div>
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "external" ? "" :formData["IOW512HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW512HoD")}
+              <RoleBasedInput
+                fieldName="IOW512HoD"
+                type="number"
+                columnType="hod"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "hod" ? "" :formData["IOW512External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW512External")}
+              <RoleBasedInput
+                fieldName="IOW512External"
+                type="number"
+                columnType="external"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
           </tr>
           <tr>
@@ -347,13 +356,14 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">Any other please specify</td>
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
-              <input type="number"
-                value={formData["IOW513Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "IOW513Self")}
+              <RoleBasedInput
+                fieldName="IOW513Self"
+                type="number"
+                columnType="self"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
                 {userRole === "faculty" ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
@@ -379,22 +389,24 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 </div>
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "external" ? "" :formData["IOW513HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW513HoD")}
+              <RoleBasedInput
+                fieldName="IOW513HoD"
+                type="number"
+                columnType="hod"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "hod" ? "" :formData["IOW513External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW513External")}
+              <RoleBasedInput
+                fieldName="IOW513External"
+                type="number"
+                columnType="external"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
           </tr>
           <tr className="bg-gray-300">
@@ -406,13 +418,14 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">Subject Expert for Interview panel</td>
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
-              <input type="number"
-                value={formData["IOW521Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "IOW521Self")}
+              <RoleBasedInput
+                fieldName="IOW521Self"
+                type="number"
+                columnType="self"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
                 {userRole === "faculty" ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
@@ -438,22 +451,24 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 </div>
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "external" ? "" :formData["IOW521HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW521HoD")}
+              <RoleBasedInput
+                fieldName="IOW521HoD"
+                type="number"
+                columnType="hod"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "hod" ? "" :formData["IOW521External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW521External")}
+              <RoleBasedInput
+                fieldName="IOW521External"
+                type="number"
+                columnType="external"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
           </tr>
           <tr>
@@ -461,13 +476,14 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">Judge/Session chairs for International/National Conference</td>
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
-              <input type="number"
-                value={formData["IOW522Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "IOW522Self")}
+              <RoleBasedInput
+                fieldName="IOW522Self"
+                type="number"
+                columnType="self"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
                 {userRole === "faculty" ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
@@ -493,22 +509,24 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 </div>
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "external" ? "" :formData["IOW522HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW522HoD")}
+              <RoleBasedInput
+                fieldName="IOW522HoD"
+                type="number"
+                columnType="hod"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "hod" ? "" :formData["IOW522External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW522External")}
+              <RoleBasedInput
+                fieldName="IOW522External"
+                type="number"
+                columnType="external"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
           </tr>
           <tr>
@@ -516,13 +534,14 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">Reviewer - International/National Journal</td>
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
-              <input type="number"
-                value={formData["IOW523Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "IOW523Self")}
+              <RoleBasedInput
+                fieldName="IOW523Self"
+                type="number"
+                columnType="self"
                 min="0"
-                max="10" className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
                 {userRole === "faculty" ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
@@ -548,22 +567,24 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 </div>
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "external" ? "" :formData["IOW523HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW523HoD")}
+              <RoleBasedInput
+                fieldName="IOW523HoD"
+                type="number"
+                columnType="hod"
                 min="0"
-                max="10"  className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "hod" ? "" :formData["IOW523External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW523External")}
+              <RoleBasedInput
+                fieldName="IOW523External"
+                type="number"
+                columnType="external"
                 min="0"
-                max="10"  className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
           </tr>
           <tr>
@@ -571,13 +592,14 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">Editorial Board Member for National and International journal</td>
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
-              <input type="number"
-                value={formData["IOW524Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "IOW524Self")}
+              <RoleBasedInput
+                fieldName="IOW524Self"
+                type="number"
+                columnType="self"
                 min="0"
-                max="10"  className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
                 {userRole === "faculty" ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
@@ -603,22 +625,24 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 </div>
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "external" ? "" :formData["IOW524HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW524HoD")}
+              <RoleBasedInput
+                fieldName="IOW524HoD"
+                type="number"
+                columnType="hod"
                 min="0"
-                max="10"  className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "hod" ? "" :formData["IOW524External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW524External")}
+              <RoleBasedInput
+                fieldName="IOW524External"
+                type="number"
+                columnType="external"
                 min="0"
-                max="10"  className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
           </tr>
           <tr>
@@ -626,13 +650,14 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">Resource person for conferences/seminars/workshops/symposia etc.</td>
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
-              <input type="number"
-                value={formData["IOW525Self"] || ""}
-                readOnly={isReadOnly}
-
-                onChange={(e) => handleInputChange(e, "IOW525Self")}
+              <RoleBasedInput
+                fieldName="IOW525Self"
+                type="number"
+                columnType="self"
                 min="0"
-                max="10"  className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
                 {userRole === "faculty" ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
@@ -658,22 +683,24 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 </div>
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "external" ? "" :formData["IOW525HoD"] || ""}
-                disabled={userRole === "external"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW525HoD")}
+              <RoleBasedInput
+                fieldName="IOW525HoD"
+                type="number"
+                columnType="hod"
                 min="0"
-                max="10"  className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
             <td className="border border-gray-300 p-2">
-              <input type="number"
-                value={userRole === "hod" ? "" :formData["IOW525External"] || ""}
-                disabled={userRole === "hod"}
-                readOnly={userRole==="faculty"}
-                onChange={(e) => handleInputChange(e, "IOW525External")}
+              <RoleBasedInput
+                fieldName="IOW525External"
+                type="number"
+                columnType="external"
                 min="0"
-                max="10"  className="border p-1" minLength="0" maxLength="10" />
+                max="10"
+                className="border p-1"
+              />
             </td>
           </tr>
           <tr>

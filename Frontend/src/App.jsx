@@ -72,8 +72,12 @@ const App = () => {
         if (authState && authState.role) {
           const userRole = authState.role.toLowerCase();
           setUserRole(authState.role)
-          // Set readonly flag if role is hod or external
-          if (userRole === "hod" || userRole === "external") {
+          // Set readonly flag for roles that should not edit most form fields
+          // Note: This is primarily for legacy form fields that don't use RoleBasedInput
+          if (userRole === "principal") {
+            setIsReadOnly(true);
+          } else if (userRole === "hod" || userRole === "external") {
+            // HOD and External can edit some fields, but most should be read-only
             setIsReadOnly(true);
           }
           
