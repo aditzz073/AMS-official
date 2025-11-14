@@ -5,6 +5,7 @@ import { generateSimpleFPMIPDF } from '../utils/simplePdfGenerator';
 import toast from 'react-hot-toast';
 import { useRoleBasedData } from '../hooks/useRoleBasedData';
 import RoleBasedTextarea from '../components/RoleBasedTextarea';
+import RemarksBox from '../components/RemarksBox';
 
 const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
   const navigate=useNavigate()
@@ -43,6 +44,18 @@ const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
       
       if (key === 'categoriesTotal' && typeof value === 'object') {
         evaluationData.append(key, JSON.stringify(value));
+      }
+      else if (key === 'remarks' && typeof value === 'object') {
+        // Convert remarks Map to plain object for submission
+        const remarksObj = {};
+        if (value instanceof Map) {
+          value.forEach((val, key) => {
+            remarksObj[key] = val;
+          });
+        } else {
+          Object.assign(remarksObj, value);
+        }
+        evaluationData.append(key, JSON.stringify(remarksObj));
       }
       else if (key.endsWith('Image') && typeof value === 'string' && value.startsWith('data:')) {
         try {

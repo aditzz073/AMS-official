@@ -2,23 +2,33 @@
 export const roleAccess = {
   faculty: { 
     editable: ['self'], 
-    visible: ['self'] 
+    visible: ['self'],
+    canEditRemarks: false,
+    canViewRemarks: false
   },
   hod: { 
     editable: ['hod'], 
-    visible: ['self', 'hod'] 
+    visible: ['self', 'hod'],
+    canEditRemarks: true,
+    canViewRemarks: true
   },
   external: { 
     editable: ['external'], 
-    visible: ['self', 'hod', 'external'] 
+    visible: ['self', 'hod', 'external'],
+    canEditRemarks: false,
+    canViewRemarks: false
   },
   principal: { 
     editable: [], 
-    visible: ['self', 'hod', 'external'] 
+    visible: ['self', 'hod', 'external'],
+    canEditRemarks: false,
+    canViewRemarks: true
   },
   admin: { 
     editable: ['self', 'hod', 'external'], 
-    visible: ['self', 'hod', 'external'] 
+    visible: ['self', 'hod', 'external'],
+    canEditRemarks: true,
+    canViewRemarks: true
   },
 };
 
@@ -130,4 +140,16 @@ export const filterSubmissionDataForRole = (data, userRole) => {
   });
   
   return filteredData;
+};
+
+// Check if user can edit remarks
+export const canEditRemarks = (userRole) => {
+  const permissions = getRolePermissions(userRole);
+  return permissions.canEditRemarks || false;
+};
+
+// Check if user can view remarks
+export const canViewRemarks = (userRole) => {
+  const permissions = getRolePermissions(userRole);
+  return permissions.canViewRemarks || false;
 };

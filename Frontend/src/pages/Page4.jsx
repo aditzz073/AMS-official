@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import RoleBasedInput from "../components/RoleBasedInput";
+import RemarksBox from "../components/RemarksBox";
 import useRoleBasedData from "../hooks/useRoleBasedData";
 import { FormProvider } from "../contexts/FormContext";
 
@@ -447,6 +448,16 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
         </tbody>
       </table>
 
+      {/* Remarks for Subsection 2.1 */}
+      <RemarksBox
+        sectionId="section-2-1-pdrc-teaching"
+        sectionTitle="Section 2.1 - Teaching Related Activities"
+        userRole={userRole}
+        formData={formData}
+        setFormData={setFormData}
+        maxLength={1000}
+      />
+
       {/* Research Achievements Table */}
       <table className="min-w-full border-collapse border-2 border-gray-300 mt-4">
         <thead>
@@ -612,8 +623,28 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
           {/* Continue similarly for remaining rows */}
         </tbody>
       </table>
-                  {/* Navigation Buttons */}
-                  <div className="flex justify-between mt-6">
+
+      {/* Remarks for Subsection 2.2 */}
+      <RemarksBox
+        sectionId="section-2-2-pdrc-research"
+        sectionTitle="Section 2.2 - Research Achievements"
+        userRole={userRole}
+        formData={formData}
+        setFormData={setFormData}
+        maxLength={1000}
+      />
+
+      {/* Remarks for Overall Section 2 - PDRC */}
+      <RemarksBox
+        sectionId="section-2-pdrc"
+        sectionTitle="Professional Development and Research Contribution (PDRC)"
+        userRole={userRole}
+        formData={formData}
+        setFormData={setFormData}
+        maxLength={1000}
+      />
+
+      <div className="flex justify-between mt-6">
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           onClick={onPrevious}

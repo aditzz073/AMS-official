@@ -157,7 +157,14 @@ const evaluationSchema = new mongoose.Schema({
   TLP114External: { type: String },
   TLP114HoD: { type: String },
   TLP114Self: { type: String },
-  TLP114SelfImage: { type: String }
+  TLP114SelfImage: { type: String },
+
+  // Section-wise remarks (HOD-only editable)
+  remarks: {
+    type: Map,
+    of: String,
+    default: {}
+  }
 
 }, { timestamps: true });
 

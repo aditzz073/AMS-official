@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axiosInstance from '../helper/axiosInstance';
 import toast from 'react-hot-toast';
 import RoleBasedInput from "../components/RoleBasedInput";
+import RemarksBox from "../components/RemarksBox";
 import useRoleBasedData from "../hooks/useRoleBasedData";
 
 const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole }) => {
@@ -413,6 +414,21 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="p-2">B</td>
             <td colSpan="4" className="p-2"></td>
           </tr>
+        </tbody>
+      </table>
+
+      {/* Remarks for Subsection 5.1 (A) */}
+      <RemarksBox
+        sectionId="section-5-1-iow-a"
+        sectionTitle="Section 5.1 - IOW/EI (A)"
+        userRole={userRole}
+        formData={formData}
+        setFormData={setFormData}
+        maxLength={1000}
+      />
+
+      <table className="border border-gray-300 w-full">
+        <tbody>
           <tr>
             <td className="border border-gray-300 p-2">1</td>
             <td className="border border-gray-300 p-2">Subject Expert for Interview panel</td>
@@ -710,6 +726,26 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
           </tr>
         </tbody>
       </table>
+
+      {/* Remarks for Subsection 5.2 (B) */}
+      <RemarksBox
+        sectionId="section-5-2-iow-b"
+        sectionTitle="Section 5.2 - IOW/EI (B)"
+        userRole={userRole}
+        formData={formData}
+        setFormData={setFormData}
+        maxLength={1000}
+      />
+
+      {/* Remarks for Overall Section 5 - IOW */}
+      <RemarksBox
+        sectionId="section-5-iow"
+        sectionTitle="Interaction with the Outside World (IOW) / External Interface (EI)"
+        userRole={userRole}
+        formData={formData}
+        setFormData={setFormData}
+        maxLength={1000}
+      />
 
       {/* Navigation Buttons */}
       <div className="flex justify-between mt-6">

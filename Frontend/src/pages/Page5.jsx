@@ -1,6 +1,7 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import RoleBasedInput from "../components/RoleBasedInput";
+import RemarksBox from "../components/RemarksBox";
 import useRoleBasedData from "../hooks/useRoleBasedData";
 
 const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole }) => {
@@ -268,6 +269,16 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 </tbody>
             </table>
 
+      {/* Remarks for Section 3 - CDL */}
+      <RemarksBox
+        sectionId="section-3-cdl"
+        sectionTitle="Contribution at Department Level (CDL)"
+        userRole={userRole}
+        formData={formData}
+        setFormData={setFormData}
+        maxLength={1000}
+      />
+
             <h3 id="head_pdrc" className="text-xl font-bold text-center pt-6">4. Contribution at Institute Level (CIL)</h3>
             <table className="border-3 border-gray-300 w-full mt-4">
                 <thead>
@@ -344,8 +355,18 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </tr>
                 </tbody>
             </table>
-            {/* Navigation Buttons */}
-            <div className="flex justify-between mt-6">
+
+      {/* Remarks for Section 4 - CIL */}
+      <RemarksBox
+        sectionId="section-4-cil"
+        sectionTitle="Contribution at Institutional Level (CIL)"
+        userRole={userRole}
+        formData={formData}
+        setFormData={setFormData}
+        maxLength={1000}
+      />
+
+      <div className="flex justify-between mt-6">
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           onClick={onPrevious}

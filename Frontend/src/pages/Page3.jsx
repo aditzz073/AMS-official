@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import RoleBasedInput from "../components/RoleBasedInput";
+import RemarksBox from "../components/RemarksBox";
 import { useRoleBasedData } from "../hooks/useRoleBasedData";
 
 const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole }) => {
@@ -454,7 +455,16 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
         </table>
       </div>
 
-      {/* Navigation Buttons */}
+      {/* Remarks for Section 1 - TLP */}
+      <RemarksBox
+        sectionId="section-1-tlp"
+        sectionTitle="Teaching Learning Process (TLP)"
+        userRole={userRole}
+        formData={formData}
+        setFormData={setFormData}
+        maxLength={1000}
+      />
+
       <div className="flex justify-between mt-6">
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"

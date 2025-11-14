@@ -59,6 +59,15 @@ const filterDataForRole = (data, userRole) => {
   const permissions = roleAccess[userRole?.toLowerCase()] || roleAccess.faculty;
   const filteredData = { ...data.toObject() };
   
+  // Convert remarks Map to plain object if it exists
+  if (filteredData.remarks && filteredData.remarks instanceof Map) {
+    const remarksObj = {};
+    filteredData.remarks.forEach((value, key) => {
+      remarksObj[key] = value;
+    });
+    filteredData.remarks = remarksObj;
+  }
+  
   // List of field patterns to check
   const fieldPatterns = [
     { pattern: /Self$/, type: 'self' },
@@ -116,6 +125,28 @@ const createOrUpdateEmployee = async (req, res) => {
     
     let updateData = { ...req.body };
     
+    // Handle remarks separately - only HOD and Admin can update
+    if (updateData.remarks) {
+      if (!['hod', 'admin'].includes(userRole?.toLowerCase())) {
+        console.log(`User role ${userRole} cannot update remarks - removing from update data`);
+        delete updateData.remarks;
+      } else {
+        // Parse remarks if it's a JSON string
+        if (typeof updateData.remarks === 'string') {
+          try {
+            updateData.remarks = JSON.parse(updateData.remarks);
+            console.log('Parsed remarks from JSON string:', updateData.remarks);
+          } catch (error) {
+            console.error('Error parsing remarks JSON:', error);
+            delete updateData.remarks;
+          }
+        }
+        console.log('Remarks to be saved:', updateData.remarks);
+      }
+    } else {
+      console.log('No remarks in updateData');
+    }
+    
     // Validate role-based field access
     if (userRole) {
       updateData = validateRoleBasedFields(userRole, updateData);
@@ -153,6 +184,8 @@ const createOrUpdateEmployee = async (req, res) => {
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
     
+    console.log('Employee updated successfully. Remarks in DB:', updatedEmployee.remarks);
+    
     return res.status(200).json({
       success: true,
       message: 'Employee record created/updated successfully',
@@ -179,11 +212,15 @@ const getEmployeeById = async (req, res) => {
             return res.status(200).json({success:false, message: 'Employee not found' });
         }
 
+        console.log('Employee remarks from DB (raw):', employee.remarks);
+
         // Filter data based on user role
         let responseData = employee;
         if (userRole) {
             responseData = filterDataForRole(employee, userRole);
         }
+
+        console.log('Remarks in response data:', responseData.remarks);
 
         return res.status(200).json({success:true, data: responseData });
     } catch (error) {
