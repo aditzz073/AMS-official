@@ -64,60 +64,9 @@ export const generateSimpleFPMIPDF = (formData) => {
     
     yPosition += 10;
     
-    // Assessment Summary Section
-    addSectionHeader('Assessment Summary', 12);
-    
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
-    
-    const categories = [
-      { key: "TLP", title: "Teaching Learning Process (TLP)", max: 80 },
-      { key: "PDRC", title: "Professional Development and Research Contribution (PDRC)", max: 90 },
-      { key: "CDL", title: "Contribution at Departmental level (CDL)", max: 50 },
-      { key: "CIL", title: "Contribution at Institutional level (CIL)", max: 30 },
-      { key: "IOW", title: "Interaction with the Outside World (IOW) / External Interface (EI)", max: 50 },
-    ];
-    
-    // Table headers
-    checkNewPage(50);
-    doc.setFont(undefined, 'bold');
-    doc.text('Assessment Head', margin, yPosition);
-    doc.text('Max', margin + 120, yPosition);
-    doc.text('Self', margin + 140, yPosition);
-    doc.text('HoD', margin + 160, yPosition);
-    doc.text('External', margin + 180, yPosition);
-    yPosition += 8;
-    
-    // Draw header line
-    doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+    // FPMI Detailed Breakdown Section (moved to position 2)
+    addSectionHeader('FPMI Detailed Breakdown', 14);
     yPosition += 5;
-    
-    // Table rows
-    doc.setFont(undefined, 'normal');
-    categories.forEach(category => {
-      checkNewPage(10);
-      doc.text(category.title, margin, yPosition);
-      doc.text(category.max.toString(), margin + 120, yPosition);
-      doc.text((formData.categoriesTotal?.[`${category.key}Self`] || "0").toString(), margin + 140, yPosition);
-      doc.text((formData.categoriesTotal?.[`${category.key}HoD`] || "0").toString(), margin + 160, yPosition);
-      doc.text((formData.categoriesTotal?.[`${category.key}External`] || "0").toString(), margin + 180, yPosition);
-      yPosition += 8;
-    });
-    
-    // Total row
-    yPosition += 5;
-    doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
-    yPosition += 5;
-    
-    doc.setFont(undefined, 'bold');
-    doc.text('Total', margin, yPosition);
-    doc.text('300', margin + 120, yPosition);
-    doc.text((formData.totalSelf || "0").toString(), margin + 140, yPosition);
-    doc.text((formData.totalHoD || "0").toString(), margin + 160, yPosition);
-    doc.text((formData.totalExternal || "0").toString(), margin + 180, yPosition);
-    yPosition += 20;
-
-    // Now add detailed evaluation sections
     
     // 1. Teaching Learning Process (TLP) Details
     addSectionHeader('1. Teaching Learning Process (TLP) - Detailed Evaluation');
@@ -300,7 +249,149 @@ export const generateSimpleFPMIPDF = (formData) => {
     
     yPosition += 15;
     
-    // Signatures Section
+    // Assessment Summary Section (moved to position 3)
+    addSectionHeader('Assessment Summary', 12);
+    
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    
+    const categories = [
+      { key: "TLP", title: "Teaching Learning Process (TLP)", max: 80 },
+      { key: "PDRC", title: "Professional Development and Research Contribution (PDRC)", max: 90 },
+      { key: "CDL", title: "Contribution at Departmental level (CDL)", max: 50 },
+      { key: "CIL", title: "Contribution at Institutional level (CIL)", max: 30 },
+      { key: "IOW", title: "Interaction with the Outside World (IOW) / External Interface (EI)", max: 50 },
+    ];
+    
+    // Table headers
+    checkNewPage(50);
+    doc.setFont(undefined, 'bold');
+    doc.text('Assessment Head', margin, yPosition);
+    doc.text('Max', margin + 120, yPosition);
+    doc.text('Self', margin + 140, yPosition);
+    doc.text('HoD', margin + 160, yPosition);
+    doc.text('External', margin + 180, yPosition);
+    yPosition += 8;
+    
+    // Draw header line
+    doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+    yPosition += 5;
+    
+    // Table rows
+    doc.setFont(undefined, 'normal');
+    categories.forEach(category => {
+      checkNewPage(10);
+      doc.text(category.title, margin, yPosition);
+      doc.text(category.max.toString(), margin + 120, yPosition);
+      doc.text((formData.categoriesTotal?.[`${category.key}Self`] || "0").toString(), margin + 140, yPosition);
+      doc.text((formData.categoriesTotal?.[`${category.key}HoD`] || "0").toString(), margin + 160, yPosition);
+      doc.text((formData.categoriesTotal?.[`${category.key}External`] || "0").toString(), margin + 180, yPosition);
+      yPosition += 8;
+    });
+    
+    // Total row
+    yPosition += 5;
+    doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+    yPosition += 5;
+    
+    doc.setFont(undefined, 'bold');
+    doc.text('Total', margin, yPosition);
+    doc.text('300', margin + 120, yPosition);
+    doc.text((formData.totalSelf || "0").toString(), margin + 140, yPosition);
+    doc.text((formData.totalHoD || "0").toString(), margin + 160, yPosition);
+    doc.text((formData.totalExternal || "0").toString(), margin + 180, yPosition);
+    yPosition += 20;
+    
+    // Average Score Evaluation (moved to position 4)
+    checkNewPage(20);
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Average Score Evaluation:', margin, yPosition);
+    yPosition += 10;
+    
+    doc.setFont(undefined, 'normal');
+    const selfScore = formData.totalSelf || 0;
+    const hodScore = formData.totalHoD || 0;
+    const externalScore = formData.totalExternal || 0;
+    const averageScore = ((selfScore + hodScore + externalScore) / 3).toFixed(2);
+    
+    doc.text(`Average Score: ${averageScore} (based on Self: ${selfScore}, HoD: ${hodScore}, External: ${externalScore})`, margin, yPosition);
+    yPosition += 10;
+    doc.setFontSize(8);
+    doc.text('Note: The evaluation of score is based on taking average of three (Self, HoD, External Audit Member)', margin, yPosition);
+    yPosition += 20;
+    
+    // Remarks Section (moved to position 5)
+    addSectionHeader('Remarks', 12);
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    
+    // Remarks by HoD
+    checkNewPage(30);
+    doc.text('Remarks by HoD:', margin, yPosition);
+    yPosition += 8;
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(9);
+    
+    if (formData.RemarksHoD) {
+      const hodRemarksLines = doc.splitTextToSize(formData.RemarksHoD, pageWidth - 2 * margin);
+      hodRemarksLines.forEach(line => {
+        checkNewPage(8);
+        doc.text(line, margin, yPosition);
+        yPosition += 6;
+      });
+    } else {
+      doc.text('—', margin, yPosition);
+      yPosition += 6;
+    }
+    yPosition += 10;
+    
+    // Remarks by External Auditor
+    checkNewPage(30);
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Remarks by External Auditor:', margin, yPosition);
+    yPosition += 8;
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(9);
+    
+    if (formData.RemarksExternal) {
+      const externalRemarksLines = doc.splitTextToSize(formData.RemarksExternal, pageWidth - 2 * margin);
+      externalRemarksLines.forEach(line => {
+        checkNewPage(8);
+        doc.text(line, margin, yPosition);
+        yPosition += 6;
+      });
+    } else {
+      doc.text('—', margin, yPosition);
+      yPosition += 6;
+    }
+    yPosition += 10;
+    
+    // Remarks by Principal
+    checkNewPage(30);
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Remarks by Principal:', margin, yPosition);
+    yPosition += 8;
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(9);
+    
+    if (formData.RemarksPrincipal) {
+      const principalRemarksLines = doc.splitTextToSize(formData.RemarksPrincipal, pageWidth - 2 * margin);
+      principalRemarksLines.forEach(line => {
+        checkNewPage(8);
+        doc.text(line, margin, yPosition);
+        yPosition += 6;
+      });
+    } else {
+      doc.text('—', margin, yPosition);
+      yPosition += 6;
+    }
+    yPosition += 20;
+    
+    // Signatures Section (moved to position 6)
     addSectionHeader('Signatures', 12);
     
     doc.setFontSize(9);
