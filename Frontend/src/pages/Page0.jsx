@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const Page0 = ({onNext}) => {
+  const [isConfirmed, setIsConfirmed] = useState(false);
+
   return (
     <div className="max-w-4xl mx-auto p-8">
       <div className="border border-gray-200 rounded-lg shadow-md p-8">
@@ -22,15 +24,33 @@ const Page0 = ({onNext}) => {
           <li>The Head of the department after complete evaluation will forward the appraisal to the Dean for final review and approval.</li>
         </ol>
         
+        <div className="mt-6 flex items-center mb-4">
+          <input
+            type="checkbox"
+            id="confirmation"
+            checked={isConfirmed}
+            onChange={(e) => setIsConfirmed(e.target.checked)}
+            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <label htmlFor="confirmation" className="ml-2 text-sm text-gray-600">
+            I confirm that I have read and understood all the instructions above
+          </label>
+        </div>
+        
         <div className="flex justify-between mt-6">
-        <div></div>
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          onClick={onNext}
-        >
-          Next
-        </button>
-      </div>
+          <div></div>
+          <button
+            className={`px-4 py-2 rounded ${
+              isConfirmed 
+                ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+            onClick={onNext}
+            disabled={!isConfirmed}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );
