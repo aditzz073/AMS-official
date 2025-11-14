@@ -2,6 +2,8 @@ import User from '../model/user.js';
 import jwt from 'jsonwebtoken';
 import Evaluation from "../model/data.js"
 import LoginLog from '../model/loginLog.js';
+import EmailVerificationOtp from '../model/emailVerificationOtp.js';
+import { sendWelcomeEmail } from '../utils/emailService.js';
 
 
 // Constants for expiration (6 hours)
@@ -50,6 +52,14 @@ export const signup = async (req, res) => {
     try {
       const { email, password, role } = req.body;
   
+      // Validate required fields
+      if (!email || !password || !role) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email, password, and role are required'
+        });
+      }
+
       // Check if user already exists
       const existingUser = await User.findOne({ email });
       if (existingUser) {
@@ -58,13 +68,33 @@ export const signup = async (req, res) => {
           message: 'Email already registered'
         });
       }
+
+      // Verify that OTP was validated for this email
+      const verifiedOtp = await EmailVerificationOtp.findOne({
+        email,
+        isUsed: true,
+        expiresAt: { $gte: new Date(Date.now() - 15 * 60 * 1000) } // Within last 15 minutes
+      }).sort({ createdAt: -1 });
+
+      if (!verifiedOtp) {
+        return res.status(403).json({
+          success: false,
+          message: 'Email verification required. Please verify your email first.'
+        });
+      }
   
-      // Create user
+      // Create user with verified email
       const user = await User.create({
         email,
         password,
-        role
+        role,
+        emailVerified: true
       });
+
+      // Send welcome email (non-blocking)
+      sendWelcomeEmail(email, role).catch(err => 
+        console.error('Failed to send welcome email:', err)
+      );
   
       sendTokenResponse(user, 201, res);
     } catch (error) {

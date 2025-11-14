@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Lock, AtSign, Key } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axiosInstance from "../helper/axiosInstance";
 import { useDispatch } from "react-redux";
 import { logout, setEmpCode, setToken } from "../redux/authSlice";
 import logo from "../dscelogo.png";
+import OTPVerification from "../components/OTPVerification";
 
 const Auth = () => {
   const navigate = useNavigate();
   const dispatch=useDispatch()
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -59,13 +61,19 @@ const Auth = () => {
       if (isSignUp) {
         if (formData.password !== formData.confirmPassword) {
           toast.error("Passwords do not match!");
+          setLoading(false);
           return;
         }
 
-        const { confirmPassword, ...signupData } = formData;
-        const response = await axiosInstance.post("/signup", signupData);
-        handleAuthSuccess(response.data);
-        toast.success("Account created successfully!");
+        // Request OTP for email verification
+        const otpResponse = await axiosInstance.post("/auth/request-otp", {
+          email: formData.email
+        });
+
+        if (otpResponse.data.success) {
+          toast.success("OTP sent to your email!");
+          setShowOTP(true);
+        }
       } else {
         const response = await axiosInstance.post("/login", {
           email: formData.email,
@@ -81,6 +89,35 @@ const Auth = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOTPVerified = async () => {
+    setLoading(true);
+    
+    try {
+      // Now create the account after OTP verification
+      const { confirmPassword, ...signupData } = formData;
+      const response = await axiosInstance.post("/signup", signupData);
+      
+      handleAuthSuccess(response.data);
+      toast.success("Account created successfully!");
+      setShowOTP(false);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Registration failed");
+      setShowOTP(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBackFromOTP = () => {
+    setShowOTP(false);
+    setFormData({
+      email: "",
+      password: "",
+      confirmPassword: "",
+      role: "faculty"
+    });
   };
 
   const handleAuthSuccess = (data) => {
@@ -127,19 +164,37 @@ const Auth = () => {
             {/* <Lock className="h-12 w-12 text-white mx-auto mb-4" /> */}
             <img src={logo} className="h-22 w-full text-white mx-auto mb-4" alt="dsce" />
                           <h1 className="text-3xl font-bold text-white">
-                {isSignUp ? "Create Account" : "Appraisal Management System"}
+                {showOTP ? "Verify Email" : isSignUp ? "Create Account" : "Appraisal Management System"}
               </h1>
               <p className="text-blue-100 mt-2">
-                {isSignUp 
-                  ? "Sign up to get started with your account" 
-                  : "Sign in to continue to your account"}
+                {showOTP 
+                  ? "Enter the OTP sent to your email"
+                  : isSignUp 
+                    ? "Sign up to get started with your account" 
+                    : "Sign in to continue to your account"}
               </p>
             </div>
           </div>
 
-          {/* Form */}
+          {/* Form Content */}
           <div className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <AnimatePresence mode="wait">
+              {showOTP ? (
+                <OTPVerification
+                  key="otp"
+                  email={formData.email}
+                  onVerified={handleOTPVerified}
+                  onBack={handleBackFromOTP}
+                />
+              ) : (
+                <motion.form
+                  key="form"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onSubmit={handleSubmit}
+                  className="space-y-6"
+                >
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email Address
@@ -246,7 +301,9 @@ const Auth = () => {
                   {isSignUp ? "Sign In" : "Create Account"}
                 </button>
               </div>
-            </form>
+                </motion.form>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </motion.div>

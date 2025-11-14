@@ -2,6 +2,7 @@ import express from "express"
 import evaluateScores from "../controller/calculate.js"
 import { createOrUpdateEmployee, getAllEmployeeCodes, getEmployeeById } from "../controller/handelData.js"
 import { login, logout, signup } from "../controller/authController.js"
+import { requestOTP, verifyOTP, resendOTP } from "../controller/otpController.js"
 import { getRemarks, updateRemarks, bulkUpdateRemarks } from "../controller/remarksController.js"
 import { getLoginLogs, getLoginStats, closeStaleSession } from "../controller/loginLogController.js"
 import uploadFields from "../middleware/multerMiddleware.js"
@@ -19,7 +20,12 @@ router.get("/remarks/:employeeCode", protect, getRemarks) // Get remarks
 router.put("/remarks/:employeeCode", protect, updateRemarks) // Update single remark
 router.put("/remarks/:employeeCode/bulk", protect, bulkUpdateRemarks) // Bulk update remarks
 
-// Auth routes
+// Auth routes - OTP verification
+router.post('/auth/request-otp', requestOTP); // Request OTP for email verification
+router.post('/auth/verify-otp', verifyOTP); // Verify OTP
+router.post('/auth/resend-otp', resendOTP); // Resend OTP
+
+// Auth routes - Registration and Login
 router.post('/signup', signup);
 router.post('/login', login);
 router.post('/logout', protect, logout);
