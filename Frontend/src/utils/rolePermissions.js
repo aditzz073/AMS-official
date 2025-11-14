@@ -15,13 +15,13 @@ export const roleAccess = {
   external: { 
     editable: ['external'], 
     visible: ['self', 'hod', 'external'],
-    canEditRemarks: false,
-    canViewRemarks: false
+    canEditRemarks: true,
+    canViewRemarks: true
   },
   principal: { 
     editable: [], 
     visible: ['self', 'hod', 'external'],
-    canEditRemarks: false,
+    canEditRemarks: true,
     canViewRemarks: true
   },
   admin: { 
