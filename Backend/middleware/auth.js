@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../model/user.js';
+import LoginLog from '../model/loginLog.js';
 import { log } from 'console';
 
 export const protect = async (req, res, next) => {
@@ -26,6 +27,15 @@ export const protect = async (req, res, next) => {
       // Check token expiration
       const expirationTime = new Date(decoded.exp * 1000);
       if (expirationTime <= new Date()) {
+        // Close any open sessions for this user
+        await LoginLog.updateMany(
+          { user: decoded.id, timeOut: null },
+          { 
+            timeOut: new Date(),
+            sessionDuration: Date.now() - new Date().getTime()
+          }
+        );
+        
         // Clear the expired cookie
         res.cookie('token', 'none', {
           expires: new Date(Date.now()),
@@ -67,6 +77,32 @@ export const protect = async (req, res, next) => {
     return res.status(401).json({
       success: false,
       message: 'Authentication error'
+    });
+  }
+};
+
+// Middleware to check if user is admin
+export const adminOnly = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Not authorized to access this route'
+      });
+    }
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.'
+      });
+    }
+
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Authorization error'
     });
   }
 };

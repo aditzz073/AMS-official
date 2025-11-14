@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import LoginActivityLog from '../components/LoginActivityLog';
+import { useSelector } from 'react-redux';
 
 const Page0 = ({onNext}) => {
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const userRole = useSelector((state) => state.auth.role);
 
   return (
     <div className="max-w-4xl mx-auto p-8">
@@ -52,6 +55,13 @@ const Page0 = ({onNext}) => {
           </button>
         </div>
       </div>
+
+      {/* Login Activity Log - Admin Only */}
+      {userRole === 'admin' && (
+        <div className="mt-8">
+          <LoginActivityLog />
+        </div>
+      )}
     </div>
   );
 };

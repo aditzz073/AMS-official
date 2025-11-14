@@ -3,8 +3,9 @@ import evaluateScores from "../controller/calculate.js"
 import { createOrUpdateEmployee, getAllEmployeeCodes, getEmployeeById } from "../controller/handelData.js"
 import { login, logout, signup } from "../controller/authController.js"
 import { getRemarks, updateRemarks, bulkUpdateRemarks } from "../controller/remarksController.js"
+import { getLoginLogs, getLoginStats, closeStaleSession } from "../controller/loginLogController.js"
 import uploadFields from "../middleware/multerMiddleware.js"
-import { protect } from "../middleware/auth.js"
+import { protect, adminOnly } from "../middleware/auth.js"
 
 const router=express.Router()
 
@@ -18,9 +19,15 @@ router.get("/remarks/:employeeCode", protect, getRemarks) // Get remarks
 router.put("/remarks/:employeeCode", protect, updateRemarks) // Update single remark
 router.put("/remarks/:employeeCode/bulk", protect, bulkUpdateRemarks) // Bulk update remarks
 
+// Auth routes
 router.post('/signup', signup);
 router.post('/login', login);
-router.post('/logout', logout);
+router.post('/logout', protect, logout);
+
+// Admin-only Login Log routes
+router.get('/admin/login-logs', protect, adminOnly, getLoginLogs); // Get all login logs
+router.get('/admin/login-stats', protect, adminOnly, getLoginStats); // Get login statistics
+router.post('/admin/close-stale-sessions', protect, adminOnly, closeStaleSession); // Close stale sessions
 
 export default router
 

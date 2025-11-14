@@ -1,6 +1,7 @@
 import User from '../model/user.js';
 import jwt from 'jsonwebtoken';
 import Evaluation from "../model/data.js"
+import LoginLog from '../model/loginLog.js';
 
 
 // Constants for expiration (6 hours)
@@ -103,6 +104,31 @@ export const login = async (req, res) => {
       });
     }
 
+    // Close any previous open sessions for this user
+    await LoginLog.updateMany(
+      { user: user._id, timeOut: null },
+      { 
+        timeOut: new Date(),
+        sessionDuration: Date.now() - new Date().getTime()
+      }
+    );
+
+    // Create new login log entry
+    const ipAddress = req.headers['x-forwarded-for'] || 
+                      req.connection.remoteAddress || 
+                      req.socket.remoteAddress || 
+                      req.ip;
+    
+    const userAgent = req.headers['user-agent'];
+
+    await LoginLog.create({
+      user: user._id,
+      email: user.email,
+      timeIn: new Date(),
+      ipAddress,
+      userAgent
+    });
+
     sendTokenResponse(user, 200, res);
   } catch (error) {
     res.status(400).json({
@@ -116,22 +142,49 @@ export const login = async (req, res) => {
 // @route   GET /api/auth/logout
 // @access  Private
 export const logout = async (req, res) => {
+  try {
     console.log("logout");
     
-  // Set cookie to expire immediately
-  res.cookie('token', 'none', {
-    expires: new Date(Date.now()),
-    httpOnly: true,
-    sameSite: 'strict'
-  });
+    // Update the latest open login log for this user
+    if (req.user && req.user._id) {
+      const openLog = await LoginLog.findOne({
+        user: req.user._id,
+        timeOut: null
+      }).sort({ timeIn: -1 });
 
-  // Clear any authorization header
-  res.setHeader('Authorization', '');
+      if (openLog) {
+        await openLog.closeSession();
+      }
+    }
 
-  res.status(200).json({
-    success: true,
-    message: 'Logged out successfully'
-  });
+    // Set cookie to expire immediately
+    res.cookie('token', 'none', {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+      sameSite: 'strict'
+    });
+
+    // Clear any authorization header
+    res.setHeader('Authorization', '');
+
+    res.status(200).json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    // Still logout the user even if logging fails
+    res.cookie('token', 'none', {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+      sameSite: 'strict'
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  }
 };
 
 // Optional: Refresh token endpoint if needed
