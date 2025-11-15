@@ -4,7 +4,14 @@ import { Mail, RefreshCw, CheckCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axiosInstance from "../helper/axiosInstance";
 
-const OTPVerification = ({ email, onVerified, onBack }) => {
+const OTPVerification = ({ 
+  email, 
+  onVerified, 
+  onBack, 
+  onResend,
+  title = "Verify Your Email",
+  description = null
+}) => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
@@ -90,21 +97,27 @@ const OTPVerification = ({ email, onVerified, onBack }) => {
     setLoading(true);
 
     try {
-      const response = await axiosInstance.post("/auth/verify-otp", {
-        email,
-        otp: otpString,
-      });
-
-      const data = response.data;
-
-      if (data.success) {
-        toast.success("Email verified successfully!");
-        onVerified();
+      // If onVerified is provided, call it directly (for password reset)
+      // Otherwise, use the default email verification flow
+      if (onVerified.length > 0) {
+        await onVerified(otpString);
       } else {
-        toast.error(data.message || "Invalid OTP");
-        // Clear OTP on error
-        setOtp(["", "", "", "", "", ""]);
-        inputRefs.current[0]?.focus();
+        const response = await axiosInstance.post("/auth/verify-otp", {
+          email,
+          otp: otpString,
+        });
+
+        const data = response.data;
+
+        if (data.success) {
+          toast.success("Email verified successfully!");
+          onVerified();
+        } else {
+          toast.error(data.message || "Invalid OTP");
+          // Clear OTP on error
+          setOtp(["", "", "", "", "", ""]);
+          inputRefs.current[0]?.focus();
+        }
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Verification failed. Please try again.");
@@ -119,20 +132,30 @@ const OTPVerification = ({ email, onVerified, onBack }) => {
     setResendLoading(true);
 
     try {
-      const response = await axiosInstance.post("/auth/resend-otp", {
-        email
-      });
-
-      const data = response.data;
-
-      if (data.success) {
-        toast.success("New OTP sent to your email");
+      // If custom onResend is provided, use it (for password reset)
+      // Otherwise, use default resend OTP endpoint
+      if (onResend) {
+        await onResend();
         setTimeLeft(600);
         setCanResend(false);
         setOtp(["", "", "", "", "", ""]);
         inputRefs.current[0]?.focus();
       } else {
-        toast.error(data.message || "Failed to resend OTP");
+        const response = await axiosInstance.post("/auth/resend-otp", {
+          email
+        });
+
+        const data = response.data;
+
+        if (data.success) {
+          toast.success("New OTP sent to your email");
+          setTimeLeft(600);
+          setCanResend(false);
+          setOtp(["", "", "", "", "", ""]);
+          inputRefs.current[0]?.focus();
+        } else {
+          toast.error(data.message || "Failed to resend OTP");
+        }
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to resend OTP. Please try again.");
@@ -153,11 +176,17 @@ const OTPVerification = ({ email, onVerified, onBack }) => {
         <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
           <Mail className="h-8 w-8 text-blue-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Verify Your Email</h2>
-        <p className="text-gray-600">
-          We've sent a 6-digit code to
-        </p>
-        <p className="font-semibold text-gray-800">{email}</p>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">{title}</h2>
+        {description ? (
+          <p className="text-gray-600">{description}</p>
+        ) : (
+          <>
+            <p className="text-gray-600">
+              We've sent a 6-digit code to
+            </p>
+            <p className="font-semibold text-gray-800">{email}</p>
+          </>
+        )}
       </div>
 
       {/* OTP Input */}

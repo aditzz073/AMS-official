@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { logout, setEmpCode, setToken } from "../redux/authSlice";
 import logo from "../dscelogo.png";
 import OTPVerification from "../components/OTPVerification";
+import ForgotPassword from "../components/ForgotPassword";
 import { validateEmail, getDomainExample } from "../utils/emailValidator";
 
 const Auth = () => {
@@ -16,6 +17,7 @@ const Auth = () => {
   const dispatch=useDispatch()
   const [isSignUp, setIsSignUp] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [formData, setFormData] = useState({
@@ -143,6 +145,21 @@ const Auth = () => {
     });
   };
 
+  const handleShowForgotPassword = () => {
+    setShowForgotPassword(true);
+    setIsSignUp(false);
+    setShowOTP(false);
+  };
+
+  const handleBackFromForgotPassword = () => {
+    setShowForgotPassword(false);
+  };
+
+  const handleResetComplete = () => {
+    setShowForgotPassword(false);
+    toast.success("You can now login with your new password");
+  };
+
   const handleAuthSuccess = (data) => {
     localStorage.setItem("token", data.token);
     axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
@@ -187,14 +204,22 @@ const Auth = () => {
             {/* <Lock className="h-12 w-12 text-white mx-auto mb-4" /> */}
             <img src={logo} className="h-22 w-full text-white mx-auto mb-4" alt="dsce" />
                           <h1 className="text-3xl font-bold text-white">
-                {showOTP ? "Verify Email" : isSignUp ? "Create Account" : "Appraisal Management System"}
+                {showOTP 
+                  ? "Verify Email" 
+                  : showForgotPassword 
+                    ? "Reset Password"
+                    : isSignUp 
+                      ? "Create Account" 
+                      : "Appraisal Management System"}
               </h1>
               <p className="text-blue-100 mt-2">
                 {showOTP 
                   ? "Enter the OTP sent to your email"
-                  : isSignUp 
-                    ? "Sign up to get started with your account" 
-                    : "Sign in to continue to your account"}
+                  : showForgotPassword
+                    ? "Recover your account"
+                    : isSignUp 
+                      ? "Sign up to get started with your account" 
+                      : "Sign in to continue to your account"}
               </p>
             </div>
           </div>
@@ -202,7 +227,13 @@ const Auth = () => {
           {/* Form Content */}
           <div className="p-8">
             <AnimatePresence mode="wait">
-              {showOTP ? (
+              {showForgotPassword ? (
+                <ForgotPassword
+                  key="forgot-password"
+                  onBack={handleBackFromForgotPassword}
+                  onResetComplete={handleResetComplete}
+                />
+              ) : showOTP ? (
                 <OTPVerification
                   key="otp"
                   email={formData.email}
@@ -330,6 +361,19 @@ const Auth = () => {
                 ) : isSignUp ? "Create Account" : "Sign In"
                 }
               </motion.button>
+
+              {/* Forgot Password Link */}
+              {!isSignUp && (
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={handleShowForgotPassword}
+                    className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+              )}
 
               <div className="text-center text-sm text-gray-600">
                 {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}

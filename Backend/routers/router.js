@@ -3,6 +3,7 @@ import evaluateScores from "../controller/calculate.js"
 import { createOrUpdateEmployee, getAllEmployeeCodes, getEmployeeById } from "../controller/handelData.js"
 import { login, logout, signup } from "../controller/authController.js"
 import { requestOTP, verifyOTP, resendOTP } from "../controller/otpController.js"
+import { requestPasswordReset, verifyResetOTP, resetPassword, resendResetOTP } from "../controller/passwordResetController.js"
 import { getRemarks, updateRemarks, bulkUpdateRemarks } from "../controller/remarksController.js"
 import { getLoginLogs, getLoginStats, closeStaleSession } from "../controller/loginLogController.js"
 import uploadFields from "../middleware/multerMiddleware.js"
@@ -24,6 +25,12 @@ router.put("/remarks/:employeeCode/bulk", protect, bulkUpdateRemarks) // Bulk up
 router.post('/auth/request-otp', requestOTP); // Request OTP for email verification
 router.post('/auth/verify-otp', verifyOTP); // Verify OTP
 router.post('/auth/resend-otp', resendOTP); // Resend OTP
+
+// Auth routes - Password Reset
+router.post('/auth/forgot-password', requestPasswordReset); // Request password reset OTP
+router.post('/auth/verify-reset-otp', verifyResetOTP); // Verify password reset OTP
+router.post('/auth/reset-password', resetPassword); // Reset password with OTP
+router.post('/auth/resend-reset-otp', resendResetOTP); // Resend password reset OTP
 
 // Auth routes - Registration and Login
 router.post('/signup', signup);

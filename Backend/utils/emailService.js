@@ -202,3 +202,133 @@ export const sendWelcomeEmail = async (email, role) => {
     // Don't throw error for welcome email - it's not critical
   }
 };
+
+// Send Password Reset OTP email
+export const sendPasswordResetOTP = async (email, otp, role) => {
+  try {
+    const transporter = createTransporter();
+
+    const mailOptions = {
+      from: `"Appraisal Management System" <${process.env.SMTP_EMAIL}>`,
+      to: email,
+      subject: 'Password Reset OTP',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              background-color: #f4f4f4;
+              padding: 20px;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              background-color: #ffffff;
+              padding: 30px;
+              border-radius: 10px;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+            .header {
+              text-align: center;
+              padding-bottom: 20px;
+              border-bottom: 2px solid #DC2626;
+            }
+            .header h1 {
+              color: #DC2626;
+              margin: 0;
+            }
+            .content {
+              padding: 30px 0;
+            }
+            .otp-box {
+              background-color: #FEF2F2;
+              padding: 20px;
+              text-align: center;
+              border-radius: 8px;
+              margin: 20px 0;
+              border: 2px solid #DC2626;
+            }
+            .otp {
+              font-size: 32px;
+              font-weight: bold;
+              color: #DC2626;
+              letter-spacing: 5px;
+            }
+            .warning {
+              color: #DC2626;
+              font-size: 14px;
+              margin-top: 20px;
+              background-color: #FEF2F2;
+              padding: 15px;
+              border-radius: 5px;
+              border-left: 4px solid #DC2626;
+            }
+            .info-box {
+              background-color: #EFF6FF;
+              padding: 15px;
+              border-radius: 5px;
+              margin-top: 20px;
+              border-left: 4px solid #3B82F6;
+            }
+            .footer {
+              text-align: center;
+              padding-top: 20px;
+              border-top: 1px solid #E5E7EB;
+              color: #6B7280;
+              font-size: 12px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🔐 Password Reset Request</h1>
+            </div>
+            <div class="content">
+              <h2>Reset Your Password</h2>
+              <p>We received a request to reset the password for your account (${role}).</p>
+              <p>Use the OTP below to reset your password:</p>
+              <div class="otp-box">
+                <div class="otp">${otp}</div>
+              </div>
+              <p><strong>This OTP is valid for 10 minutes.</strong></p>
+              <div class="warning">
+                <strong>⚠️ Security Warning:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                  <li>Do not share this code with anyone</li>
+                  <li>We will never ask for your OTP via phone or chat</li>
+                  <li>If you didn't request this, please ignore this email and secure your account</li>
+                </ul>
+              </div>
+              <div class="info-box">
+                <strong>ℹ️ What to do next:</strong>
+                <ol style="margin: 10px 0; padding-left: 20px;">
+                  <li>Enter this OTP on the password reset page</li>
+                  <li>Create a new strong password</li>
+                  <li>Confirm your new password</li>
+                  <li>Login with your new credentials</li>
+                </ol>
+              </div>
+            </div>
+            <div class="footer">
+              <p>If you didn't request a password reset, please ignore this email or contact support if you have concerns.</p>
+              <p>&copy; ${new Date().getFullYear()} Appraisal Management System. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `Password Reset OTP\n\nWe received a request to reset your password.\n\nYour OTP: ${otp}\n\nValid for 10 minutes.\n\nDo not share this code with anyone.\n\nIf you didn't request this, please ignore this email.`
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Password reset OTP sent: %s', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('Password reset email error:', error);
+    throw new Error('Failed to send password reset OTP email');
+  }
+};
+
