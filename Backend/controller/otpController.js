@@ -1,6 +1,7 @@
 import EmailVerificationOtp from '../model/emailVerificationOtp.js';
 import User from '../model/user.js';
 import { generateOTP, sendOTPEmail } from '../utils/emailService.js';
+import { validateEmail, getInvalidDomainMessage } from '../utils/emailValidator.js';
 
 // @desc    Request OTP for email verification
 // @route   POST /api/auth/request-otp
@@ -16,12 +17,12 @@ export const requestOTP = async (req, res) => {
       });
     }
 
-    // Validate email format
-    const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
-    if (!emailRegex.test(email)) {
+    // Validate email format and domain
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.success) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid email format'
+        message: emailValidation.message
       });
     }
 
@@ -163,6 +164,15 @@ export const resendOTP = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Email is required'
+      });
+    }
+
+    // Validate email format and domain
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.success) {
+      return res.status(400).json({
+        success: false,
+        message: emailValidation.message
       });
     }
 

@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, AtSign, Key } from "lucide-react";
+import { Lock, AtSign, Key, AlertCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axiosInstance from "../helper/axiosInstance";
 import { useDispatch } from "react-redux";
 import { logout, setEmpCode, setToken } from "../redux/authSlice";
 import logo from "../dscelogo.png";
 import OTPVerification from "../components/OTPVerification";
+import { validateEmail, getDomainExample } from "../utils/emailValidator";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -50,7 +52,18 @@ const Auth = () => {
   }, [navigate]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // Real-time email validation for signup
+    if (name === "email" && isSignUp) {
+      if (value.trim() === "") {
+        setEmailError("");
+      } else {
+        const validation = validateEmail(value);
+        setEmailError(validation.isValid ? "" : validation.message);
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -59,6 +72,15 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
+        // Validate email domain before proceeding
+        const emailValidation = validateEmail(formData.email);
+        if (!emailValidation.isValid) {
+          toast.error(emailValidation.message);
+          setEmailError(emailValidation.message);
+          setLoading(false);
+          return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
           toast.error("Passwords do not match!");
           setLoading(false);
@@ -112,6 +134,7 @@ const Auth = () => {
 
   const handleBackFromOTP = () => {
     setShowOTP(false);
+    setEmailError("");
     setFormData({
       email: "",
       password: "",
@@ -198,6 +221,11 @@ const Auth = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email Address
+                  {isSignUp && (
+                    <span className="text-xs text-gray-500 ml-2">
+                      (Use {getDomainExample()})
+                    </span>
+                  )}
                 </label>
                 <div className="relative">
                 <AtSign className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
@@ -207,10 +235,22 @@ const Auth = () => {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      emailError ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     placeholder="Enter your email"
                   />
                 </div>
+                {emailError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-2 flex items-start gap-2 text-red-600 text-sm"
+                  >
+                    <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <span>{emailError}</span>
+                  </motion.div>
+                )}
               </div>
 
               <div>
@@ -276,7 +316,7 @@ const Auth = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                disabled={loading}
+                disabled={loading || (isSignUp && emailError)}
                 className="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold shadow-md hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
@@ -295,7 +335,10 @@ const Auth = () => {
                 {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
                 <button
                   type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    setEmailError("");
+                  }}
                   className="font-semibold text-blue-600 hover:text-blue-700"
                 >
                   {isSignUp ? "Sign In" : "Create Account"}

@@ -4,6 +4,7 @@ import Evaluation from "../model/data.js"
 import LoginLog from '../model/loginLog.js';
 import EmailVerificationOtp from '../model/emailVerificationOtp.js';
 import { sendWelcomeEmail } from '../utils/emailService.js';
+import { validateEmail } from '../utils/emailValidator.js';
 
 
 // Constants for expiration (6 hours)
@@ -57,6 +58,15 @@ export const signup = async (req, res) => {
         return res.status(400).json({
           success: false,
           message: 'Email, password, and role are required'
+        });
+      }
+
+      // Validate email format and domain
+      const emailValidation = validateEmail(email);
+      if (!emailValidation.success) {
+        return res.status(400).json({
+          success: false,
+          message: emailValidation.message
         });
       }
 
