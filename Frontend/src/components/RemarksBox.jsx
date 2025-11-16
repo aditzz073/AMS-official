@@ -69,7 +69,7 @@ const RemarksBox = ({
             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
           </svg>
           Remarks {sectionTitle && `- ${sectionTitle}`}
-          {canEdit && <span className="ml-2 text-xs text-yellow-600">(HOD Only)</span>}
+          {canEdit && <span className="ml-2 text-xs text-yellow-600">(HOD, Principal and External Evaluator)</span>}
         </label>
         <span className={`text-sm ${charCount > maxLength * 0.9 ? 'text-red-600 font-bold' : 'text-gray-500'}`}>
           {charCount} / {maxLength}
