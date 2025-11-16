@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import Header from './Header';
 import axiosInstance from '../helper/axiosInstance';
 
@@ -23,21 +24,25 @@ const ThankYouPage = () => {
      }, []);
      
      const handleLogout = async () => {
-        try {
-          const response = await axiosInstance.post("/logout");
-          console.log(response);
-          
-          localStorage.removeItem("token");
-          localStorage.removeItem("authState");
-          localStorage.clear();
-    
-          delete axiosInstance.defaults.headers.common["Authorization"];
-          navigate("/");
-          toast.success("Logged out successfully");
-        } catch (error) {
-          console.error("Logout error:", error);
-        }
-      };
+       try {
+         await axiosInstance.post("/logout");
+       } catch (error) {
+         console.error("Logout API error:", error);
+         // Continue with logout even if API fails
+       } finally {
+         // Clean up local storage and state
+         localStorage.removeItem("token");
+         localStorage.removeItem("authState");
+         localStorage.clear();
+         
+         // Clear axios headers
+         delete axiosInstance.defaults.headers.common["Authorization"];
+         
+         // Navigate to login
+         navigate("/");
+         toast.success("Logged out successfully");
+       }
+     };
   return (
     <div>
         <header>

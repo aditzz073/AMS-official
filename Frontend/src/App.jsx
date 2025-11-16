@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "./redux/authSlice";
+import toast from "react-hot-toast";
 import Page1 from "./pages/Page1";
 import Page2 from "./pages/Page2";
 import Page3 from "./pages/Page3";
@@ -6,16 +10,15 @@ import Page4 from "./pages/Page4";
 import Page5 from "./pages/Page5";
 import Page6 from "./pages/Page6";
 import Page7 from "./pages/Page7";
+import Page0 from "./pages/Page0";
 import logo from "./logo.png";
 import Header from "./components/Header";
 import axiosInstance from "./helper/axiosInstance";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import Page0 from "./pages/Page0";
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [userName, setUserName] = useState("User Name");
   const [userRole, setUserRole] = useState("faculty");
@@ -110,18 +113,25 @@ const App = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await axiosInstance.post("/logout");
-      console.log(response);
-      
+      await axiosInstance.post("/logout");
+    } catch (error) {
+      console.error("Logout API error:", error);
+      // Continue with logout even if API fails
+    } finally {
+      // Clean up local storage and state
       localStorage.removeItem("token");
       localStorage.removeItem("authState");
-      localStorage.clear();
-
+      localStorage.removeItem("formData");
+      
+      // Dispatch logout action to Redux
+      dispatch(logout());
+      
+      // Clear axios headers
       delete axiosInstance.defaults.headers.common["Authorization"];
+      
+      // Navigate to login
       navigate("/");
       toast.success("Logged out successfully");
-    } catch (error) {
-      console.error("Logout error:", error);
     }
   };
 
