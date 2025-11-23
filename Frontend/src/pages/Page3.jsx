@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import RoleBasedInput from "../components/RoleBasedInput";
@@ -161,7 +160,43 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
     
   };
   
-  console.log(formData);
+  const validateRequiredFields = () => {
+    // Define all field keys for Page 3
+    const page3Fields = [
+      'TLP111', 'TLP112', 'TLP113', 'TLP114', 'TLP115', 'TLP116',
+      'TLP121', 'TLP122', 'TLP123'
+    ];
+
+    // Check based on role
+    if (userRole === 'hod') {
+      const emptyFields = page3Fields.filter(field => !formData[`${field}HoD`] || formData[`${field}HoD`] === '');
+      if (emptyFields.length > 0) {
+        toast.error('Please fill all HoD evaluation fields before proceeding');
+        return false;
+      }
+    } else if (userRole === 'principal') {
+      const emptyFields = page3Fields.filter(field => !formData[`${field}HoD`] || formData[`${field}HoD`] === '');
+      if (emptyFields.length > 0) {
+        toast.error('Please fill all HoD evaluation fields before proceeding');
+        return false;
+      }
+    } else if (userRole === 'external') {
+      const emptyFields = page3Fields.filter(field => !formData[`${field}External`] || formData[`${field}External`] === '');
+      if (emptyFields.length > 0) {
+        toast.error('Please fill all External Audit Member evaluation fields before proceeding');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleNext = () => {
+    if (!validateRequiredFields()) {
+      return;
+    }
+    onNext();
+  };
 
   return (
     <div className="p-6 min-h-screen">
@@ -169,7 +204,8 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
         1. Teaching Learning Process (TLP)
       </h3>
 
-      <div className="overflow-x-auto">
+      {/* Section 1.1 - Teaching Learning Activities */}
+      <div className="overflow-x-auto mb-8">
         <table className="w-full border-collapse border border-gray-300">
           <thead className="bg-gray-200">
             <tr>
@@ -451,6 +487,410 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                   />
               </td>
             </tr>
+
+            {/* 1.1.5 - Internal examination/Evaluation duties */}
+            <tr>
+              <td className="border border-gray-300 px-4 py-2">1.1.5</td>
+              <td className="border border-gray-300 px-4 py-2">
+                Internal examination/Evaluation duties for internal/ continuous assessment work as allotted{" "}
+                <span className="text-blue-600">(100% compliance = 3 Marks/sem)</span>
+                <br />
+                <span className="text-red-600">(Max: 6 marks)</span>{" "}
+                <span className="text-green-600">(Verification for 1.1.4 to 1.1.5 : Official circulars)</span>
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <div className="flex flex-col items-center space-y-2">
+                  <RoleBasedInput
+                    fieldKey="TLP115Self"
+                    userRole={userRole}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                  />
+                  {canEditColumn('self') ? (
+                    <div className="flex flex-col items-center mt-2 w-full">
+                      <input
+                        type="file"
+                        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                        onChange={(e) => handleImageUpload(e, "TLP115Self")}
+                        className="text-xs w-full"
+                      />
+                      <button
+                        onClick={() => showImagePreview("TLP115Self")}
+                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                      >
+                        View Evidence
+                      </button>
+                    </div>
+                  ):<><button
+                    onClick={() => showImagePreview("TLP115Self")}
+                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                  >
+                    View Evidence
+                  </button></>}
+                </div>
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <RoleBasedInput
+                  fieldKey="TLP115HoD"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                />
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <RoleBasedInput
+                  fieldKey="TLP115External"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                />
+              </td>
+            </tr>
+
+            {/* 1.1.6 - Use of Innovative teaching methodologies */}
+            <tr>
+              <td className="border border-gray-300 px-4 py-2">1.1.6</td>
+              <td className="border border-gray-300 px-4 py-2">
+                <div>
+                  <strong>Use of Innovative teaching – learning methodologies;</strong>
+                </div>
+                <ul className="list-disc ml-6 mt-2">
+                  <li>a) Use of Information and Communications Technology (ICT); or any animation software,</li>
+                  <li>b) Updated subject content and course improvement</li>
+                  <li>c) Subject material sharing with the students.</li>
+                  <li>d) Inviting experts from other Organizations</li>
+                </ul>
+                <div className="mt-2">
+                  <span className="text-blue-600">(2 Marks for each activity for all assigned subjects in both the semesters)</span>{" "}
+                  <span className="text-red-600">(Max: 8 marks)</span>{" "}
+                  <span className="text-green-600">(Verification for 1.1.6: Course file)</span>
+                </div>
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <div className="flex flex-col items-center space-y-2">
+                  <RoleBasedInput
+                    fieldKey="TLP116Self"
+                    userRole={userRole}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                  />
+                  {canEditColumn('self') ? (
+                    <div className="flex flex-col items-center mt-2 w-full">
+                      <input
+                        type="file"
+                        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                        onChange={(e) => handleImageUpload(e, "TLP116Self")}
+                        className="text-xs w-full"
+                      />
+                      <button
+                        onClick={() => showImagePreview("TLP116Self")}
+                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                      >
+                        View Evidence
+                      </button>
+                    </div>
+                  ):<><button
+                    onClick={() => showImagePreview("TLP116Self")}
+                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                  >
+                    View Evidence
+                  </button></>}
+                </div>
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <RoleBasedInput
+                  fieldKey="TLP116HoD"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                />
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <RoleBasedInput
+                  fieldKey="TLP116External"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Section 1.2 - Students' centric parameters */}
+      <div className="overflow-x-auto mb-8">
+        <table className="w-full border-collapse border border-gray-300">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="border border-gray-300 px-4 py-2">1.2</th>
+              <th
+                colSpan="4"
+                className="border border-gray-300 px-4 py-2 text-left"
+              >
+                Students' centric parameters <span className="text-blue-600">(maximum marks 30)</span>
+              </th>
+            </tr>
+            <tr>
+              <th className="border border-gray-300 px-4 py-2">Sr. No</th>
+              <th className="border border-gray-300 px-4 py-2">Parameter</th>
+              <th className="border border-gray-300 px-4 py-2">
+                Self-Evaluation
+              </th>
+              <th className="border border-gray-300 px-4 py-2">
+                Evaluation by HoD
+              </th>
+              <th className="border border-gray-300 px-4 py-2">
+                Evaluation by External Audit Member
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* 1.2.1 - Attendance of Students */}
+            <tr>
+              <td className="border border-gray-300 px-4 py-2">1.2.1</td>
+              <td className="border border-gray-300 px-4 py-2">
+                <div>
+                  <strong>Attendance of Students above 85%</strong> <span className="text-red-600">(5 marks for each semester)</span>
+                </div>
+                <div className="mt-2">
+                  <strong>SEMESTER No.:</strong>
+                  <ul className="list-disc ml-6 mt-1">
+                    <li>1. Theory 1...........................</li>
+                    <li>2. Theory 2...........................</li>
+                    <li>3. Practical 1/Tutorial 1...........</li>
+                    <li>4. Practical 2/ Tutorial 2..........</li>
+                  </ul>
+                </div>
+                <div className="mt-2">
+                  <strong>SEMESTER No.:</strong>
+                  <ul className="list-disc ml-6 mt-1">
+                    <li>1. Theory 1...........................</li>
+                    <li>2. Theory 2...........................</li>
+                    <li>3. Practical 1/Tutorial 1...........</li>
+                    <li>4. Practical 2/ Tutorial 2..........</li>
+                  </ul>
+                </div>
+                <div className="mt-2 text-blue-600">
+                  * Average of the student's attendance in the entire Theory/Practical work load assigned during the entire academic year.
+                </div>
+                <div className="mt-1 text-green-600">
+                  (Max: 10 marks) (Verification 1.2.1 : Official attendance record)
+                </div>
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <div className="flex flex-col items-center space-y-2">
+                  <RoleBasedInput
+                    fieldKey="TLP121Self"
+                    userRole={userRole}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                  />
+                  {canEditColumn('self') ? (
+                    <div className="flex flex-col items-center mt-2 w-full">
+                      <input
+                        type="file"
+                        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                        onChange={(e) => handleImageUpload(e, "TLP121Self")}
+                        className="text-xs w-full"
+                      />
+                      <button
+                        onClick={() => showImagePreview("TLP121Self")}
+                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                      >
+                        View Evidence
+                      </button>
+                    </div>
+                  ):<><button
+                    onClick={() => showImagePreview("TLP121Self")}
+                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                  >
+                    View Evidence
+                  </button></>}
+                </div>
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <RoleBasedInput
+                  fieldKey="TLP121HoD"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                />
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <RoleBasedInput
+                  fieldKey="TLP121External"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                />
+              </td>
+            </tr>
+
+            {/* 1.2.2 - Student feedback */}
+            <tr>
+              <td className="border border-gray-300 px-4 py-2">1.2.2</td>
+              <td className="border border-gray-300 px-4 py-2">
+                <div>
+                  <strong>Student feedback (TH/PR)</strong> <span className="text-red-600">(5 marks for each semester)</span>
+                </div>
+                <div className="mt-2">
+                  <strong>SEMESTER No.:</strong>
+                  <ul className="list-disc ml-6 mt-1">
+                    <li>1. Theory 1...........................</li>
+                    <li>2. Theory 2...........................</li>
+                    <li>3. Practical 1........................</li>
+                    <li>4. Practical 2........................</li>
+                  </ul>
+                </div>
+                <div className="mt-2">
+                  <strong>SEMESTER No.:</strong>
+                  <ul className="list-disc ml-6 mt-1">
+                    <li>1. Theory 1...........................</li>
+                    <li>2. Theory 2...........................</li>
+                    <li>3. Practical 1........................</li>
+                    <li>4. Practical 2........................</li>
+                  </ul>
+                </div>
+                <div className="mt-2 text-blue-600">
+                  * Score proportional to average of percentage of <strong>"Student's feedback"</strong> obtained for all assigned theory and practical Subjects in both the Semester.
+                </div>
+                <div className="mt-1 text-green-600">
+                  (Max: 10 marks) (Verification 1.3.2 : Official feedback record/report)
+                </div>
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <div className="flex flex-col items-center space-y-2">
+                  <RoleBasedInput
+                    fieldKey="TLP122Self"
+                    userRole={userRole}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                  />
+                  {canEditColumn('self') ? (
+                    <div className="flex flex-col items-center mt-2 w-full">
+                      <input
+                        type="file"
+                        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                        onChange={(e) => handleImageUpload(e, "TLP122Self")}
+                        className="text-xs w-full"
+                      />
+                      <button
+                        onClick={() => showImagePreview("TLP122Self")}
+                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                      >
+                        View Evidence
+                      </button>
+                    </div>
+                  ):<><button
+                    onClick={() => showImagePreview("TLP122Self")}
+                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                  >
+                    View Evidence
+                  </button></>}
+                </div>
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <RoleBasedInput
+                  fieldKey="TLP122HoD"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                />
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <RoleBasedInput
+                  fieldKey="TLP122External"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                />
+              </td>
+            </tr>
+
+            {/* 1.2.3 - Results of students */}
+            <tr>
+              <td className="border border-gray-300 px-4 py-2">1.2.3</td>
+              <td className="border border-gray-300 px-4 py-2">
+                <div>
+                  <strong>Results of students(TH/PR)</strong> <span className="text-red-600">(5 marks for each semester)</span>
+                </div>
+                <div className="mt-2">
+                  <strong>SEMESTER No.:</strong>
+                  <ul className="list-disc ml-6 mt-1">
+                    <li>1. Theory 1...........................</li>
+                    <li>2. Theory 2...........................</li>
+                    <li>3. Practical 1........................</li>
+                    <li>4. Practical 2........................</li>
+                  </ul>
+                </div>
+                <div className="mt-2">
+                  <strong>SEMESTER No.:</strong>
+                  <ul className="list-disc ml-6 mt-1">
+                    <li>1. Theory 1...........................</li>
+                    <li>2. Theory 2...........................</li>
+                    <li>3. Practical 1........................</li>
+                    <li>4. Practical 2........................</li>
+                  </ul>
+                </div>
+                <div className="mt-2 text-blue-600">
+                  * More than average of previous three years results in the respective subject/practical – <strong>'10' Marks</strong>
+                </div>
+                <div className="text-blue-600">
+                  If the results are less by 10% compared to the average of three years – <strong>'0' Marks</strong> and in between give proportional Marks.
+                </div>
+                <div className="mt-1 text-green-600">
+                  (Max: 10 marks) (Verification 1.3.3 : Official result)
+                </div>
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <div className="flex flex-col items-center space-y-2">
+                  <RoleBasedInput
+                    fieldKey="TLP123Self"
+                    userRole={userRole}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                  />
+                  {canEditColumn('self') ? (
+                    <div className="flex flex-col items-center mt-2 w-full">
+                      <input
+                        type="file"
+                        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                        onChange={(e) => handleImageUpload(e, "TLP123Self")}
+                        className="text-xs w-full"
+                      />
+                      <button
+                        onClick={() => showImagePreview("TLP123Self")}
+                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                      >
+                        View Evidence
+                      </button>
+                    </div>
+                  ):<><button
+                    onClick={() => showImagePreview("TLP123Self")}
+                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                  >
+                    View Evidence
+                  </button></>}
+                </div>
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <RoleBasedInput
+                  fieldKey="TLP123HoD"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                />
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <RoleBasedInput
+                  fieldKey="TLP123External"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                />
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -474,7 +914,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
         </button>
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          onClick={onNext}
+          onClick={handleNext}
         >
           Next
         </button>

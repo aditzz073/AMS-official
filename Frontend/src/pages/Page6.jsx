@@ -6,8 +6,8 @@ import RemarksBox from "../components/RemarksBox";
 import useRoleBasedData from "../hooks/useRoleBasedData";
 
 const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole }) => {
-    const [previewImages, setPreviewImages] = useState({});
-    const { getFieldValue, isFieldEditable, getSubmissionData } = useRoleBasedData(userRole, formData, setFormData);
+  const [previewImages, setPreviewImages] = useState({});
+  const { canEditColumn } = useRoleBasedData(userRole, formData);
 
   const handleInputChange = (e, key) => {
     const { value } = e.target;
@@ -215,6 +215,45 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
   }
     
   };
+
+  const validateRequiredFields = () => {
+    // Define all field keys for Page 6
+    const page6Fields = [
+      'IOW511', 'IOW512', 'IOW513', 'IOW514', 'IOW515', 'IOW516',
+      'IOW521', 'IOW522', 'IOW523', 'IOW524', 'IOW525'
+    ];
+
+    // Check based on role
+    if (userRole === 'hod') {
+      const emptyFields = page6Fields.filter(field => !formData[`${field}HoD`] || formData[`${field}HoD`] === '');
+      if (emptyFields.length > 0) {
+        toast.error('Please fill all HoD evaluation fields before proceeding');
+        return false;
+      }
+    } else if (userRole === 'principal') {
+      const emptyFields = page6Fields.filter(field => !formData[`${field}HoD`] || formData[`${field}HoD`] === '');
+      if (emptyFields.length > 0) {
+        toast.error('Please fill all HoD evaluation fields before proceeding');
+        return false;
+      }
+    } else if (userRole === 'external') {
+      const emptyFields = page6Fields.filter(field => !formData[`${field}External`] || formData[`${field}External`] === '');
+      if (emptyFields.length > 0) {
+        toast.error('Please fill all External Audit Member evaluation fields before proceeding');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleNext = () => {
+    if (!validateRequiredFields()) {
+      return;
+    }
+    onNext();
+  };
+
   console.log(formData);
   return (
     <div className='p-6  min-h-screen'>
@@ -242,14 +281,13 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
               <RoleBasedInput
-                fieldName="IOW511Self"
-                type="number"
-                columnType="self"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW511Self"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
-                {userRole === "faculty" ? (
+                {canEditColumn('self') ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -266,7 +304,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   
                   ):<><button
-                  onClick={() => showImagePreview("TLP111Self")}
+                  onClick={() => showImagePreview("IOW511Self")}
                   className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
                 >
                   View Evidence
@@ -275,22 +313,20 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW511HoD"
-                type="number"
-                columnType="hod"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW511HoD"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW511External"
-                type="number"
-                columnType="external"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW511External"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
           </tr>
@@ -300,14 +336,13 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
               <RoleBasedInput
-                fieldName="IOW512Self"
-                type="number"
-                columnType="self"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW512Self"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
-                {userRole === "faculty" ? (
+                {canEditColumn('self') ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -324,7 +359,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   
                   ):<><button
-                  onClick={() => showImagePreview("TLP111Self")}
+                  onClick={() => showImagePreview("IOW512Self")}
                   className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
                 >
                   View Evidence
@@ -333,22 +368,20 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW512HoD"
-                type="number"
-                columnType="hod"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW512HoD"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW512External"
-                type="number"
-                columnType="external"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW512External"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
           </tr>
@@ -358,14 +391,13 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
               <RoleBasedInput
-                fieldName="IOW513Self"
-                type="number"
-                columnType="self"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW513Self"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
-                {userRole === "faculty" ? (
+                {canEditColumn('self') ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -382,7 +414,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   
                   ):<><button
-                  onClick={() => showImagePreview("TLP111Self")}
+                  onClick={() => showImagePreview("IOW513Self")}
                   className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
                 >
                   View Evidence
@@ -391,22 +423,20 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW513HoD"
-                type="number"
-                columnType="hod"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW513HoD"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW513External"
-                type="number"
-                columnType="external"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW513External"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
           </tr>
@@ -435,14 +465,13 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
               <RoleBasedInput
-                fieldName="IOW521Self"
-                type="number"
-                columnType="self"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW521Self"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
-                {userRole === "faculty" ? (
+                {canEditColumn('self') ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -459,7 +488,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   
                   ):<><button
-                  onClick={() => showImagePreview("TLP111Self")}
+                  onClick={() => showImagePreview("IOW521Self")}
                   className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
                 >
                   View Evidence
@@ -468,22 +497,20 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW521HoD"
-                type="number"
-                columnType="hod"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW521HoD"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW521External"
-                type="number"
-                columnType="external"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW521External"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
           </tr>
@@ -493,14 +520,13 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
               <RoleBasedInput
-                fieldName="IOW522Self"
-                type="number"
-                columnType="self"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW522Self"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
-                {userRole === "faculty" ? (
+                {canEditColumn('self') ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -517,7 +543,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   
                   ):<><button
-                  onClick={() => showImagePreview("TLP111Self")}
+                  onClick={() => showImagePreview("IOW522Self")}
                   className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
                 >
                   View Evidence
@@ -526,22 +552,20 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW522HoD"
-                type="number"
-                columnType="hod"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW522HoD"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW522External"
-                type="number"
-                columnType="external"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW522External"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
           </tr>
@@ -551,14 +575,13 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
               <RoleBasedInput
-                fieldName="IOW523Self"
-                type="number"
-                columnType="self"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW523Self"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
-                {userRole === "faculty" ? (
+                {canEditColumn('self') ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -575,7 +598,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   
                   ):<><button
-                  onClick={() => showImagePreview("TLP111Self")}
+                  onClick={() => showImagePreview("IOW523Self")}
                   className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
                 >
                   View Evidence
@@ -584,22 +607,20 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW523HoD"
-                type="number"
-                columnType="hod"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW523HoD"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW523External"
-                type="number"
-                columnType="external"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW523External"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
           </tr>
@@ -609,14 +630,13 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
               <RoleBasedInput
-                fieldName="IOW524Self"
-                type="number"
-                columnType="self"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW524Self"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
-                {userRole === "faculty" ? (
+                {canEditColumn('self') ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -633,7 +653,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   
                   ):<><button
-                  onClick={() => showImagePreview("TLP111Self")}
+                  onClick={() => showImagePreview("IOW524Self")}
                   className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
                 >
                   View Evidence
@@ -642,22 +662,20 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW524HoD"
-                type="number"
-                columnType="hod"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW524HoD"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW524External"
-                type="number"
-                columnType="external"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW524External"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
           </tr>
@@ -667,14 +685,13 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">
             <div className="flex flex-col items-center space-y-2">
               <RoleBasedInput
-                fieldName="IOW525Self"
-                type="number"
-                columnType="self"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW525Self"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
-                {userRole === "faculty" ? (
+                {canEditColumn('self') ? (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -691,7 +708,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   
                   ):<><button
-                  onClick={() => showImagePreview("TLP111Self")}
+                  onClick={() => showImagePreview("IOW525Self")}
                   className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
                 >
                   View Evidence
@@ -700,28 +717,21 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW525HoD"
-                type="number"
-                columnType="hod"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW525HoD"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
             </td>
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
-                fieldName="IOW525External"
-                type="number"
-                columnType="external"
-                min="0"
-                max="10"
-                className="border p-1"
+                fieldKey="IOW525External"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-1 w-full"
               />
-            </td>
-          </tr>
-          <tr>
-            <td colSpan="5" className="text-green-500 p-2">
-              (Verification for 2.2 : Office order / Attendance / Certificate / Account details / letter/report)
             </td>
           </tr>
         </tbody>
@@ -737,17 +747,6 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
         maxLength={1000}
       />
 
-      {/* Remarks for Overall Section 5 - IOW */}
-      <RemarksBox
-        sectionId="section-5-iow"
-        sectionTitle="Interaction with the Outside World (IOW) / External Interface (EI)"
-        userRole={userRole}
-        formData={formData}
-        setFormData={setFormData}
-        maxLength={1000}
-      />
-
-      {/* Navigation Buttons */}
       <div className="flex justify-between mt-6">
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
@@ -757,7 +756,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
         </button>
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          onClick={handleSubmit}
+          onClick={handleNext}
         >
           Next
         </button>

@@ -110,7 +110,17 @@ const Page2 = ({ formData, setFormData, onNext, onPrevious, userRole, isReadOnly
   const handleGeneratePDF = () => {
     try {
       console.log("Generating FPMI PDF...");
-      const filename = generateSimpleFPMIPDF(formData);
+      console.log("User role:", userRole); // Debug log
+      
+      // Map userRole to match the role names expected by PDF generator
+      let mappedRole = userRole;
+      if (userRole === 'hod') mappedRole = 'HOD';
+      else if (userRole === 'principal') mappedRole = 'Principal';
+      else if (userRole === 'external') mappedRole = 'ExternalEvaluator';
+      else if (userRole === 'admin') mappedRole = 'Admin';
+      
+      // Pass both formData AND mappedRole to the PDF generator
+      const filename = generateSimpleFPMIPDF(formData, mappedRole);
       toast.success(`PDF generated successfully: ${filename}`);
     } catch (error) {
       console.error("PDF generation error:", error);
