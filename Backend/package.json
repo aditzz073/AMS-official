@@ -5,7 +5,26 @@
   "type": "module",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:coverage": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {},
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "services/**/*.js",
+      "controller/**/*.js",
+      "model/**/*.js",
+      "utils/**/*.js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/__tests__/"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -14,9 +33,11 @@
   "dependencies": {
     "@jest/globals": "^29.7.0",
     "bcryptjs": "^3.0.0",
+    "chokidar": "^4.0.3",
     "cloudinary": "^2.8.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
     "dotenv": "^16.6.1",
     "express": "^4.21.2",
     "form-data": "^4.0.4",
@@ -28,6 +49,7 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.10",
     "nodemon": "^3.1.9",
+    "pino": "^10.1.0",
     "sinon": "^20.0.0",
     "supertest": "^7.1.1"
   }
