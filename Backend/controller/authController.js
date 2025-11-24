@@ -1,6 +1,5 @@
 import User from '../model/user.js';
 import jwt from 'jsonwebtoken';
-import Evaluation from "../model/data.js"
 import LoginLog from '../model/loginLog.js';
 import EmailVerificationOtp from '../model/emailVerificationOtp.js';
 import { sendWelcomeEmail } from '../utils/emailService.js';
@@ -183,8 +182,6 @@ export const login = async (req, res) => {
 // @access  Private
 export const logout = async (req, res) => {
   try {
-    console.log("logout");
-    
     // Update the latest open login log for this user
     if (req.user && req.user._id) {
       const openLog = await LoginLog.findOne({

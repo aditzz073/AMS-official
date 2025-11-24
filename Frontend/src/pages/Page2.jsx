@@ -36,10 +36,8 @@ const Page2 = ({ formData, setFormData, onNext, onPrevious, userRole, isReadOnly
   const calculateTotals = async () => {
     try {
       setIsCalculating(true);
-      console.log("Calculating totals for FPMI...");
       
       const response = await axiosInstance.post("/total", formData);
-      console.log("Calculation response:", response);
       
       if (response?.data?.success) {
         const newCategoriesTotal = {
@@ -81,11 +79,8 @@ const Page2 = ({ formData, setFormData, onNext, onPrevious, userRole, isReadOnly
         
         setFormData(updatedFormData);
         localStorage.setItem("formData", JSON.stringify(updatedFormData));
-        
-        console.log("Totals updated successfully");
       }
     } catch (error) {
-      console.error("Error calculating totals:", error);
       toast.error("Failed to calculate totals. Please try again.");
     } finally {
       setIsCalculating(false);
@@ -109,9 +104,6 @@ const Page2 = ({ formData, setFormData, onNext, onPrevious, userRole, isReadOnly
   // Function to generate PDF
   const handleGeneratePDF = () => {
     try {
-      console.log("Generating FPMI PDF...");
-      console.log("User role:", userRole); // Debug log
-      
       // Map userRole to match the role names expected by PDF generator
       let mappedRole = userRole;
       if (userRole === 'hod') mappedRole = 'HOD';
@@ -123,14 +115,10 @@ const Page2 = ({ formData, setFormData, onNext, onPrevious, userRole, isReadOnly
       const filename = generateSimpleFPMIPDF(formData, mappedRole);
       toast.success(`PDF generated successfully: ${filename}`);
     } catch (error) {
-      console.error("PDF generation error:", error);
       toast.error(`Failed to generate PDF: ${error.message}`);
     }
   };
   
-  console.log("FPMI Page - Current totals:", { totalSelf, totalHoD, totalExternal, categoriesTotal });
- 
-
   return (
     <div className="p-6 min-h-screen">
       <div className="flex justify-between items-center mb-6">

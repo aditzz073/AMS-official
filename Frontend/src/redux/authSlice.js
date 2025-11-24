@@ -11,18 +11,15 @@ const loadAuthState = () => {
         email: null,
         role: null,
         token: null,
-        // employeeCode:null,
       };
     }
     return JSON.parse(serializedState);
   } catch (error) {
-    console.error("Error loading auth state", error);
     return {
       userId: null,
       email: null,
       role: null,
       token: null,
-    //   employeeCode:null,
     };
   }
 };
@@ -58,35 +55,24 @@ const authSlice = createSlice({
             token: token,
           }));
         } catch (error) {
-          console.error("Invalid token", error);
+          // Invalid token - silently fail
         }
       }
     },
-    // setEmpCode:(state,action)=>{
-    //     const empCode = action.payload;
-    //     if(empCode){
-    //         state.employeeCode=empCode
-    //         localStorage.setItem("employeeCodes", JSON.stringify({
-    //             employeeCode:empCode
-    //           }));
-    //     }
-    // },
     logout: (state) => {
       state.userId = null;
       state.email = null;
       state.role = null;
       state.token = null;
-      state.employeeCode=null
       
       // Clear from localStorage
       localStorage.removeItem("authState");
-    //   localStorage.removeItem("employeeCode");
     },
   },
 });
 
 // Export actions
-export const { setToken, logout,setEmpCode } = authSlice.actions;
+export const { setToken, logout } = authSlice.actions;
 
 // Export reducer
 export default authSlice.reducer;

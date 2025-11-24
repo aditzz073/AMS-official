@@ -6,7 +6,7 @@ import { Lock, AtSign, Key, AlertCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axiosInstance from "../helper/axiosInstance";
 import { useDispatch } from "react-redux";
-import { logout, setEmpCode, setToken } from "../redux/authSlice";
+import { logout, setToken } from "../redux/authSlice";
 import logo from "../dscelogo.png";
 import OTPVerification from "../components/OTPVerification";
 import ForgotPassword from "../components/ForgotPassword";
@@ -45,7 +45,6 @@ const Auth = () => {
           dispatch(setToken({ token, user: {} }))
         }
       } catch (error) {
-        console.error("Error restoring auth state:", error);
         dispatch(setToken({ token, user: {} }))
       }
 

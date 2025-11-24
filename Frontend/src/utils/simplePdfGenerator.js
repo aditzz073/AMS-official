@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import dsceLogoUrl from '../dscelogo.png';
+import { evaluationCriteria, getItemsBySection } from './pdfDataMapping';
 
 // Define roles that are allowed to see remarks in PDF
 const ROLES_WITH_REMARKS = ["HOD", "Principal", "ExternalEvaluator", "Admin"];
@@ -239,12 +240,7 @@ export const generateSimpleFPMIPDF = (formData, userRole) => {
     // 1. Teaching Learning Process (TLP) Details
     addSectionHeader('1. Teaching Learning Process (TLP) - Detailed Evaluation');
     
-    const tlpItems = [
-      { key: 'TLP111', title: '1.1.1 Lectures taken as percentage of lectures allocated' },
-      { key: 'TLP112', title: '1.1.2 Tutorials taken as percentage of tutorials allocated' },
-      { key: 'TLP113', title: '1.1.3 Lab sessions taken as percentage of lab sessions allocated' },
-      { key: 'TLP114', title: '1.1.4 Additional academic activities and innovative teaching methods' }
-    ];
+    const tlpItems = getItemsBySection('TLP');
     
     // Add TLP table
     doc.setFontSize(8);
@@ -254,48 +250,76 @@ export const generateSimpleFPMIPDF = (formData, userRole) => {
     doc.setFillColor(0, 51, 102);
     doc.setTextColor(255, 255, 255);
     doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
-    doc.text('Item', margin + 2, yPosition);
-    doc.text('Self', margin + 122, yPosition);
-    doc.text('HoD', margin + 142, yPosition);
-    doc.text('External', margin + 162, yPosition);
+    doc.text('Code', margin + 2, yPosition);
+    doc.text('Item', margin + 18, yPosition);
+    doc.text('Max', margin + 112, yPosition);
+    doc.text('Self', margin + 132, yPosition);
+    doc.text('HoD', margin + 152, yPosition);
+    doc.text('Ext', margin + 172, yPosition);
     doc.setTextColor(0, 0, 0);
     yPosition += 8;
     
     doc.setFont(undefined, 'normal');
+    doc.setFontSize(7);
     let rowIndex = 0;
     tlpItems.forEach(item => {
-      checkNewPage(10);
+      checkNewPage(15);
       if (rowIndex % 2 === 0) {
         doc.setFillColor(248, 248, 248);
-        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
+        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 12, 'F');
       }
-      const wrappedTitle = doc.splitTextToSize(item.title, 115);
-      doc.text(wrappedTitle, margin + 2, yPosition);
-      doc.text((formData[`${item.key}Self`] || "0").toString(), margin + 122, yPosition);
-      doc.text((formData[`${item.key}HoD`] || "0").toString(), margin + 142, yPosition);
-      doc.text((formData[`${item.key}External`] || "0").toString(), margin + 162, yPosition);
-      yPosition += Math.max(8, wrappedTitle.length * 4);
+      
+      // Code
+      doc.text(item.code, margin + 2, yPosition);
+      
+      // Title and description
+      const titleText = `${item.title}`;
+      const wrappedTitle = doc.splitTextToSize(titleText, 90);
+      doc.text(wrappedTitle, margin + 18, yPosition);
+      
+      const descLines = wrappedTitle.length;
+      const midPoint = yPosition + (descLines * 2.5);
+      
+      // Max points
+      doc.text(item.maxPoints.toString(), margin + 112, midPoint);
+      
+      // Scores
+      doc.text((formData[`${item.key}Self`] || "0").toString(), margin + 132, midPoint);
+      doc.text((formData[`${item.key}HoD`] || "0").toString(), margin + 152, midPoint);
+      doc.text((formData[`${item.key}External`] || "0").toString(), margin + 172, midPoint);
+      
+      // Description
+      yPosition += descLines * 3.5;
+      doc.setFontSize(6);
+      doc.setTextColor(100, 100, 100);
+      const wrappedDesc = doc.splitTextToSize(item.description, 90);
+      doc.text(wrappedDesc, margin + 18, yPosition);
+      doc.setFontSize(7);
+      doc.setTextColor(0, 0, 0);
+      
+      yPosition += Math.max(10, wrappedDesc.length * 2.5);
       rowIndex++;
     });
     
     yPosition += 10;
     
     // Add TLP Section Remarks
-    addSectionRemarks('TLP11', 'Section 1.1 - Teaching Related Activities');
+    addSectionRemarks('section-1-tlp', 'Section 1 - Teaching Learning Process');
     
     // 2. Professional Development and Research Contribution (PDRC)
     addSectionHeader('2. Professional Development and Research Contribution (PDRC) - Detailed Evaluation');
     
-    const pdrcItems = [
-      { key: 'PDRC211', title: '2.1.1 Acquiring higher qualifications during the appraisal period' },
-      { key: 'PDRC212', title: '2.1.2 Acquiring status of Certified trainer for skill development courses' },
-      { key: 'PDRC213', title: '2.1.3 FDP / Training / Workshop / Seminar / Conference attended' },
-      { key: 'PDRC214', title: '2.1.4 Invited talks / Keynote / Expert lectures delivered' },
-      { key: 'PDRC221', title: '2.2.1 Research Publication (journals)' },
-      { key: 'PDRC222', title: '2.2.2 Research Publication (Conference proceedings)' }
-    ];
+    // Subsection 2.1
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(0, 51, 102);
+    doc.text('2.1 Professional Development', margin, yPosition);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 8;
     
-    // Add PDRC table
+    const pdrcProfItems = evaluationCriteria.PDRC.subsections[0].items;
+    
+    // Add PDRC Professional Development table
     doc.setFontSize(8);
     doc.setFont(undefined, 'bold');
     checkNewPage(30);
@@ -303,46 +327,126 @@ export const generateSimpleFPMIPDF = (formData, userRole) => {
     doc.setFillColor(0, 51, 102);
     doc.setTextColor(255, 255, 255);
     doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
-    doc.text('Item', margin + 2, yPosition);
-    doc.text('Self', margin + 122, yPosition);
-    doc.text('HoD', margin + 142, yPosition);
-    doc.text('External', margin + 162, yPosition);
+    doc.text('Code', margin + 2, yPosition);
+    doc.text('Item', margin + 18, yPosition);
+    doc.text('Max', margin + 112, yPosition);
+    doc.text('Self', margin + 132, yPosition);
+    doc.text('HoD', margin + 152, yPosition);
+    doc.text('Ext', margin + 172, yPosition);
     doc.setTextColor(0, 0, 0);
     yPosition += 8;
     
     doc.setFont(undefined, 'normal');
+    doc.setFontSize(7);
     rowIndex = 0;
-    pdrcItems.forEach(item => {
-      checkNewPage(10);
+    pdrcProfItems.forEach(item => {
+      checkNewPage(15);
       if (rowIndex % 2 === 0) {
         doc.setFillColor(248, 248, 248);
-        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
+        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 12, 'F');
       }
-      const wrappedTitle = doc.splitTextToSize(item.title, 115);
-      doc.text(wrappedTitle, margin + 2, yPosition);
-      doc.text((formData[`${item.key}Self`] || "0").toString(), margin + 122, yPosition);
-      doc.text((formData[`${item.key}HoD`] || "0").toString(), margin + 142, yPosition);
-      doc.text((formData[`${item.key}External`] || "0").toString(), margin + 162, yPosition);
-      yPosition += Math.max(8, wrappedTitle.length * 4);
+      
+      doc.text(item.code, margin + 2, yPosition);
+      const wrappedTitle = doc.splitTextToSize(item.title, 90);
+      doc.text(wrappedTitle, margin + 18, yPosition);
+      
+      const descLines = wrappedTitle.length;
+      const midPoint = yPosition + (descLines * 2.5);
+      
+      doc.text(item.maxPoints.toString(), margin + 112, midPoint);
+      doc.text((formData[`${item.key}Self`] || "0").toString(), margin + 132, midPoint);
+      doc.text((formData[`${item.key}HoD`] || "0").toString(), margin + 152, midPoint);
+      doc.text((formData[`${item.key}External`] || "0").toString(), margin + 172, midPoint);
+      
+      yPosition += descLines * 3.5;
+      doc.setFontSize(6);
+      doc.setTextColor(100, 100, 100);
+      const wrappedDesc = doc.splitTextToSize(item.description, 90);
+      doc.text(wrappedDesc, margin + 18, yPosition);
+      doc.setFontSize(7);
+      doc.setTextColor(0, 0, 0);
+      
+      yPosition += Math.max(10, wrappedDesc.length * 2.5);
       rowIndex++;
     });
     
     yPosition += 10;
     
-    // Add PDRC Section Remarks
-    addSectionRemarks('PDRC21', 'Section 2.1 - Professional Development');
-    addSectionRemarks('PDRC22', 'Section 2.2 - Research Contribution');
+    // Add PDRC Professional Development Remarks
+    addSectionRemarks('section-2-1-pdrc-teaching', 'Section 2.1 - Professional Development');
+    
+    // Subsection 2.2
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(0, 51, 102);
+    checkNewPage(20);
+    doc.text('2.2 Research Achievements', margin, yPosition);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 8;
+    
+    const pdrcResearchItems = evaluationCriteria.PDRC.subsections[1].items;
+    
+    // Add PDRC Research table
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'bold');
+    checkNewPage(30);
+    
+    doc.setFillColor(0, 51, 102);
+    doc.setTextColor(255, 255, 255);
+    doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
+    doc.text('Code', margin + 2, yPosition);
+    doc.text('Item', margin + 18, yPosition);
+    doc.text('Max', margin + 112, yPosition);
+    doc.text('Self', margin + 132, yPosition);
+    doc.text('HoD', margin + 152, yPosition);
+    doc.text('Ext', margin + 172, yPosition);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 8;
+    
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(7);
+    rowIndex = 0;
+    pdrcResearchItems.forEach(item => {
+      checkNewPage(15);
+      if (rowIndex % 2 === 0) {
+        doc.setFillColor(248, 248, 248);
+        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 12, 'F');
+      }
+      
+      doc.text(item.code, margin + 2, yPosition);
+      const wrappedTitle = doc.splitTextToSize(item.title, 90);
+      doc.text(wrappedTitle, margin + 18, yPosition);
+      
+      const descLines = wrappedTitle.length;
+      const midPoint = yPosition + (descLines * 2.5);
+      
+      doc.text(item.maxPoints.toString(), margin + 112, midPoint);
+      doc.text((formData[`${item.key}Self`] || "0").toString(), margin + 132, midPoint);
+      doc.text((formData[`${item.key}HoD`] || "0").toString(), margin + 152, midPoint);
+      doc.text((formData[`${item.key}External`] || "0").toString(), margin + 172, midPoint);
+      
+      yPosition += descLines * 3.5;
+      doc.setFontSize(6);
+      doc.setTextColor(100, 100, 100);
+      const wrappedDesc = doc.splitTextToSize(item.description, 90);
+      doc.text(wrappedDesc, margin + 18, yPosition);
+      doc.setFontSize(7);
+      doc.setTextColor(0, 0, 0);
+      
+      yPosition += Math.max(10, wrappedDesc.length * 2.5);
+      rowIndex++;
+    });
+    
+    yPosition += 10;
+    
+    // Add PDRC Research Remarks
+    addSectionRemarks('section-2-2-pdrc-research', 'Section 2.2 - Research Achievements');
+    addSectionRemarks('section-2-pdrc', 'Section 2 - Professional Development and Research Contribution (Overall)');
     
     // 3. Contribution at Departmental Level (CDL)
     addSectionHeader('3. Contribution at Departmental Level (CDL) - Detailed Evaluation');
     
-    const cdlItems = [
-      { key: 'CDL31', title: '3.1 Contribution at Departmental Level - Item 1' },
-      { key: 'CDL32', title: '3.2 Contribution at Departmental Level - Item 2' },
-      { key: 'CDL33', title: '3.3 Contribution at Departmental Level - Item 3' },
-      { key: 'CDL34', title: '3.4 Contribution at Departmental Level - Item 4' },
-      { key: 'CDL35', title: '3.5 Contribution at Departmental Level - Item 5' }
-    ];
+    const cdlItems = getItemsBySection('CDL');
     
     // Add CDL table
     doc.setFontSize(8);
@@ -352,41 +456,58 @@ export const generateSimpleFPMIPDF = (formData, userRole) => {
     doc.setFillColor(0, 51, 102);
     doc.setTextColor(255, 255, 255);
     doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
-    doc.text('Item', margin + 2, yPosition);
-    doc.text('Self', margin + 122, yPosition);
-    doc.text('HoD', margin + 142, yPosition);
-    doc.text('External', margin + 162, yPosition);
+    doc.text('Code', margin + 2, yPosition);
+    doc.text('Item', margin + 18, yPosition);
+    doc.text('Max', margin + 112, yPosition);
+    doc.text('Self', margin + 132, yPosition);
+    doc.text('HoD', margin + 152, yPosition);
+    doc.text('Ext', margin + 172, yPosition);
     doc.setTextColor(0, 0, 0);
     yPosition += 8;
     
     doc.setFont(undefined, 'normal');
+    doc.setFontSize(7);
     rowIndex = 0;
     cdlItems.forEach(item => {
-      checkNewPage(10);
+      checkNewPage(15);
       if (rowIndex % 2 === 0) {
         doc.setFillColor(248, 248, 248);
-        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
+        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 12, 'F');
       }
-      const wrappedTitle = doc.splitTextToSize(item.title, 115);
-      doc.text(wrappedTitle, margin + 2, yPosition);
-      doc.text((formData[`${item.key}Self`] || "0").toString(), margin + 122, yPosition);
-      doc.text((formData[`${item.key}HoD`] || "0").toString(), margin + 142, yPosition);
-      doc.text((formData[`${item.key}External`] || "0").toString(), margin + 162, yPosition);
-      yPosition += Math.max(8, wrappedTitle.length * 4);
+      
+      doc.text(item.code, margin + 2, yPosition);
+      const wrappedTitle = doc.splitTextToSize(item.title, 90);
+      doc.text(wrappedTitle, margin + 18, yPosition);
+      
+      const descLines = wrappedTitle.length;
+      const midPoint = yPosition + (descLines * 2.5);
+      
+      doc.text(item.maxPoints.toString(), margin + 112, midPoint);
+      doc.text((formData[`${item.key}Self`] || "0").toString(), margin + 132, midPoint);
+      doc.text((formData[`${item.key}HoD`] || "0").toString(), margin + 152, midPoint);
+      doc.text((formData[`${item.key}External`] || "0").toString(), margin + 172, midPoint);
+      
+      yPosition += descLines * 3.5;
+      doc.setFontSize(6);
+      doc.setTextColor(100, 100, 100);
+      const wrappedDesc = doc.splitTextToSize(item.description, 90);
+      doc.text(wrappedDesc, margin + 18, yPosition);
+      doc.setFontSize(7);
+      doc.setTextColor(0, 0, 0);
+      
+      yPosition += Math.max(10, wrappedDesc.length * 2.5);
       rowIndex++;
     });
     
     yPosition += 10;
     
     // Add CDL Section Remarks
-    addSectionRemarks('CDL3', 'Section 3 - Contribution at Departmental Level');
+    addSectionRemarks('section-3-cdl', 'Section 3 - Contribution at Departmental Level');
     
     // 4. Contribution at Institutional Level (CIL)
     addSectionHeader('4. Contribution at Institutional Level (CIL) - Detailed Evaluation');
     
-    const cilItems = [
-      { key: 'CIL4', title: '4.1 Institutional committee membership and activities' }
-    ];
+    const cilItems = getItemsBySection('CIL');
     
     // Add CIL table
     doc.setFontSize(8);
@@ -396,50 +517,68 @@ export const generateSimpleFPMIPDF = (formData, userRole) => {
     doc.setFillColor(0, 51, 102);
     doc.setTextColor(255, 255, 255);
     doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
-    doc.text('Item', margin + 2, yPosition);
-    doc.text('Self', margin + 122, yPosition);
-    doc.text('HoD', margin + 142, yPosition);
-    doc.text('External', margin + 162, yPosition);
+    doc.text('Code', margin + 2, yPosition);
+    doc.text('Item', margin + 18, yPosition);
+    doc.text('Max', margin + 112, yPosition);
+    doc.text('Self', margin + 132, yPosition);
+    doc.text('HoD', margin + 152, yPosition);
+    doc.text('Ext', margin + 172, yPosition);
     doc.setTextColor(0, 0, 0);
     yPosition += 8;
     
     doc.setFont(undefined, 'normal');
+    doc.setFontSize(7);
     rowIndex = 0;
     cilItems.forEach(item => {
-      checkNewPage(10);
+      checkNewPage(15);
       if (rowIndex % 2 === 0) {
         doc.setFillColor(248, 248, 248);
-        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
+        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 12, 'F');
       }
-      const wrappedTitle = doc.splitTextToSize(item.title, 115);
-      doc.text(wrappedTitle, margin + 2, yPosition);
-      doc.text((formData[`${item.key}Self`] || "0").toString(), margin + 122, yPosition);
-      doc.text((formData[`${item.key}HoD`] || "0").toString(), margin + 142, yPosition);
-      doc.text((formData[`${item.key}External`] || "0").toString(), margin + 162, yPosition);
-      yPosition += Math.max(8, wrappedTitle.length * 4);
+      
+      doc.text(item.code, margin + 2, yPosition);
+      const wrappedTitle = doc.splitTextToSize(item.title, 90);
+      doc.text(wrappedTitle, margin + 18, yPosition);
+      
+      const descLines = wrappedTitle.length;
+      const midPoint = yPosition + (descLines * 2.5);
+      
+      doc.text(item.maxPoints.toString(), margin + 112, midPoint);
+      doc.text((formData[`${item.key}Self`] || "0").toString(), margin + 132, midPoint);
+      doc.text((formData[`${item.key}HoD`] || "0").toString(), margin + 152, midPoint);
+      doc.text((formData[`${item.key}External`] || "0").toString(), margin + 172, midPoint);
+      
+      yPosition += descLines * 3.5;
+      doc.setFontSize(6);
+      doc.setTextColor(100, 100, 100);
+      const wrappedDesc = doc.splitTextToSize(item.description, 90);
+      doc.text(wrappedDesc, margin + 18, yPosition);
+      doc.setFontSize(7);
+      doc.setTextColor(0, 0, 0);
+      
+      yPosition += Math.max(10, wrappedDesc.length * 2.5);
       rowIndex++;
     });
     
     yPosition += 10;
     
     // Add CIL Section Remarks
-    addSectionRemarks('CIL4', 'Section 4 - Contribution at Institutional Level');
+    addSectionRemarks('section-4-cil', 'Section 4 - Contribution at Institutional Level');
     
     // 5. Interaction with Outside World (IOW)
     addSectionHeader('5. Interaction with Outside World (IOW) / External Interface (EI) - Detailed Evaluation');
     
-    const iowItems = [
-      { key: 'IOW511', title: '5.1.1 Industry collaboration and projects' },
-      { key: 'IOW512', title: '5.1.2 Live industrial projects' },
-      { key: 'IOW513', title: '5.1.3 Internship coordination and facilitation' },
-      { key: 'IOW521', title: '5.2.1 Subject expert for interview panel' },
-      { key: 'IOW522', title: '5.2.2 External examiner for universities' },
-      { key: 'IOW523', title: '5.2.3 Reviewer - International/National Journal' },
-      { key: 'IOW524', title: '5.2.4 Professional society membership and activities' },
-      { key: 'IOW525', title: '5.2.5 Community outreach and social service' }
-    ];
+    // Subsection 5.1
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(0, 51, 102);
+    doc.text('5.1 Industry Interface', margin, yPosition);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 8;
     
-    // Add IOW table
+    const iowIndustryItems = evaluationCriteria.IOW.subsections[0].items;
+    
+    // Add IOW Industry Interface table
     doc.setFontSize(8);
     doc.setFont(undefined, 'bold');
     checkNewPage(30);
@@ -447,35 +586,121 @@ export const generateSimpleFPMIPDF = (formData, userRole) => {
     doc.setFillColor(0, 51, 102);
     doc.setTextColor(255, 255, 255);
     doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
-    doc.text('Item', margin + 2, yPosition);
-    doc.text('Self', margin + 122, yPosition);
-    doc.text('HoD', margin + 142, yPosition);
-    doc.text('External', margin + 162, yPosition);
+    doc.text('Code', margin + 2, yPosition);
+    doc.text('Item', margin + 18, yPosition);
+    doc.text('Max', margin + 112, yPosition);
+    doc.text('Self', margin + 132, yPosition);
+    doc.text('HoD', margin + 152, yPosition);
+    doc.text('Ext', margin + 172, yPosition);
     doc.setTextColor(0, 0, 0);
     yPosition += 8;
     
     doc.setFont(undefined, 'normal');
+    doc.setFontSize(7);
     rowIndex = 0;
-    iowItems.forEach(item => {
-      checkNewPage(10);
+    iowIndustryItems.forEach(item => {
+      checkNewPage(15);
       if (rowIndex % 2 === 0) {
         doc.setFillColor(248, 248, 248);
-        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
+        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 12, 'F');
       }
-      const wrappedTitle = doc.splitTextToSize(item.title, 115);
-      doc.text(wrappedTitle, margin + 2, yPosition);
-      doc.text((formData[`${item.key}Self`] || "0").toString(), margin + 122, yPosition);
-      doc.text((formData[`${item.key}HoD`] || "0").toString(), margin + 142, yPosition);
-      doc.text((formData[`${item.key}External`] || "0").toString(), margin + 162, yPosition);
-      yPosition += Math.max(8, wrappedTitle.length * 4);
+      
+      doc.text(item.code, margin + 2, yPosition);
+      const wrappedTitle = doc.splitTextToSize(item.title, 90);
+      doc.text(wrappedTitle, margin + 18, yPosition);
+      
+      const descLines = wrappedTitle.length;
+      const midPoint = yPosition + (descLines * 2.5);
+      
+      doc.text(item.maxPoints.toString(), margin + 112, midPoint);
+      doc.text((formData[`${item.key}Self`] || "0").toString(), margin + 132, midPoint);
+      doc.text((formData[`${item.key}HoD`] || "0").toString(), margin + 152, midPoint);
+      doc.text((formData[`${item.key}External`] || "0").toString(), margin + 172, midPoint);
+      
+      yPosition += descLines * 3.5;
+      doc.setFontSize(6);
+      doc.setTextColor(100, 100, 100);
+      const wrappedDesc = doc.splitTextToSize(item.description, 90);
+      doc.text(wrappedDesc, margin + 18, yPosition);
+      doc.setFontSize(7);
+      doc.setTextColor(0, 0, 0);
+      
+      yPosition += Math.max(10, wrappedDesc.length * 2.5);
       rowIndex++;
     });
     
     yPosition += 10;
     
-    // Add IOW Section Remarks
-    addSectionRemarks('IOW51', 'Section 5.1 - Industry and Academic Interface');
-    addSectionRemarks('IOW52', 'Section 5.2 - Professional and Social Engagement');
+    // Add IOW Industry Interface Remarks
+    addSectionRemarks('section-5-1-iow-industry', 'Section 5.1 - Industry Interface');
+    
+    // Subsection 5.2
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(0, 51, 102);
+    checkNewPage(20);
+    doc.text('5.2 Professional Engagement', margin, yPosition);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 8;
+    
+    const iowProfessionalItems = evaluationCriteria.IOW.subsections[1].items;
+    
+    // Add IOW Professional Engagement table
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'bold');
+    checkNewPage(30);
+    
+    doc.setFillColor(0, 51, 102);
+    doc.setTextColor(255, 255, 255);
+    doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
+    doc.text('Code', margin + 2, yPosition);
+    doc.text('Item', margin + 18, yPosition);
+    doc.text('Max', margin + 112, yPosition);
+    doc.text('Self', margin + 132, yPosition);
+    doc.text('HoD', margin + 152, yPosition);
+    doc.text('Ext', margin + 172, yPosition);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 8;
+    
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(7);
+    rowIndex = 0;
+    iowProfessionalItems.forEach(item => {
+      checkNewPage(15);
+      if (rowIndex % 2 === 0) {
+        doc.setFillColor(248, 248, 248);
+        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 12, 'F');
+      }
+      
+      doc.text(item.code, margin + 2, yPosition);
+      const wrappedTitle = doc.splitTextToSize(item.title, 90);
+      doc.text(wrappedTitle, margin + 18, yPosition);
+      
+      const descLines = wrappedTitle.length;
+      const midPoint = yPosition + (descLines * 2.5);
+      
+      doc.text(item.maxPoints.toString(), margin + 112, midPoint);
+      doc.text((formData[`${item.key}Self`] || "0").toString(), margin + 132, midPoint);
+      doc.text((formData[`${item.key}HoD`] || "0").toString(), margin + 152, midPoint);
+      doc.text((formData[`${item.key}External`] || "0").toString(), margin + 172, midPoint);
+      
+      yPosition += descLines * 3.5;
+      doc.setFontSize(6);
+      doc.setTextColor(100, 100, 100);
+      const wrappedDesc = doc.splitTextToSize(item.description, 90);
+      doc.text(wrappedDesc, margin + 18, yPosition);
+      doc.setFontSize(7);
+      doc.setTextColor(0, 0, 0);
+      
+      yPosition += Math.max(10, wrappedDesc.length * 2.5);
+      rowIndex++;
+    });
+    
+    yPosition += 10;
+    
+    // Add IOW Professional Engagement Remarks
+    addSectionRemarks('section-5-2-iow-professional', 'Section 5.2 - Professional Engagement');
+    addSectionRemarks('section-5-iow', 'Section 5 - Interaction with Outside World (Overall)');
     
     yPosition += 15;
     
