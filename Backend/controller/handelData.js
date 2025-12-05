@@ -43,7 +43,6 @@ const validateRoleBasedFields = (userRole, updateData) => {
     for (const { pattern, type } of fieldPatterns) {
       if (pattern.test(key)) {
         if (!permissions.editable.includes(type)) {
-          console.log(`Removing field ${key} - user role ${userRole} cannot edit ${type} fields`);
           delete validatedData[key];
         }
         break;
@@ -128,23 +127,17 @@ const createOrUpdateEmployee = async (req, res) => {
     // Handle remarks separately - only HOD and Admin can update
     if (updateData.remarks) {
       if (!['hod', 'admin'].includes(userRole?.toLowerCase())) {
-        console.log(`User role ${userRole} cannot update remarks - removing from update data`);
         delete updateData.remarks;
       } else {
         // Parse remarks if it's a JSON string
         if (typeof updateData.remarks === 'string') {
           try {
             updateData.remarks = JSON.parse(updateData.remarks);
-            console.log('Parsed remarks from JSON string:', updateData.remarks);
           } catch (error) {
-            console.error('Error parsing remarks JSON:', error);
             delete updateData.remarks;
           }
         }
-        console.log('Remarks to be saved:', updateData.remarks);
       }
-    } else {
-      console.log('No remarks in updateData');
     }
     
     // Validate role-based field access
@@ -170,8 +163,6 @@ const createOrUpdateEmployee = async (req, res) => {
             const file = files[0];
             const cloudinaryUrl = await uploadToCloudinary(file.path, employeeCode, fieldName);
             updateData[fieldName] = cloudinaryUrl;
-          } else {
-            console.log(`User role ${userRole} cannot upload to field ${fieldName}`);
           }
         }
       }
@@ -183,8 +174,6 @@ const createOrUpdateEmployee = async (req, res) => {
       updateData,
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
-    
-    console.log('Employee updated successfully. Remarks in DB:', updatedEmployee.remarks);
     
     return res.status(200).json({
       success: true,
@@ -205,22 +194,17 @@ const getEmployeeById = async (req, res) => {
     try {
         const { id } = req.params;
         const userRole = req.user?.role; // Get user role from authenticated user
-        console.log(`Fetching employee ${id} for role: ${userRole}`);
         
         const employee = await Evaluation.findOne({employeeCode:id});
         if (!employee) {
             return res.status(200).json({success:false, message: 'Employee not found' });
         }
 
-        console.log('Employee remarks from DB (raw):', employee.remarks);
-
         // Filter data based on user role
         let responseData = employee;
         if (userRole) {
             responseData = filterDataForRole(employee, userRole);
         }
-
-        console.log('Remarks in response data:', responseData.remarks);
 
         return res.status(200).json({success:true, data: responseData });
     } catch (error) {

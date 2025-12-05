@@ -25,7 +25,6 @@ const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
       return updatedData;
     });
   };
-  console.log(formData);
 
   const handleSubmit = async () => {
     const confirmSubmit = window.confirm("This action will submit the form data. Do you want to proceed?");
@@ -33,8 +32,6 @@ const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
     
     // Filter form data based on role permissions before submission
     const filteredFormData = getSubmissionData(formData);
-    console.log("Original formData:", formData);
-    console.log("Filtered formData for submission:", filteredFormData);
     
     const evaluationData = new FormData();
     
@@ -84,7 +81,6 @@ const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
           
           evaluationData.append(key, file);
         } catch (error) {
-          console.error(`Error processing ${key}:`, error);
           evaluationData.append(key, value);
         }
       }
@@ -92,7 +88,6 @@ const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
         evaluationData.append(key, value);
       }
     }
-    console.log(evaluationData);
     
     try {
       const response = await axiosInstance.post("/addData", evaluationData, {
@@ -101,18 +96,15 @@ const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
         }
       });
       
-      console.log(response);
       if (response?.data?.success) {
         // Show success message
         toast.success("Form submitted successfully!");
         
         // Generate and download PDF after successful submission
         try {
-          console.log("Generating FPMI PDF after form submission...");
           const filename = generateSimpleFPMIPDF(formData);
           toast.success(`PDF report generated: ${filename}`);
         } catch (pdfError) {
-          console.error("PDF generation error:", pdfError);
           toast.error("Form submitted successfully, but PDF generation failed.");
         }
         
@@ -129,7 +121,6 @@ const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
       }
     } catch (error) {
       toast.error("An error occurred while submitting the form. Please try again.");
-      console.error("Submission error:", error);
     }
   };
   

@@ -30,6 +30,25 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  // Employee linking fields
+  staffId: {
+    type: String,
+    unique: true,
+    sparse: true, // Allows null values while maintaining uniqueness for non-null values
+    index: true
+  },
+  employeeDetails: {
+    staffFullName: String,
+    staffShortName: String,
+    mobile: String,
+    staffCode: String,
+    emailPrivate: String,
+    instituteJoiningDate: Date,
+    currentDesignationName: String,
+    departmentCode: String,
+    facultyName: String,
+    sourceFile: String
+  },
   createdAt: {
     type: Date,
     default: Date.now

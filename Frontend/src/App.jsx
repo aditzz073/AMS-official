@@ -91,7 +91,7 @@ const App = () => {
         }
       }
     } catch (error) {
-      console.error("Error parsing authState from localStorage:", error);
+      // Silently handle error
     }
   }, []);
 
@@ -115,7 +115,6 @@ const App = () => {
     try {
       await axiosInstance.post("/logout");
     } catch (error) {
-      console.error("Logout API error:", error);
       // Continue with logout even if API fails
     } finally {
       // Clean up local storage and state

@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../model/user.js';
 import LoginLog from '../model/loginLog.js';
-import { log } from 'console';
 
 export const protect = async (req, res, next) => {
   try {

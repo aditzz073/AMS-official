@@ -30,7 +30,6 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
   const handleSubmit = async () => {
     try {
       const response = await axiosInstance.post("/total", formData);
-      console.log("Page6 calculation response:", response);
       
       if (response?.data?.success) {
         const categoriesTotal = {
@@ -55,8 +54,6 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
         const totalHoD = response?.data?.totals?.totalHoD || "0";
         const totalExternal = response?.data?.totals?.totalExternal || "0";
         
-        console.log("Calculated totals:", { categoriesTotal, totalSelf, totalHoD, totalExternal });
-        
         // Update formData with calculated totals
         const updatedFormData = { 
           ...formData, 
@@ -70,14 +67,11 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
         setFormData(updatedFormData);
         localStorage.setItem("formData", JSON.stringify(updatedFormData));
         
-        console.log("Updated formData with totals:", updatedFormData);
-        
         onNext();
       } else {
         throw new Error("Calculation failed");
       }
     } catch (error) {
-      console.error("Error submitting data:", error);
       alert("Failed to submit data. Please try again.");
     }
   };
@@ -207,7 +201,6 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
     }
   }else{
     if (!fileUrl) {
-      console.error("No file uploaded for this field");
       return;
   }
 
@@ -268,7 +261,6 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
     onNext();
   };
 
-  console.log(formData);
   return (
     <div className='p-6  min-h-screen'>
       <h3 id="head_pdrc" className="text-xl font-bold mb-4 text-center">

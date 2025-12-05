@@ -1,0 +1,4 @@
+Sr,Staff I D,StaffFullName,StaffShortName,Mobile,StaffCode,EmailPrivate,EmailInstitute,InstituteJoiningDate,CurrentDesignationName,DepartmentCode,FacultyName
+1,TEST001,Dr. John Doe,JD,9876543210,JD001,john.personal@gmail.com,john.doe@dayanandasagar.edu,01/15/2020,Professor,CS,FoE - Faculty of Engineering
+2,TEST002,Dr. Jane Smith,JS,9876543211,JS002,jane.personal@gmail.com,jane.smith@dayanandasagar.edu,03/20/2019,Associate Professor,CS,FoE - Faculty of Engineering
+3,TEST003,Mr. Bob Wilson,BW,9876543212,BW003,bob.personal@gmail.com,bob.wilson@dayanandasagar.edu,06/10/2021,Assistant Professor,CS,FoE - Faculty of Engineering

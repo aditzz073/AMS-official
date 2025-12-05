@@ -1,10 +1,24 @@
 import User from '../model/user.js';
 import jwt from 'jsonwebtoken';
-import Evaluation from "../model/data.js"
 import LoginLog from '../model/loginLog.js';
 import EmailVerificationOtp from '../model/emailVerificationOtp.js';
 import { sendWelcomeEmail } from '../utils/emailService.js';
 import { validateEmail } from '../utils/emailValidator.js';
+import {
+  EmployeeNotFoundError,
+  EmployeeAlreadyLinkedError,
+} from '../utils/errors/employeeErrors.js';
+
+// Employee service will be injected
+let employeeService = null;
+
+/**
+ * Set the employee service instance
+ * @param {import('../services/employeeService.js').EmployeeService} service
+ */
+export const setEmployeeService = (service) => {
+  employeeService = service;
+};
 
 
 // Constants for expiration (6 hours)
@@ -92,14 +106,81 @@ export const signup = async (req, res) => {
           message: 'Email verification required. Please verify your email first.'
         });
       }
+
+      // ====== EMPLOYEE VERIFICATION STEP ======
+      // Verify that the email exists in employee CSV files
+      let employeeData = null;
+      
+      if (employeeService) {
+        try {
+          const verificationResult = await employeeService.verifyEmployeeEmail(email);
+          
+          if (!verificationResult.success || !verificationResult.employee) {
+            return res.status(403).json({
+              success: false,
+              message: 'You are not authorized to create an account. Email not found in employee database.'
+            });
+          }
+
+          employeeData = verificationResult.employee;
+
+          // Check if this employee is already linked to another user
+          const linkedUser = await User.findOne({ staffId: employeeData.staffId });
+          if (linkedUser) {
+            throw new EmployeeAlreadyLinkedError(employeeData.staffId);
+          }
+
+        } catch (error) {
+          // Handle specific employee verification errors
+          if (error instanceof EmployeeNotFoundError) {
+            return res.status(403).json({
+              success: false,
+              message: error.message
+            });
+          }
+          
+          if (error instanceof EmployeeAlreadyLinkedError) {
+            return res.status(409).json({
+              success: false,
+              message: error.message
+            });
+          }
+
+          // Log and rethrow unexpected errors
+          console.error('Employee verification error:', error);
+          throw error;
+        }
+      } else {
+        console.warn('Employee service not initialized - skipping employee verification');
+      }
+      // ====== END EMPLOYEE VERIFICATION ======
   
-      // Create user with verified email
-      const user = await User.create({
+      // Create user with verified email and linked employee data
+      const userData = {
         email,
         password,
         role,
         emailVerified: true
-      });
+      };
+
+      // Add employee linking if verification succeeded
+      if (employeeData) {
+        userData.staffId = employeeData.staffId;
+        userData.employeeDetails = {
+          staffFullName: employeeData.staffFullName,
+          staffShortName: employeeData.staffShortName,
+          mobile: employeeData.mobile,
+          staffCode: employeeData.staffCode,
+          emailPrivate: employeeData.emailPrivate,
+          instituteJoiningDate: employeeData.instituteJoiningDate,
+          currentDesignationName: employeeData.currentDesignationName,
+          departmentCode: employeeData.departmentCode,
+          facultyName: employeeData.facultyName,
+          sourceFile: employeeData._sourceFile
+        };
+      }
+
+      const user = await User.create(userData);
 
       // Send welcome email (non-blocking)
       sendWelcomeEmail(email, role).catch(err => 
@@ -108,6 +189,14 @@ export const signup = async (req, res) => {
   
       sendTokenResponse(user, 201, res);
     } catch (error) {
+      // Handle duplicate key error for staffId
+      if (error.code === 11000 && error.keyPattern?.staffId) {
+        return res.status(409).json({
+          success: false,
+          message: 'This employee record is already linked to an existing account.'
+        });
+      }
+
       res.status(400).json({
         success: false,
         message: error.message
@@ -183,8 +272,6 @@ export const login = async (req, res) => {
 // @access  Private
 export const logout = async (req, res) => {
   try {
-    console.log("logout");
-    
     // Update the latest open login log for this user
     if (req.user && req.user._id) {
       const openLog = await LoginLog.findOne({
