@@ -1,3 +1,0 @@
-Sr,Staff I D,StaffFullName,StaffShortName,Mobile,StaffCode,EmailPrivate,EmailInstitute,InstituteJoiningDate,CurrentDesignationName,DepartmentCode,FacultyName
-1,,Invalid Employee,IE,9999999999,IE001,invalid@gmail.com,,01/01/2020,Professor,CS,FoE
-2,TEST005,,,9876543214,,,valid.employee@dayanandasagar.edu,05/15/2021,Lecturer,EC,FoE
