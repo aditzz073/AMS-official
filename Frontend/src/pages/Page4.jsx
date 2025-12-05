@@ -162,35 +162,49 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
   console.log(formData);
 
   const validateRequiredFields = () => {
-    // Define all field keys for Page 4
-    const page4Fields = [
-      'PDRC211', 'PDRC212', 'PDRC213', 'PDRC214',
-      'PDRC221', 'PDRC222', 'PDRC223', 'PDRC224', 'PDRC225', 'PDRC226', 'PDRC227', 'PDRC228'
-    ];
-
-    // Check based on role
-    if (userRole === 'hod') {
-      const emptyFields = page4Fields.filter(field => !formData[`${field}HoD`] || formData[`${field}HoD`] === '');
-      if (emptyFields.length > 0) {
-        toast.error('Please fill all HoD evaluation fields before proceeding');
-        return false;
-      }
-    } else if (userRole === 'principal') {
-      const emptyFields = page4Fields.filter(field => !formData[`${field}HoD`] || formData[`${field}HoD`] === '');
-      if (emptyFields.length > 0) {
-        toast.error('Please fill all HoD evaluation fields before proceeding');
-        return false;
-      }
-    } else if (userRole === 'external') {
-      const emptyFields = page4Fields.filter(field => !formData[`${field}External`] || formData[`${field}External`] === '');
-      if (emptyFields.length > 0) {
-        toast.error('Please fill all External Audit Member evaluation fields before proceeding');
-        return false;
-      }
-    }
-
+  // Principal can skip validation - view-only access
+  if (userRole === 'principal') {
     return true;
-  };
+  }
+
+  // Define all field keys for Page 4
+  const page4Fields = [
+    'PDRC211', 'PDRC212', 'PDRC213', 'PDRC214',
+    'PDRC221', 'PDRC222', 'PDRC223', 'PDRC224', 'PDRC225', 'PDRC226', 'PDRC227', 'PDRC228'
+  ];
+
+  // Check based on role - ALL ROLES must fill their respective columns
+  if (userRole === 'faculty') {
+    const emptyFields = page4Fields.filter(field => 
+      !formData[`${field}Self`] || formData[`${field}Self`] === ''
+    );
+    if (emptyFields.length > 0) {
+      toast.error(`Please fill all ${emptyFields.length} Self evaluation field(s) before proceeding`);
+      console.log('Empty Self fields:', emptyFields);
+      return false;
+    }
+  } else if (userRole === 'hod') {
+    const emptyFields = page4Fields.filter(field => 
+      !formData[`${field}HoD`] || formData[`${field}HoD`] === ''
+    );
+    if (emptyFields.length > 0) {
+      toast.error(`Please fill all ${emptyFields.length} HoD evaluation field(s) before proceeding`);
+      console.log('Empty HoD fields:', emptyFields);
+      return false;
+    }
+  } else if (userRole === 'external') {
+    const emptyFields = page4Fields.filter(field => 
+      !formData[`${field}External`] || formData[`${field}External`] === ''
+    );
+    if (emptyFields.length > 0) {
+      toast.error(`Please fill all ${emptyFields.length} External evaluation field(s) before proceeding`);
+      console.log('Empty External fields:', emptyFields);
+      return false;
+    }
+  }
+
+  return true;
+};
 
   const handleNext = () => {
     if (!validateRequiredFields()) {

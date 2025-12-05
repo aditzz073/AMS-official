@@ -217,29 +217,43 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
   };
 
   const validateRequiredFields = () => {
+    // Principal can skip validation - view-only access
+    if (userRole === 'principal') {
+      return true;
+    }
+
     // Define all field keys for Page 6
     const page6Fields = [
-      'IOW511', 'IOW512', 'IOW513', 'IOW514', 'IOW515', 'IOW516',
+      'IOW511', 'IOW512', 'IOW513', 
       'IOW521', 'IOW522', 'IOW523', 'IOW524', 'IOW525'
     ];
 
-    // Check based on role
-    if (userRole === 'hod') {
-      const emptyFields = page6Fields.filter(field => !formData[`${field}HoD`] || formData[`${field}HoD`] === '');
+    // Check based on role - ALL ROLES must fill their respective columns
+    if (userRole === 'faculty') {
+      const emptyFields = page6Fields.filter(field => 
+        !formData[`${field}Self`] || formData[`${field}Self`] === ''
+      );
       if (emptyFields.length > 0) {
-        toast.error('Please fill all HoD evaluation fields before proceeding');
+        toast.error(`Please fill all ${emptyFields.length} Self evaluation field(s) before proceeding`);
+        console.log('Empty Self fields:', emptyFields);
         return false;
       }
-    } else if (userRole === 'principal') {
-      const emptyFields = page6Fields.filter(field => !formData[`${field}HoD`] || formData[`${field}HoD`] === '');
+    } else if (userRole === 'hod') {
+      const emptyFields = page6Fields.filter(field => 
+        !formData[`${field}HoD`] || formData[`${field}HoD`] === ''
+      );
       if (emptyFields.length > 0) {
-        toast.error('Please fill all HoD evaluation fields before proceeding');
+        toast.error(`Please fill all ${emptyFields.length} HoD evaluation field(s) before proceeding`);
+        console.log('Empty HoD fields:', emptyFields);
         return false;
       }
     } else if (userRole === 'external') {
-      const emptyFields = page6Fields.filter(field => !formData[`${field}External`] || formData[`${field}External`] === '');
+      const emptyFields = page6Fields.filter(field => 
+        !formData[`${field}External`] || formData[`${field}External`] === ''
+      );
       if (emptyFields.length > 0) {
-        toast.error('Please fill all External Audit Member evaluation fields before proceeding');
+        toast.error(`Please fill all ${emptyFields.length} External evaluation field(s) before proceeding`);
+        console.log('Empty External fields:', emptyFields);
         return false;
       }
     }
