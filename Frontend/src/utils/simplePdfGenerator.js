@@ -201,6 +201,28 @@ export const generateSimpleFPMIPDF = (formData, userRole) => {
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     
+    // Helper function to format date as MM/YYYY for display
+    const formatDateDisplay = (dateString) => {
+      if (!dateString) return 'N/A';
+      try {
+        // Handle YYYY-MM format from backend
+        if (typeof dateString === 'string' && dateString.match(/^\\d{4}-\\d{2}/)) {
+          const [year, month] = dateString.split('-');
+          return `${month}/${year}`;
+        }
+        // Handle full date objects
+        const date = new Date(dateString);
+        if (!isNaN(date.getTime())) {
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = date.getFullYear();
+          return `${month}/${year}`;
+        }
+        return dateString; // Return as-is if can't parse
+      } catch (e) {
+        return dateString || 'N/A';
+      }
+    };
+    
     const facultyInfo = [
       { label: 'Employee Code:', value: formData.employeeCode || 'N/A' },
       { label: 'Name:', value: formData.name || 'N/A' },
@@ -208,8 +230,8 @@ export const generateSimpleFPMIPDF = (formData, userRole) => {
       { label: 'Department:', value: formData.department || 'N/A' },
       { label: 'College:', value: formData.college || 'N/A' },
       { label: 'Campus:', value: formData.campus || 'N/A' },
-      { label: 'Joining Date:', value: formData.joiningDate || 'N/A' },
-      { label: 'Period of Assessment:', value: formData.periodOfAssessment || 'N/A' }
+      { label: 'Joining Date:', value: formatDateDisplay(formData.joiningDate) },
+      { label: 'Period of Assessment:', value: formatDateDisplay(formData.periodOfAssessment) }
     ];
     
     const columnWidth = (pageWidth - 2 * margin - 10) / 2;

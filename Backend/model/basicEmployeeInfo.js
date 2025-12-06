@@ -68,7 +68,17 @@ const basicEmployeeInfoSchema = new mongoose.Schema({
 basicEmployeeInfoSchema.index({ email: 1, employeeCode: 1 });
 basicEmployeeInfoSchema.index({ department: 1, college: 1 });
 
-// Method to get full employee info
+// Helper method to format date as YYYY-MM for frontend
+basicEmployeeInfoSchema.methods.formatDateYYYYMM = function(date) {
+  if (!date) return null;
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return null;
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+};
+
+// Method to get full employee info with formatted dates
 basicEmployeeInfoSchema.methods.getFullInfo = function() {
   return {
     email: this.email,

@@ -5,37 +5,43 @@ import LoginLog from '../model/loginLog.js';
 import EmailVerificationOtp from '../model/emailVerificationOtp.js';
 import { sendWelcomeEmail } from '../utils/emailService.js';
 import { validateEmail } from '../utils/emailValidator.js';
+import { logger, maskEmail } from '../utils/securityLogger.js';
 
+// Constants for expiration - shorter for admin roles
+const EXPIRATION_HOURS = parseInt(process.env.TOKEN_EXPIRY_HOURS) || 6;
+const ADMIN_EXPIRATION_HOURS = parseInt(process.env.ADMIN_TOKEN_EXPIRY_HOURS) || 2;
+const EXPIRATION_MS = EXPIRATION_HOURS * 60 * 60 * 1000;
+const ADMIN_EXPIRATION_MS = ADMIN_EXPIRATION_HOURS * 60 * 60 * 1000;
 
-// Constants for expiration (6 hours)
-const EXPIRATION_HOURS = 6 ; //for 10sec= 10/3600
-const EXPIRATION_MS = EXPIRATION_HOURS * 60 * 60 * 1000; // 6 hours in milliseconds
-
-// Generate JWT Token with 6 hour expiration
+// Generate JWT Token with role-based expiration (shorter for admin)
 const generateToken = (id, role, email, employeeCode) => {
+  const isAdmin = role === 'admin';
+  const expiryHours = isAdmin ? ADMIN_EXPIRATION_HOURS : EXPIRATION_HOURS;
+  
   return jwt.sign({ 
     id, 
     role, 
     email,
     employeeCode 
   }, process.env.JWT_SECRET, {
-    expiresIn: `${EXPIRATION_HOURS}h` // 6 hours
+    expiresIn: `${expiryHours}h`
   });
 };
 
-// Set token cookie with 6 hour expiration
+// Set token cookie with role-based expiration
 const sendTokenResponse = async (user, statusCode, res) => {
   const token = generateToken(user._id, user.role, user.email, user.employeeCode);
+  const isAdmin = user.role === 'admin';
+  const expiryMs = isAdmin ? ADMIN_EXPIRATION_MS : EXPIRATION_MS;
 
   const options = {
-    expires: new Date(Date.now() + EXPIRATION_MS),
+    expires: new Date(Date.now() + expiryMs),
     httpOnly: true,
-    sameSite: 'strict'
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production' // Only send over HTTPS in production
   };
 
-  if (process.env.NODE_ENV === 'production') {
-    options.secure = true;
-  }
+  logger.success('Token generated', `Role: ${user.role}, Expiry: ${isAdmin ? ADMIN_EXPIRATION_HOURS : EXPIRATION_HOURS}h`);
 
   res
     .status(statusCode)
@@ -43,7 +49,7 @@ const sendTokenResponse = async (user, statusCode, res) => {
     .json({
       success: true,
       token,
-      expiresIn: EXPIRATION_MS,
+      expiresIn: expiryMs,
       user: {
         id: user._id,
         email: user.email,
@@ -132,9 +138,10 @@ export const signup = async (req, res) => {
 
       // Send welcome email (non-blocking)
       sendWelcomeEmail(email, role).catch(err => 
-        console.error('Failed to send welcome email:', err)
+        logger.error('Failed to send welcome email', { code: err.code })
       );
   
+      logger.success('User signup successful', maskEmail(email));
       sendTokenResponse(user, 201, res);
     } catch (error) {
       res.status(400).json({
@@ -167,6 +174,7 @@ export const login = async (req, res) => {
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      logger.warn('Failed login attempt', maskEmail(email));
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
@@ -198,6 +206,7 @@ export const login = async (req, res) => {
       userAgent
     });
 
+    logger.success('User login successful', `${maskEmail(email)} - Role: ${user.role}`);
     sendTokenResponse(user, 200, res);
   } catch (error) {
     res.status(400).json({
@@ -234,12 +243,13 @@ export const logout = async (req, res) => {
     // Clear any authorization header
     res.setHeader('Authorization', '');
 
+    logger.success('User logout successful', req.user ? maskEmail(req.user.email) : 'unknown');
     res.status(200).json({
       success: true,
       message: 'Logged out successfully'
     });
   } catch (error) {
-    console.error('Logout error:', error);
+    logger.error('Logout error', error);
     // Still logout the user even if logging fails
     res.cookie('token', 'none', {
       expires: new Date(Date.now()),

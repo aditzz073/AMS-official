@@ -14,15 +14,16 @@ export const roleAccess = {
   },
   external: { 
     editable: ['external'], 
-    visible: ['self', 'hod', 'external'],
-    canEditRemarks: true,
+    visible: ['self', 'external'], // External cannot see HOD column
+    canEditRemarks: true, // External can add section remarks
     canViewRemarks: true
   },
   principal: { 
     editable: [], 
     visible: ['self', 'hod', 'external'],
-    canEditRemarks: true,
-    canViewRemarks: true
+    canEditRemarks: false, // Cannot edit section-wise remarks (HOD-only)
+    canViewRemarks: true // Can view section-wise remarks (read-only)
+    // Note: Principal CAN edit RemarksPrincipal field via RoleBasedTextarea
   },
   admin: { 
     editable: ['self', 'hod', 'external'], // Full edit access to all columns

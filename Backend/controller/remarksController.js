@@ -23,7 +23,8 @@ export const getRemarks = async (req, res) => {
     }
 
     // Check if user has permission to view remarks
-    const canViewRemarks = ['hod', 'principal', 'admin'].includes(userRole?.toLowerCase());
+    // External can view remarks to add their observations
+    const canViewRemarks = ['hod', 'external', 'principal', 'admin'].includes(userRole?.toLowerCase());
     
     if (!canViewRemarks) {
       return res.status(403).json({
@@ -53,11 +54,11 @@ export const updateRemarks = async (req, res) => {
     const { sectionId, remark } = req.body;
     const userRole = req.user?.role;
 
-    // Only HOD and Admin can update remarks
-    if (!['hod', 'admin'].includes(userRole?.toLowerCase())) {
+    // Only HOD, External, and Admin can update remarks
+    if (!['hod', 'external', 'admin'].includes(userRole?.toLowerCase())) {
       return res.status(403).json({
         success: false,
-        message: 'Only HOD can update remarks'
+        message: 'Only HOD and External Auditor can update remarks'
       });
     }
 
@@ -118,11 +119,11 @@ export const bulkUpdateRemarks = async (req, res) => {
     const { remarks } = req.body;
     const userRole = req.user?.role;
 
-    // Only HOD and Admin can update remarks
-    if (!['hod', 'admin'].includes(userRole?.toLowerCase())) {
+    // Only HOD, External, and Admin can update remarks
+    if (!['hod', 'external', 'admin'].includes(userRole?.toLowerCase())) {
       return res.status(403).json({
         success: false,
-        message: 'Only HOD can update remarks'
+        message: 'Only HOD and External Auditor can update remarks'
       });
     }
 

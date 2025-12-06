@@ -46,6 +46,15 @@ export const updateBasicInfo = async (req, res) => {
         message: 'User email not found'
       });
     }
+    
+    // Only faculty can update basic employee info (their own profile)
+    // HOD, External, Principal, and Admin cannot modify basic info
+    if (userRole?.toLowerCase() !== 'faculty') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only faculty members can update their basic profile information'
+      });
+    }
 
     const {
       employeeCode,

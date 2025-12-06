@@ -33,8 +33,9 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
   const isHodOrExternal = role === "hod" || role === "external" || role === "principal" || role === "admin";
   const isFaculty = role === "faculty";
   const isAdmin = role === "admin";
-  // Admin has full edit access, others (HOD/External/Principal) are read-only
-  const isReadOnlyRole = (role === "hod" || role === "external" || role === "principal") && role !== "admin";
+  // Only faculty can edit basic info (their own profile), all others are read-only
+  // Admin can select any employee but cannot edit basic info fields
+  const isReadOnlyRole = role !== "faculty";
 
   // Fetch all employee codes when component mounts if user is HOD, External, Principal, or Admin
   // For faculty, auto-load their own data by email

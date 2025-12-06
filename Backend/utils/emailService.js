@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { logger, maskEmail } from './securityLogger.js';
 
 // Create reusable transporter
 const createTransporter = () => {
@@ -110,10 +111,10 @@ export const sendOTPEmail = async (email, otp) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent: %s', info.messageId);
+    logger.success('OTP email sent', maskEmail(email));
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Email sending error:', error);
+    logger.error('Email sending error', error);
     throw new Error('Failed to send OTP email');
   }
 };
@@ -324,11 +325,11 @@ export const sendPasswordResetOTP = async (email, otp, role) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Password reset OTP sent: %s', info.messageId);
+    logger.success('Password reset OTP sent', maskEmail(email));
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Password reset email error:', error);
-    throw new Error('Failed to send password reset OTP email');
+    logger.error('Password reset email error', error);
+    throw new Error('Failed to send password reset email');
   }
 };
 

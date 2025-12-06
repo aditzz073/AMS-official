@@ -3,6 +3,29 @@ import BasicEmployeeInfo from "../model/basicEmployeeInfo.js"
 import fs from 'fs';
 import cloudinary from "../server.js";
 
+// Helper function to parse YYYY-MM date format from frontend
+const parseDateYYYYMM = (dateString) => {
+  if (!dateString) return null;
+  
+  // If already a Date object, return as is
+  if (dateString instanceof Date) return dateString;
+  
+  // Handle YYYY-MM format (from month input)
+  if (typeof dateString === 'string') {
+    // Check if it's already in YYYY-MM-DD format or YYYY-MM format
+    const dateMatch = dateString.match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/);
+    if (dateMatch) {
+      const [, year, month, day] = dateMatch;
+      // Create date with first day of the month if no day specified
+      return new Date(`${year}-${month}-${day || '01'}`);
+    }
+  }
+  
+  // Fallback: try to parse as-is
+  const parsed = new Date(dateString);
+  return isNaN(parsed.getTime()) ? null : parsed;
+};
+
 // Role-based access control configuration
 const roleAccess = {
   faculty: { 
@@ -15,7 +38,7 @@ const roleAccess = {
   },
   external: { 
     editable: ['external'], 
-    visible: ['self', 'hod', 'external'] 
+    visible: ['self', 'external'] // External cannot see HOD column
   },
   principal: { 
     editable: [], 
@@ -120,6 +143,14 @@ const createOrUpdateEmployee = async (req, res) => {
     const userRole = req.user?.role;
     const userEmail = req.user?.email;
     
+    // Validate user authentication
+    if (!userRole || !userEmail) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'User authentication required. Please ensure you are logged in with a valid role.' 
+      });
+    }
+    
     // Determine the target email
     let targetEmail = email;
     
@@ -129,7 +160,7 @@ const createOrUpdateEmployee = async (req, res) => {
     } else if (!targetEmail && !employeeCode) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Email or employee code is required' 
+        message: 'Email or employee code is required. Please provide at least one identifier.' 
       });
     }
     
@@ -153,8 +184,8 @@ const createOrUpdateEmployee = async (req, res) => {
         department: otherData.department,
         college: otherData.college,
         campus: otherData.campus,
-        joiningDate: otherData.joiningDate,
-        periodOfAssessment: otherData.periodOfAssessment,
+        joiningDate: otherData.joiningDate ? parseDateYYYYMM(otherData.joiningDate) : undefined,
+        periodOfAssessment: otherData.periodOfAssessment ? parseDateYYYYMM(otherData.periodOfAssessment) : undefined,
         externalEvaluatorName: otherData.externalEvaluatorName,
         principalName: otherData.principalName,
         HODName: otherData.HODName
@@ -186,7 +217,7 @@ const createOrUpdateEmployee = async (req, res) => {
     if (!targetEmail) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Could not determine target email' 
+        message: 'Could not determine target email. Please provide a valid email address or employee code with associated email in the system.' 
       });
     }
     
@@ -203,9 +234,9 @@ const createOrUpdateEmployee = async (req, res) => {
     updateData.email = targetEmail;
     updateData.employeeCode = basicInfo?.employeeCode || employeeCode;
     
-    // Handle remarks separately - only HOD and Admin can update
+    // Handle remarks separately - only HOD, External, and Admin can update
     if (updateData.remarks) {
-      if (!['hod', 'admin'].includes(userRole?.toLowerCase())) {
+      if (!['hod', 'external', 'admin'].includes(userRole?.toLowerCase())) {
         delete updateData.remarks;
       } else {
         // Parse remarks if it's a JSON string

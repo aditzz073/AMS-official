@@ -9,6 +9,7 @@ import { getRemarks, updateRemarks, bulkUpdateRemarks } from "../controller/rema
 import { getLoginLogs, getLoginStats, closeStaleSession } from "../controller/loginLogController.js"
 import uploadFields from "../middleware/multerMiddleware.js"
 import { protect, adminOnly } from "../middleware/auth.js"
+import { loginLimiter, apiLimiter, otpLimiter, passwordResetLimiter, adminLimiter } from "../middleware/rateLimiter.js"
 
 const router=express.Router()
 
@@ -27,26 +28,26 @@ router.get("/remarks/:employeeCode", protect, getRemarks) // Get remarks
 router.put("/remarks/:employeeCode", protect, updateRemarks) // Update single remark
 router.put("/remarks/:employeeCode/bulk", protect, bulkUpdateRemarks) // Bulk update remarks
 
-// Auth routes - OTP verification
-router.post('/auth/request-otp', requestOTP); // Request OTP for email verification
-router.post('/auth/verify-otp', verifyOTP); // Verify OTP
-router.post('/auth/resend-otp', resendOTP); // Resend OTP
+// Auth routes - OTP verification (with rate limiting)
+router.post('/auth/request-otp', otpLimiter, requestOTP); // Request OTP for email verification
+router.post('/auth/verify-otp', apiLimiter, verifyOTP); // Verify OTP
+router.post('/auth/resend-otp', otpLimiter, resendOTP); // Resend OTP
 
-// Auth routes - Password Reset
-router.post('/auth/forgot-password', requestPasswordReset); // Request password reset OTP
-router.post('/auth/verify-reset-otp', verifyResetOTP); // Verify password reset OTP
-router.post('/auth/reset-password', resetPassword); // Reset password with OTP
-router.post('/auth/resend-reset-otp', resendResetOTP); // Resend password reset OTP
+// Auth routes - Password Reset (with rate limiting)
+router.post('/auth/forgot-password', passwordResetLimiter, requestPasswordReset); // Request password reset OTP
+router.post('/auth/verify-reset-otp', apiLimiter, verifyResetOTP); // Verify password reset OTP
+router.post('/auth/reset-password', passwordResetLimiter, resetPassword); // Reset password with OTP
+router.post('/auth/resend-reset-otp', passwordResetLimiter, resendResetOTP); // Resend password reset OTP
 
-// Auth routes - Registration and Login
-router.post('/signup', signup);
-router.post('/login', login);
+// Auth routes - Registration and Login (with rate limiting)
+router.post('/signup', apiLimiter, signup);
+router.post('/login', loginLimiter, login);
 router.post('/logout', protect, logout);
 
-// Admin-only Login Log routes
-router.get('/admin/login-logs', protect, adminOnly, getLoginLogs); // Get all login logs
-router.get('/admin/login-stats', protect, adminOnly, getLoginStats); // Get login statistics
-router.post('/admin/close-stale-sessions', protect, adminOnly, closeStaleSession); // Close stale sessions
+// Admin-only Login Log routes (with stricter rate limiting)
+router.get('/admin/login-logs', protect, adminOnly, adminLimiter, getLoginLogs); // Get all login logs
+router.get('/admin/login-stats', protect, adminOnly, adminLimiter, getLoginStats); // Get login statistics
+router.post('/admin/close-stale-sessions', protect, adminOnly, adminLimiter, closeStaleSession); // Close stale sessions
 
 export default router
 
