@@ -78,11 +78,15 @@ const App = () => {
           setUserRole(authState.role)
           // Set readonly flag for roles that should not edit most form fields
           // Note: This is primarily for legacy form fields that don't use RoleBasedInput
+          // Admin has FULL EDIT access - NOT read-only
           if (userRole === "principal") {
             setIsReadOnly(true);
           } else if (userRole === "hod" || userRole === "external") {
             // HOD and External can edit some fields, but most should be read-only
             setIsReadOnly(true);
+          } else if (userRole === "admin") {
+            // Admin has full edit access - do NOT set read-only
+            setIsReadOnly(false);
           }
           
           // Use email as the userName display

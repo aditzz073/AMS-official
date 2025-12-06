@@ -29,11 +29,14 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
     principleName: "",
   });
 
-  // Check if user is HOD or external
-  const isHodOrExternal = role === "hod" || role === "external";
+  // Check if user is HOD, External, Principal, or Admin (all use employee selection)
+  const isHodOrExternal = role === "hod" || role === "external" || role === "principal" || role === "admin";
   const isFaculty = role === "faculty";
+  const isAdmin = role === "admin";
+  // Admin has full edit access, others (HOD/External/Principal) are read-only
+  const isReadOnlyRole = (role === "hod" || role === "external" || role === "principal") && role !== "admin";
 
-  // Fetch all employee codes when component mounts if user is HOD or external
+  // Fetch all employee codes when component mounts if user is HOD, External, Principal, or Admin
   // For faculty, auto-load their own data by email
   useEffect(() => {
     if (isHodOrExternal) {
@@ -208,7 +211,7 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
             </tr>
           )}
           
-          {/* Employee selector - shown for HOD/External */}
+          {/* Employee selector - shown for HOD/External/Principal/Admin */}
           {isHodOrExternal && (
             <tr>
               <td colSpan="3" className="border border-gray-300 p-2">
@@ -242,7 +245,7 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
             </tr>
           )}
           
-          {/* Employee Code field - shown for all but editable only for faculty */}
+          {/* Employee Code field - shown for all, editable for faculty and admin */}
           <tr>
             <td colSpan="3" className="border border-gray-300 p-2">
               Employee Code:
@@ -252,9 +255,9 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
                   name="employeeCode"
                   value={formData.employeeCode || ""}
                   onChange={handleChange}
-                  className={`border border-gray-400 rounded px-2 py-1 w-full ${isHodOrExternal ? 'bg-gray-100' : ''}`}
+                  className={`border border-gray-400 rounded px-2 py-1 w-full ${isReadOnlyRole ? 'bg-gray-100' : ''}`}
                   placeholder={isFaculty ? "Enter your employee code" : "Employee code"}
-                  readOnly={isHodOrExternal}
+                  readOnly={isReadOnlyRole}
                 />
               </div>
             </td>
@@ -268,8 +271,8 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
                 value={formData.name || ""}
                 onChange={handleChange}
                 className="border border-gray-400 rounded px-2 py-1 w-full"
-                disabled={isLoading || (isHodOrExternal && !formData.employeeCode)}
-                readOnly={isHodOrExternal}
+                disabled={isLoading}
+                readOnly={isReadOnlyRole}
               />
             </td>
             <td colSpan="2" className="border border-gray-300 p-2">
@@ -280,8 +283,8 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
                 value={formData.designation || ""}
                 onChange={handleChange}
                 className="border border-gray-400 rounded px-2 py-1 w-full"
-                disabled={isLoading || (isHodOrExternal && !formData.employeeCode)}
-                readOnly={isHodOrExternal}
+                disabled={isLoading}
+                readOnly={isReadOnlyRole}
               />
             </td>
           </tr>
@@ -297,7 +300,7 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
                 value={formData.campus || ""}
                 onChange={handleChange}
                 className="border border-gray-400 rounded px-2 py-1 w-full"
-                disabled={isLoading || (isHodOrExternal && !formData.employeeCode)}
+                disabled={isLoading || (isReadOnlyRole && !formData.employeeCode)}
               >
                 <option value="">Select Campus</option>
                 <option value="Kumaraswamy Layout (Campus 1)">Kumaraswamy Layout (Campus 1)</option>
@@ -314,7 +317,7 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
                 value={formData.department || ""}
                 onChange={handleChange}
                 className="border border-gray-400 rounded px-2 py-1 w-full"
-                disabled={isLoading || (isHodOrExternal && !formData.employeeCode)}
+                disabled={isLoading || (isReadOnlyRole && !formData.employeeCode)}
               >
                 <option value="">Select Department</option>
                 <option value="Artificial Intelligence & Machine Learning">Artificial Intelligence & Machine Learning</option>
@@ -351,8 +354,8 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
                 value={formData.joiningDate ? formData.joiningDate.split("T")[0] : ""}
                 onChange={handleChange}
                 className="border border-gray-400 rounded px-2 py-1 w-full"
-                disabled={isLoading || (isHodOrExternal && !formData.employeeCode)}
-                readOnly={isHodOrExternal}
+                disabled={isLoading}
+                readOnly={isReadOnlyRole}
               />
             </td>
           </tr>
@@ -365,8 +368,8 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
                 value={formData.periodOfAssessment ? formData.periodOfAssessment.split("T")[0] : ""}
                 onChange={handleChange}
                 className="border border-gray-400 rounded px-2 py-1 w-full"
-                disabled={isLoading || (isHodOrExternal && !formData.employeeCode)}
-                readOnly={isHodOrExternal}
+                disabled={isLoading}
+                readOnly={isReadOnlyRole}
               />
             </td>
           </tr>
@@ -393,12 +396,12 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
         </button>
         <button
           className={`px-4 py-2 rounded text-white ${
-            isLoading || (isHodOrExternal && !formData.employeeCode)
+            isLoading || (isHodOrExternal && !formData.email && !formData.employeeCode)
               ? "bg-gray-400 cursor-not-allowed" 
               : "bg-blue-500 hover:bg-blue-600"
           }`}
           onClick={onNext}
-          disabled={isLoading || (isHodOrExternal && !formData.employeeCode)}
+          disabled={isLoading || (isHodOrExternal && !formData.email && !formData.employeeCode)}
         >
           {isLoading ? "Loading..." : "Next"}
         </button>

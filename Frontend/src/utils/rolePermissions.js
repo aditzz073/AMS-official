@@ -25,10 +25,11 @@ export const roleAccess = {
     canViewRemarks: true
   },
   admin: { 
-    editable: ['self', 'hod', 'external'], 
+    editable: ['self', 'hod', 'external'], // Full edit access to all columns
     visible: ['self', 'hod', 'external'],
     canEditRemarks: true,
-    canViewRemarks: true
+    canViewRemarks: true,
+    isAdmin: true // Special flag to identify admin with super permissions
   },
 };
 
