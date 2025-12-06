@@ -349,13 +349,14 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
             <td colSpan="3" className="border border-gray-300 p-2">
               Joining Date at DSCE:
               <input
-                type="date"
+                type="month"
                 name="joiningDate"
-                value={formData.joiningDate ? formData.joiningDate.split("T")[0] : ""}
+                value={formData.joiningDate ? formData.joiningDate.substring(0, 7) : ""}
                 onChange={handleChange}
                 className="border border-gray-400 rounded px-2 py-1 w-full"
                 disabled={isLoading}
                 readOnly={isReadOnlyRole}
+                placeholder="MM/YYYY"
               />
             </td>
           </tr>
@@ -363,13 +364,14 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
             <td colSpan="3" className="border border-gray-300 p-2">
               Period of Assessment:
               <input
-                type="date"
+                type="month"
                 name="periodOfAssessment"
-                value={formData.periodOfAssessment ? formData.periodOfAssessment.split("T")[0] : ""}
+                value={formData.periodOfAssessment ? formData.periodOfAssessment.substring(0, 7) : ""}
                 onChange={handleChange}
                 className="border border-gray-400 rounded px-2 py-1 w-full"
                 disabled={isLoading}
                 readOnly={isReadOnlyRole}
+                placeholder="MM/YYYY"
               />
             </td>
           </tr>
