@@ -101,10 +101,11 @@ const App = () => {
   }, [formData]);
 
   const handleNext = () => {
-    // Validate that either email or employeeCode exists before proceeding
+    // No strict validation - allow navigation with optional fields
+    // Only basic check for email/employeeCode for backend compatibility (skipped on intro page)
     if (currentPage !== 0 && !formData.email && !formData.employeeCode) {
-      alert("Please fill all required fields before proceeding.");
-      return;
+      // Silently allow progression - backend will handle validation if needed
+      console.warn("Proceeding without email/employeeCode - ensure backend allows partial saves");
     }
     setCurrentPage((prev) => prev + 1);
   };
