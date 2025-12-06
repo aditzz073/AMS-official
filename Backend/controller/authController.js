@@ -1,4 +1,5 @@
 import User from '../model/user.js';
+import BasicEmployeeInfo from '../model/basicEmployeeInfo.js';
 import jwt from 'jsonwebtoken';
 import LoginLog from '../model/loginLog.js';
 import EmailVerificationOtp from '../model/emailVerificationOtp.js';
@@ -11,15 +12,20 @@ const EXPIRATION_HOURS = 6 ; //for 10sec= 10/3600
 const EXPIRATION_MS = EXPIRATION_HOURS * 60 * 60 * 1000; // 6 hours in milliseconds
 
 // Generate JWT Token with 6 hour expiration
-const generateToken = (id,role) => {
-  return jwt.sign({ id,role }, process.env.JWT_SECRET, {
+const generateToken = (id, role, email, employeeCode) => {
+  return jwt.sign({ 
+    id, 
+    role, 
+    email,
+    employeeCode 
+  }, process.env.JWT_SECRET, {
     expiresIn: `${EXPIRATION_HOURS}h` // 6 hours
   });
 };
 
 // Set token cookie with 6 hour expiration
-const sendTokenResponse =async (user, statusCode, res) => {
-  const token = generateToken(user._id , user.role);
+const sendTokenResponse = async (user, statusCode, res) => {
+  const token = generateToken(user._id, user.role, user.email, user.employeeCode);
 
   const options = {
     expires: new Date(Date.now() + EXPIRATION_MS),
@@ -31,9 +37,6 @@ const sendTokenResponse =async (user, statusCode, res) => {
     options.secure = true;
   }
 
-  
-  
-
   res
     .status(statusCode)
     .cookie('token', token, options)
@@ -44,13 +47,14 @@ const sendTokenResponse =async (user, statusCode, res) => {
       user: {
         id: user._id,
         email: user.email,
-        role: user.role
+        role: user.role,
+        employeeCode: user.employeeCode
       },
     });
 };
 export const signup = async (req, res) => {
     try {
-      const { email, password, role } = req.body;
+      const { email, password, role, employeeCode } = req.body;
   
       // Validate required fields
       if (!email || !password || !role) {
@@ -78,6 +82,17 @@ export const signup = async (req, res) => {
         });
       }
 
+      // If employeeCode is provided, validate it's unique
+      if (employeeCode) {
+        const existingEmployee = await BasicEmployeeInfo.findOne({ employeeCode });
+        if (existingEmployee && existingEmployee.email !== email) {
+          return res.status(400).json({
+            success: false,
+            message: 'Employee code already in use'
+          });
+        }
+      }
+
       // Verify that OTP was validated for this email
       const verifiedOtp = await EmailVerificationOtp.findOne({
         email,
@@ -92,12 +107,27 @@ export const signup = async (req, res) => {
         });
       }
   
+      // Create or update BasicEmployeeInfo
+      const basicInfo = await BasicEmployeeInfo.findOneAndUpdate(
+        { email },
+        { 
+          email,
+          employeeCode: employeeCode || undefined
+        },
+        { 
+          upsert: true, 
+          new: true, 
+          setDefaultsOnInsert: true 
+        }
+      );
+
       // Create user with verified email
       const user = await User.create({
         email,
         password,
         role,
-        emailVerified: true
+        emailVerified: true,
+        employeeCode: employeeCode || undefined
       });
 
       // Send welcome email (non-blocking)

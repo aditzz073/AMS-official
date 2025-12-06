@@ -1,4 +1,5 @@
 import Evaluation from "../model/data.js"
+import BasicEmployeeInfo from "../model/basicEmployeeInfo.js"
 import fs from 'fs';
 import cloudinary from "../server.js";
 
@@ -115,14 +116,92 @@ const uploadToCloudinary = async (filePath, employeeCode, fieldName) => {
 
 const createOrUpdateEmployee = async (req, res) => {
   try {
-    const { employeeCode } = req.body;    
-    const userRole = req.user?.role; // Get user role from authenticated user
+    const { email, employeeCode, ...otherData } = req.body;    
+    const userRole = req.user?.role;
+    const userEmail = req.user?.email;
     
-    if (!employeeCode) {
-      return res.status(400).json({ success: false, message: 'Employee code is required' });
+    // Determine the target email
+    let targetEmail = email;
+    
+    // Faculty can only update their own data
+    if (userRole?.toLowerCase() === 'faculty') {
+      targetEmail = userEmail; // Force faculty to use their own email
+    } else if (!targetEmail && !employeeCode) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Email or employee code is required' 
+      });
     }
     
-    let updateData = { ...req.body };
+    // If employeeCode is provided, find the associated email
+    let basicInfo = null;
+    if (employeeCode && !targetEmail) {
+      basicInfo = await BasicEmployeeInfo.findOne({ employeeCode });
+      if (basicInfo) {
+        targetEmail = basicInfo.email;
+      }
+    }
+    
+    // If email is provided, get or create BasicEmployeeInfo
+    if (targetEmail) {
+      basicInfo = await BasicEmployeeInfo.findOne({ email: targetEmail });
+      
+      // Extract basic info fields from request
+      const basicInfoFields = {
+        name: otherData.name,
+        designation: otherData.designation,
+        department: otherData.department,
+        college: otherData.college,
+        campus: otherData.campus,
+        joiningDate: otherData.joiningDate,
+        periodOfAssessment: otherData.periodOfAssessment,
+        externalEvaluatorName: otherData.externalEvaluatorName,
+        principalName: otherData.principalName,
+        HODName: otherData.HODName
+      };
+      
+      // Remove undefined values
+      Object.keys(basicInfoFields).forEach(key => 
+        basicInfoFields[key] === undefined && delete basicInfoFields[key]
+      );
+      
+      // Update or create BasicEmployeeInfo
+      if (Object.keys(basicInfoFields).length > 0 || employeeCode) {
+        basicInfo = await BasicEmployeeInfo.findOneAndUpdate(
+          { email: targetEmail },
+          { 
+            email: targetEmail,
+            employeeCode: employeeCode || basicInfo?.employeeCode,
+            ...basicInfoFields
+          },
+          { 
+            upsert: true, 
+            new: true, 
+            setDefaultsOnInsert: true 
+          }
+        );
+      }
+    }
+    
+    if (!targetEmail) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Could not determine target email' 
+      });
+    }
+    
+    // Prepare evaluation update data (exclude basic info fields)
+    let updateData = { ...otherData };
+    const basicInfoFieldNames = [
+      'name', 'designation', 'department', 'college', 'campus',
+      'joiningDate', 'periodOfAssessment', 'externalEvaluatorName',
+      'principalName', 'HODName'
+    ];
+    basicInfoFieldNames.forEach(field => delete updateData[field]);
+    
+    // Add email and employeeCode to evaluation
+    updateData.email = targetEmail;
+    updateData.employeeCode = basicInfo?.employeeCode || employeeCode;
     
     // Handle remarks separately - only HOD and Admin can update
     if (updateData.remarks) {
@@ -161,16 +240,18 @@ const createOrUpdateEmployee = async (req, res) => {
           
           if (canUpload) {
             const file = files[0];
-            const cloudinaryUrl = await uploadToCloudinary(file.path, employeeCode, fieldName);
+            // Use employeeCode for folder structure (backward compatibility)
+            const folderIdentifier = updateData.employeeCode || targetEmail.split('@')[0];
+            const cloudinaryUrl = await uploadToCloudinary(file.path, folderIdentifier, fieldName);
             updateData[fieldName] = cloudinaryUrl;
           }
         }
       }
     }
     
-    // Update or create the employee record
+    // Update or create the employee evaluation record
     const updatedEmployee = await Evaluation.findOneAndUpdate(
-      { employeeCode },
+      { email: targetEmail },
       updateData,
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
@@ -192,44 +273,89 @@ const createOrUpdateEmployee = async (req, res) => {
 
 const getEmployeeById = async (req, res) => {
     try {
-        const { id } = req.params;
-        const userRole = req.user?.role; // Get user role from authenticated user
+        const { id } = req.params; // Can be email or employeeCode
+        const userRole = req.user?.role;
+        const userEmail = req.user?.email;
         
-        const employee = await Evaluation.findOne({employeeCode:id});
-        if (!employee) {
-            return res.status(200).json({success:false, message: 'Employee not found' });
+        // Faculty can only access their own data
+        let targetIdentifier = id;
+        if (userRole?.toLowerCase() === 'faculty') {
+          targetIdentifier = userEmail;
         }
+        
+        // Determine if identifier is email or employeeCode
+        let evaluation;
+        let basicInfo;
+        
+        if (targetIdentifier.includes('@')) {
+          // It's an email
+          evaluation = await Evaluation.findOne({ email: targetIdentifier.toLowerCase() });
+          basicInfo = await BasicEmployeeInfo.findOne({ email: targetIdentifier.toLowerCase() });
+        } else {
+          // It's an employeeCode
+          evaluation = await Evaluation.findOne({ employeeCode: targetIdentifier });
+          basicInfo = await BasicEmployeeInfo.findOne({ employeeCode: targetIdentifier });
+        }
+        
+        if (!evaluation && !basicInfo) {
+            return res.status(200).json({
+              success: false, 
+              message: 'Employee not found',
+              data: null
+            });
+        }
+
+        // Combine basic info with evaluation data
+        let responseData = {
+          ...(basicInfo ? basicInfo.toObject() : {}),
+          ...(evaluation ? evaluation.toObject() : {})
+        };
 
         // Filter data based on user role
-        let responseData = employee;
-        if (userRole) {
-            responseData = filterDataForRole(employee, userRole);
+        if (userRole && evaluation) {
+            responseData = {
+              ...basicInfo?.toObject(),
+              ...filterDataForRole(evaluation, userRole)
+            };
         }
 
-        return res.status(200).json({success:true, data: responseData });
+        return res.status(200).json({
+          success: true, 
+          data: responseData 
+        });
     } catch (error) {
         console.error('Error fetching employee:', error);
-        return res.status(500).json({success:false, message: 'Internal server error', error: error.message });
+        return res.status(500).json({
+          success: false, 
+          message: 'Internal server error', 
+          error: error.message 
+        });
     }
 };
 
 
  const getAllEmployeeCodes = async (req, res) => {
   try {
-    // Fetch all employee codes from the database
-    const employeeCodes = await Evaluation.find({}, 'employeeCode');
+    // Fetch all basic employee info with email and employeeCode
+    const employees = await BasicEmployeeInfo.find({}, 'email employeeCode name');
 
-    // Extract only the codes into an array
-    const codesList = employeeCodes.map((item) => item.employeeCode);
+    // Format the response
+    const employeeList = employees.map((emp) => ({
+      email: emp.email,
+      employeeCode: emp.employeeCode,
+      name: emp.name
+    }));
 
     res.status(200).json({
       success: true,
-      employeeCodes: codesList,
+      employees: employeeList,
+      // Backward compatibility
+      employeeCodes: employees.map(emp => emp.employeeCode).filter(Boolean)
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch employee codes',
+      message: 'Failed to fetch employee data',
       error: error.message,
     });
   }

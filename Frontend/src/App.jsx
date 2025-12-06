@@ -48,6 +48,7 @@ const App = () => {
     return savedData
       ? JSON.parse(savedData)
       : {
+          email: "",
           employeeCode: "",
           name: "",
           designation: "",
@@ -100,7 +101,8 @@ const App = () => {
   }, [formData]);
 
   const handleNext = () => {
-    if (currentPage!=0 && !formData.employeeCode) {
+    // Validate that either email or employeeCode exists before proceeding
+    if (currentPage !== 0 && !formData.email && !formData.employeeCode) {
       alert("Please fill all required fields before proceeding.");
       return;
     }

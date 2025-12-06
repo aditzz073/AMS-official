@@ -26,6 +26,12 @@ const userSchema = new mongoose.Schema({
     enum: ['admin', 'hod', 'faculty', "external","principal"],
     default: 'faculty'
   },
+  employeeCode: {
+    type: String,
+    sparse: true, // Allows multiple null values, but unique if set
+    trim: true,
+    ref: 'BasicEmployeeInfo'
+  },
   emailVerified: {
     type: Boolean,
     default: false

@@ -1,17 +1,20 @@
 import mongoose from "mongoose" 
 
 const evaluationSchema = new mongoose.Schema({
-  name: { type: String },
-  employeeCode: { type: String },
-  designation: { type: String },
-  department: { type: String },
-  college: { type: String },
-  campus: { type: String },
-  joiningDate: { type: Date },
-  periodOfAssessment: { type: Date },
-  externalEvaluatorName: { type: String },
-  principleName: { type: String },
-  HODName: { type: String },
+  // PRIMARY IDENTIFIER: email (references BasicEmployeeInfo)
+  email: {
+    type: String,
+    required: true,
+    lowercase: true,
+    trim: true,
+    ref: 'BasicEmployeeInfo'
+  },
+  
+  // FOREIGN KEY: employeeCode (references BasicEmployeeInfo)
+  employeeCode: {
+    type: String,
+    ref: 'BasicEmployeeInfo'
+  },
 
   categoriesTotal: {
     CDLExternal: Number,
@@ -139,6 +142,11 @@ const evaluationSchema = new mongoose.Schema({
   PDRC222Self: { type: String },
   PDRC222SelfImage: { type: String },
   
+  PDRC223External: { type: String },
+  PDRC223HoD: { type: String },
+  PDRC223Self: { type: String },
+  PDRC223SelfImage: { type: String },
+  
   TLP111External: { type: String },
   TLP111HoD: { type: String },
   TLP111Self: { type: String },
@@ -158,6 +166,56 @@ const evaluationSchema = new mongoose.Schema({
   TLP114HoD: { type: String },
   TLP114Self: { type: String },
   TLP114SelfImage: { type: String },
+  
+  TLP115External: { type: String },
+  TLP115HoD: { type: String },
+  TLP115Self: { type: String },
+  TLP115SelfImage: { type: String },
+  
+  TLP116External: { type: String },
+  TLP116HoD: { type: String },
+  TLP116Self: { type: String },
+  TLP116SelfImage: { type: String },
+  
+  TLP121External: { type: String },
+  TLP121HoD: { type: String },
+  TLP121Self: { type: String },
+  TLP121SelfImage: { type: String },
+  
+  TLP122External: { type: String },
+  TLP122HoD: { type: String },
+  TLP122Self: { type: String },
+  TLP122SelfImage: { type: String },
+  
+  TLP123External: { type: String },
+  TLP123HoD: { type: String },
+  TLP123Self: { type: String },
+  TLP123SelfImage: { type: String },
+  
+  PDRC224External: { type: String },
+  PDRC224HoD: { type: String },
+  PDRC224Self: { type: String },
+  PDRC224SelfImage: { type: String },
+  
+  PDRC225External: { type: String },
+  PDRC225HoD: { type: String },
+  PDRC225Self: { type: String },
+  PDRC225SelfImage: { type: String },
+  
+  PDRC226External: { type: String },
+  PDRC226HoD: { type: String },
+  PDRC226Self: { type: String },
+  PDRC226SelfImage: { type: String },
+  
+  PDRC227External: { type: String },
+  PDRC227HoD: { type: String },
+  PDRC227Self: { type: String },
+  PDRC227SelfImage: { type: String },
+  
+  PDRC228External: { type: String },
+  PDRC228HoD: { type: String },
+  PDRC228Self: { type: String },
+  PDRC228SelfImage: { type: String },
 
   // Section-wise remarks (HOD-only editable)
   remarks: {
@@ -167,5 +225,28 @@ const evaluationSchema = new mongoose.Schema({
   }
 
 }, { timestamps: true });
+
+// Compound indexes for efficient queries
+evaluationSchema.index({ email: 1 });
+evaluationSchema.index({ employeeCode: 1 });
+evaluationSchema.index({ email: 1, employeeCode: 1 });
+
+// Static method to find by identifier (email or employeeCode)
+evaluationSchema.statics.findByIdentifier = async function(identifier) {
+  // Check if identifier is email
+  if (identifier.includes('@')) {
+    return await this.findOne({ email: identifier.toLowerCase() });
+  }
+  // Otherwise treat as employeeCode
+  return await this.findOne({ employeeCode: identifier });
+};
+
+// Static method to get all evaluations by identifier
+evaluationSchema.statics.findAllByIdentifier = async function(identifier) {
+  if (identifier.includes('@')) {
+    return await this.find({ email: identifier.toLowerCase() });
+  }
+  return await this.find({ employeeCode: identifier });
+};
 
 export default mongoose.model('Evaluation', evaluationSchema);

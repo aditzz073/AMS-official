@@ -3,14 +3,16 @@ import axiosInstance from "../helper/axiosInstance";
 import { useSelector } from "react-redux";
 
 const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
-  const { userId, role, email } = useSelector((state) => state.auth);
+  const { userId, role, email, employeeCode } = useSelector((state) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [employeeCodes, setEmployeeCodes] = useState([]);
+  const [employees, setEmployees] = useState([]); // Store full employee list with email, code, name
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(false);
   
   const [curFormData, setCurFormData] = useState({
-    employeeCode: "",
+    email: email || "",
+    employeeCode: employeeCode || "",
     name: "",
     designation: "",
     college: "DSCE",
@@ -29,40 +31,49 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
 
   // Check if user is HOD or external
   const isHodOrExternal = role === "hod" || role === "external";
+  const isFaculty = role === "faculty";
 
   // Fetch all employee codes when component mounts if user is HOD or external
+  // For faculty, auto-load their own data by email
   useEffect(() => {
     if (isHodOrExternal) {
       fetchAllEmployeeCodes();
+    } else if (isFaculty && email) {
+      // Auto-load faculty's own data using their email
+      fetchEmployeeData(email);
     }
-  }, [isHodOrExternal]);
+  }, [isHodOrExternal, isFaculty, email]);
 
   // Function to fetch all employee codes
   const fetchAllEmployeeCodes = async () => {
     setIsLoadingEmployees(true);
     try {
-      // Adjust endpoint as needed based on your API
       const response = await axiosInstance.get("/getEmpCode");
       console.log(response);
       
       if (response?.data?.success) {
+        // New API returns employees array with email, employeeCode, name
+        const employeesList = response.data.employees || [];
+        setEmployees(employeesList);
+        
+        // Also extract just the codes for backward compatibility
         setEmployeeCodes(response.data.employeeCodes || []);
         
-        // Check if there's a previously selected employee code in localStorage
-        const savedEmployeeCode = localStorage.getItem("selectedEmployeeCode");
-        if (savedEmployeeCode) {
-          handleEmployeeCodeSelect({ target: { value: savedEmployeeCode } });
+        // Check if there's a previously selected employee identifier in localStorage
+        const savedIdentifier = localStorage.getItem("selectedEmployeeIdentifier");
+        if (savedIdentifier) {
+          handleEmployeeSelect({ target: { value: savedIdentifier } });
         }
       } else {
         setMessage({ 
-          text: "Failed to load employee codes. Please try again later.", 
+          text: "Failed to load employee list. Please try again later.", 
           type: "error" 
         });
       }
     } catch (error) {
-      console.error("Error fetching employee codes:", error);
+      console.error("Error fetching employee list:", error);
       setMessage({ 
-        text: error.response?.data?.message || "Failed to load employee codes. Please try again.", 
+        text: error.response?.data?.message || "Failed to load employee list. Please try again.", 
         type: "error" 
       });
     } finally {
@@ -80,28 +91,41 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
     localStorage.setItem("formData", JSON.stringify(updatedData)); // Save to localStorage
   };
 
-  // Special handler for employee code dropdown
-  const handleEmployeeCodeSelect = async (e) => {
-    const selectedCode = e.target.value;
+  // Special handler for employee selection (by email or employeeCode)
+  const handleEmployeeSelect = async (e) => {
+    const selectedIdentifier = e.target.value; // Can be email or employeeCode
     
-    // Update form data with selected code
-    const updatedData = { ...formData, employeeCode: selectedCode };
+    // Update form data with selected identifier
+    const updatedData = { 
+      ...formData, 
+      employeeCode: selectedIdentifier.includes('@') ? '' : selectedIdentifier,
+      email: selectedIdentifier.includes('@') ? selectedIdentifier : ''
+    };
     setFormData(updatedData);
     
-    // Save selected code to localStorage
-    localStorage.setItem("selectedEmployeeCode", selectedCode);
+    // Save selected identifier to localStorage
+    localStorage.setItem("selectedEmployeeIdentifier", selectedIdentifier);
     
-    // Fetch employee details if a code is selected
-    if (selectedCode) {
-      await fetchEmployeeData(selectedCode);
+    // Fetch employee details if an identifier is selected
+    if (selectedIdentifier) {
+      await fetchEmployeeData(selectedIdentifier);
     }
   };
 
-  const fetchEmployeeData = async (code = null) => {
-    const employeeCode = code || formData.employeeCode;
+  const fetchEmployeeData = async (identifier = null) => {
+    // Use identifier parameter, or fall back to email for faculty, or employeeCode for others
+    let targetIdentifier = identifier;
     
-    if (!employeeCode) {
-      setMessage({ text: "Please enter or select an Employee Code.", type: "error" });
+    if (!targetIdentifier) {
+      if (isFaculty && email) {
+        targetIdentifier = email;
+      } else {
+        targetIdentifier = formData.email || formData.employeeCode;
+      }
+    }
+    
+    if (!targetIdentifier) {
+      setMessage({ text: "Please enter or select an employee.", type: "error" });
       return false;
     }
 
@@ -109,7 +133,7 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
     setMessage({ text: "", type: "" });
 
     try {
-      const response = await axiosInstance.get(`/getData/${employeeCode}`);
+      const response = await axiosInstance.get(`/getData/${encodeURIComponent(targetIdentifier)}`);
       
       if (response?.data?.success) {
         setMessage({ text: "Employee data loaded successfully!", type: "success" });
@@ -118,13 +142,14 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
         return true;
       } else {
         setMessage({ 
-          text: `No existing data found using employee code: ${employeeCode}, please verify the code and try again.`, 
+          text: `No existing data found for: ${targetIdentifier}. You can start with new data.`, 
           type: "info" 
         });
         // For HOD/External, don't reset the form completely
         if (!isHodOrExternal) {
-          setFormData(curFormData);
-          localStorage.setItem("formData", JSON.stringify(curFormData));
+          const newData = { ...curFormData, email: email };
+          setFormData(newData);
+          localStorage.setItem("formData", JSON.stringify(newData));
         }
         return false;
       }
@@ -140,10 +165,10 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
     }
   };
 
-  // For regular users - handle employee code blur
+  // For regular users - handle employee code blur (deprecated but kept for backward compatibility)
   const handleEmployeeCodeBlur = async () => {
     if (!isHodOrExternal && formData.employeeCode && formData.employeeCode.length > 0) {
-      await fetchEmployeeData();
+      await fetchEmployeeData(formData.employeeCode);
     }
   };
 
@@ -166,52 +191,71 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
       
       <table className="w-full border border-gray-400">
         <tbody>
-          <tr>
-            <td colSpan="3" className="border border-gray-300 p-2">
-              Employee Code:
-              <div className="flex items-center">
-                {isHodOrExternal ? (
-                  /* Dropdown for HOD or External roles */
+          {/* Email field - shown for faculty (read-only) */}
+          {isFaculty && (
+            <tr>
+              <td colSpan="3" className="border border-gray-300 p-2">
+                Email (Your Account):
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email || email}
+                  readOnly
+                  className="border border-gray-400 rounded px-2 py-1 w-full bg-gray-100"
+                  placeholder="Your email address"
+                />
+              </td>
+            </tr>
+          )}
+          
+          {/* Employee selector - shown for HOD/External */}
+          {isHodOrExternal && (
+            <tr>
+              <td colSpan="3" className="border border-gray-300 p-2">
+                Select Employee:
+                <div className="flex items-center">
                   <div className="w-full">
                     <select
-                      name="employeeCode"
-                      value={formData.employeeCode || ""}
-                      onChange={handleEmployeeCodeSelect}
+                      name="employeeIdentifier"
+                      value={formData.email || formData.employeeCode || ""}
+                      onChange={handleEmployeeSelect}
                       className="border border-gray-400 rounded px-2 py-1 w-full"
                       disabled={isLoading || isLoadingEmployees}
                     >
-                      <option value="">Select Employee Code</option>
+                      <option value="">Select Employee</option>
                       {isLoadingEmployees ? (
-                        <option value="" disabled>Loading employee codes...</option>
+                        <option value="" disabled>Loading employees...</option>
                       ) : (
-                        employeeCodes.map(code => (
-                          <option key={code} value={code}>{code}</option>
+                        employees.map(emp => (
+                          <option 
+                            key={emp.email || emp.employeeCode} 
+                            value={emp.email || emp.employeeCode}
+                          >
+                            {emp.name} - {emp.email || emp.employeeCode}
+                          </option>
                         ))
                       )}
                     </select>
                   </div>
-                ) : (
-                  /* Text input for regular users */
-                  <>
-                    <input
-                      type="text"
-                      name="employeeCode"
-                      value={formData.employeeCode || ""}
-                      onChange={handleChange}
-                      onBlur={handleEmployeeCodeBlur}
-                      className="border border-gray-400 rounded px-2 py-1 w-full"
-                      placeholder="Enter employee code to load existing data"
-                      disabled={isLoading}
-                    />
-                    <button 
-                      onClick={() => fetchEmployeeData()}
-                      disabled={isLoading || !formData.employeeCode}
-                      className="ml-2 bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
-                    >
-                      {isLoading ? "..." : "Fetch"}
-                    </button>
-                  </>
-                )}
+                </div>
+              </td>
+            </tr>
+          )}
+          
+          {/* Employee Code field - shown for all but editable only for faculty */}
+          <tr>
+            <td colSpan="3" className="border border-gray-300 p-2">
+              Employee Code:
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  name="employeeCode"
+                  value={formData.employeeCode || ""}
+                  onChange={handleChange}
+                  className={`border border-gray-400 rounded px-2 py-1 w-full ${isHodOrExternal ? 'bg-gray-100' : ''}`}
+                  placeholder={isFaculty ? "Enter your employee code" : "Employee code"}
+                  readOnly={isHodOrExternal}
+                />
               </div>
             </td>
           </tr>

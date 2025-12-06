@@ -1,12 +1,19 @@
 import Evaluation from "../model/data.js";
+import BasicEmployeeInfo from "../model/basicEmployeeInfo.js";
 
 // Get remarks for a specific appraisal
 export const getRemarks = async (req, res) => {
   try {
-    const { employeeCode } = req.params;
+    const { employeeCode } = req.params; // Can be email or employeeCode
     const userRole = req.user?.role;
 
-    const evaluation = await Evaluation.findOne({ employeeCode });
+    // Determine if identifier is email or employeeCode
+    let evaluation;
+    if (employeeCode.includes('@')) {
+      evaluation = await Evaluation.findOne({ email: employeeCode.toLowerCase() });
+    } else {
+      evaluation = await Evaluation.findOne({ employeeCode });
+    }
     
     if (!evaluation) {
       return res.status(404).json({
@@ -42,7 +49,7 @@ export const getRemarks = async (req, res) => {
 // Update remarks for a specific section
 export const updateRemarks = async (req, res) => {
   try {
-    const { employeeCode } = req.params;
+    const { employeeCode } = req.params; // Can be email or employeeCode
     const { sectionId, remark } = req.body;
     const userRole = req.user?.role;
 
@@ -61,7 +68,13 @@ export const updateRemarks = async (req, res) => {
       });
     }
 
-    const evaluation = await Evaluation.findOne({ employeeCode });
+    // Determine if identifier is email or employeeCode
+    let evaluation;
+    if (employeeCode.includes('@')) {
+      evaluation = await Evaluation.findOne({ email: employeeCode.toLowerCase() });
+    } else {
+      evaluation = await Evaluation.findOne({ employeeCode });
+    }
     
     if (!evaluation) {
       return res.status(404).json({
@@ -101,7 +114,7 @@ export const updateRemarks = async (req, res) => {
 // Bulk update remarks for multiple sections
 export const bulkUpdateRemarks = async (req, res) => {
   try {
-    const { employeeCode } = req.params;
+    const { employeeCode } = req.params; // Can be email or employeeCode
     const { remarks } = req.body;
     const userRole = req.user?.role;
 
@@ -120,7 +133,13 @@ export const bulkUpdateRemarks = async (req, res) => {
       });
     }
 
-    const evaluation = await Evaluation.findOne({ employeeCode });
+    // Determine if identifier is email or employeeCode
+    let evaluation;
+    if (employeeCode.includes('@')) {
+      evaluation = await Evaluation.findOne({ email: employeeCode.toLowerCase() });
+    } else {
+      evaluation = await Evaluation.findOne({ employeeCode });
+    }
     
     if (!evaluation) {
       return res.status(404).json({

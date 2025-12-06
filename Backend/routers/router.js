@@ -1,6 +1,7 @@
 import express from "express"
 import evaluateScores from "../controller/calculate.js"
 import { createOrUpdateEmployee, getAllEmployeeCodes, getEmployeeById } from "../controller/handelData.js"
+import { getOrCreateBasicInfo, updateBasicInfo, getBasicInfoByIdentifier } from "../controller/basicEmployeeInfoController.js"
 import { login, logout, signup } from "../controller/authController.js"
 import { requestOTP, verifyOTP, resendOTP } from "../controller/otpController.js"
 import { requestPasswordReset, verifyResetOTP, resetPassword, resendResetOTP } from "../controller/passwordResetController.js"
@@ -13,8 +14,13 @@ const router=express.Router()
 
 router.post("/total",evaluateScores)
 router.post("/addData", protect, uploadFields, createOrUpdateEmployee) // Protected route
-router.get("/getData/:id", protect, getEmployeeById) // Protected route
+router.get("/getData/:id", protect, getEmployeeById) // Protected route - id can be email or employeeCode
 router.get("/getEmpCode", protect, getAllEmployeeCodes) // Protected route
+
+// Basic Employee Info routes
+router.get("/basicInfo", protect, getOrCreateBasicInfo) // Get current user's basic info
+router.put("/basicInfo", protect, updateBasicInfo) // Update current user's basic info
+router.get("/basicInfo/:identifier", protect, getBasicInfoByIdentifier) // Get basic info by email or employeeCode (HOD/External/Admin)
 
 // Remarks routes
 router.get("/remarks/:employeeCode", protect, getRemarks) // Get remarks

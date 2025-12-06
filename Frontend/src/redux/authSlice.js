@@ -10,6 +10,7 @@ const loadAuthState = () => {
         userId: null,
         email: null,
         role: null,
+        employeeCode: null,
         token: null,
       };
     }
@@ -19,6 +20,7 @@ const loadAuthState = () => {
       userId: null,
       email: null,
       role: null,
+      employeeCode: null,
       token: null,
     };
   }
@@ -42,16 +44,16 @@ const authSlice = createSlice({
           state.role = decoded.role;
           state.token = token;
           
-          // Store email if provided in user object
-          if (user && user.email) {
-            state.email = user.email;
-          }
+          // Store email and employeeCode from decoded token or user object
+          state.email = decoded.email || user?.email || null;
+          state.employeeCode = decoded.employeeCode || user?.employeeCode || null;
           
           // Save to localStorage
           localStorage.setItem("authState", JSON.stringify({
             userId: decoded.id,
-            email: user?.email || null,
+            email: state.email,
             role: decoded.role,
+            employeeCode: state.employeeCode,
             token: token,
           }));
         } catch (error) {
@@ -63,6 +65,7 @@ const authSlice = createSlice({
       state.userId = null;
       state.email = null;
       state.role = null;
+      state.employeeCode = null;
       state.token = null;
       
       // Clear from localStorage
