@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import axiosInstance from '../helper/axiosInstance';
 import { useNavigate } from 'react-router-dom';
-import { generateSimpleFPMIPDF } from '../utils/simplePdfGenerator';
 import toast from 'react-hot-toast';
 import { useRoleBasedData } from '../hooks/useRoleBasedData';
 import RoleBasedTextarea from '../components/RoleBasedTextarea';
 import RemarksBox from '../components/RemarksBox';
+
+// Lazy load PDF generator to reduce initial bundle size
+const generateSimpleFPMIPDF = React.lazy(() => 
+  import('../utils/simplePdfGenerator').then(module => ({
+    default: module.generateSimpleFPMIPDF
+  }))
+);
 
 const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
   const navigate=useNavigate()

@@ -33,7 +33,6 @@ const passwordResetOtpSchema = new mongoose.Schema({
 
 // Add index for faster queries
 passwordResetOtpSchema.index({ email: 1, createdAt: -1 });
-passwordResetOtpSchema.index({ expiresAt: 1 });
 
 // Method to check if OTP is still valid
 passwordResetOtpSchema.methods.isValid = function() {

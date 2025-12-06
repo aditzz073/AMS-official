@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../helper/axiosInstance";
 import toast from "react-hot-toast";
-import { generateSimpleFPMIPDF } from "../utils/simplePdfGenerator";
 import { useRoleBasedData } from "../hooks/useRoleBasedData";
+
+// Lazy load PDF generator to reduce initial bundle size
+const generateSimpleFPMIPDF = React.lazy(() => 
+  import("../utils/simplePdfGenerator").then(module => ({
+    default: module.generateSimpleFPMIPDF
+  }))
+);
 
 const Page2 = ({ formData, setFormData, onNext, onPrevious, userRole, isReadOnly }) => {
   const { canViewColumn } = useRoleBasedData(userRole, formData);

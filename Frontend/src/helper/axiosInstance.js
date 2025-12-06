@@ -2,8 +2,8 @@ import axios from "axios";
 
 const axiosInstance = axios.create();
 
-// axiosInstance.defaults.baseURL="https://mini-project-25-zomg.onrender.com/app"
-axiosInstance.defaults.baseURL = "http://localhost:9000/app";
+// Use environment variable for API URL, fallback to localhost for development
+axiosInstance.defaults.baseURL = import.meta.env.VITE_API_URL || "http://localhost:9000/app";
 axiosInstance.defaults.withCredentials = true;
 
 // Add request interceptor to include token in headers

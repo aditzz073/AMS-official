@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "./redux/authSlice";
 import toast from "react-hot-toast";
-import Page1 from "./pages/Page1";
-import Page2 from "./pages/Page2";
-import Page3 from "./pages/Page3";
-import Page4 from "./pages/Page4";
-import Page5 from "./pages/Page5";
-import Page6 from "./pages/Page6";
-import Page7 from "./pages/Page7";
-import Page0 from "./pages/Page0";
 import logo from "./logo.png";
 import Header from "./components/Header";
 import axiosInstance from "./helper/axiosInstance";
+
+// Code splitting - lazy load pages to reduce initial bundle size
+const Page0 = lazy(() => import("./pages/Page0"));
+const Page1 = lazy(() => import("./pages/Page1"));
+const Page2 = lazy(() => import("./pages/Page2"));
+const Page3 = lazy(() => import("./pages/Page3"));
+const Page4 = lazy(() => import("./pages/Page4"));
+const Page5 = lazy(() => import("./pages/Page5"));
+const Page6 = lazy(() => import("./pages/Page6"));
+const Page7 = lazy(() => import("./pages/Page7"));
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -149,14 +151,16 @@ const App = () => {
           onLogout={handleLogout} 
         />
       </header>
-      {currentPage === 0 && <Page0  onNext={handleNext}  />}
-      {currentPage === 1 && <Page1 catTotal={categoriesTotal} formData={formData} setFormData={setFormData} onPrevious={handlePrevious} onNext={handleNext}  />}
-      {currentPage === 2 && <Page3 formData={formData} setFormData={setFormData} onNext={handleNext} onPrevious={handlePrevious} isReadOnly={isReadOnly} userRole={userRole} />}
-      {currentPage === 3 && <Page4 formData={formData} setFormData={setFormData} onNext={handleNext} onPrevious={handlePrevious} isReadOnly={isReadOnly} userRole={userRole}/>}
-      {currentPage === 4 && <Page5 formData={formData} setFormData={setFormData} onNext={handleNext} onPrevious={handlePrevious} isReadOnly={isReadOnly} userRole={userRole}/>}
-      {currentPage === 5 && <Page6 formData={formData} setFormData={setFormData} onNext={handleNext} onPrevious={handlePrevious} isReadOnly={isReadOnly} userRole={userRole}/>}
-      {currentPage === 6 && <Page2 formData={formData} setFormData={setFormData} onNext={handleNext} onPrevious={handlePrevious} isReadOnly={isReadOnly} userRole={userRole}/>}
-      {currentPage === 7 && <Page7 formData={formData} setFormData={setFormData} onPrevious={handlePrevious} isReadOnly={isReadOnly} userRole={userRole} />}
+      <Suspense fallback={<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', fontSize: '18px', color: '#666'}}>Loading...</div>}>
+        {currentPage === 0 && <Page0  onNext={handleNext}  />}
+        {currentPage === 1 && <Page1 catTotal={categoriesTotal} formData={formData} setFormData={setFormData} onPrevious={handlePrevious} onNext={handleNext}  />}
+        {currentPage === 2 && <Page3 formData={formData} setFormData={setFormData} onNext={handleNext} onPrevious={handlePrevious} isReadOnly={isReadOnly} userRole={userRole} />}
+        {currentPage === 3 && <Page4 formData={formData} setFormData={setFormData} onNext={handleNext} onPrevious={handlePrevious} isReadOnly={isReadOnly} userRole={userRole}/>}
+        {currentPage === 4 && <Page5 formData={formData} setFormData={setFormData} onNext={handleNext} onPrevious={handlePrevious} isReadOnly={isReadOnly} userRole={userRole}/>}
+        {currentPage === 5 && <Page6 formData={formData} setFormData={setFormData} onNext={handleNext} onPrevious={handlePrevious} isReadOnly={isReadOnly} userRole={userRole}/>}
+        {currentPage === 6 && <Page2 formData={formData} setFormData={setFormData} onNext={handleNext} onPrevious={handlePrevious} isReadOnly={isReadOnly} userRole={userRole}/>}
+        {currentPage === 7 && <Page7 formData={formData} setFormData={setFormData} onPrevious={handlePrevious} isReadOnly={isReadOnly} userRole={userRole} />}
+      </Suspense>
     </div>
   );
 };
