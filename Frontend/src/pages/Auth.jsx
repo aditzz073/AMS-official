@@ -342,8 +342,6 @@ const Auth = () => {
                       <option value="principal">Principal</option>
                       <option value="hod">HOD</option>
                       <option value="external">External evaluator</option>
-                      <option value="admin">Admin</option>
-
                     </select>
                   </div>
                 </>

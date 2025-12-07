@@ -7,8 +7,9 @@ import axiosInstance from '../helper/axiosInstance';
 const ThankYouPage = () => {
    const navigate=useNavigate()
      const [userName, setUserName] = useState("User Name");
+     const [userRole, setUserRole] = useState("faculty");
      
-     // Get user email from auth state
+     // Get user email and role from auth state
      useEffect(() => {
        try {
          const authStateString = localStorage.getItem("authState");
@@ -16,6 +17,9 @@ const ThankYouPage = () => {
            const authState = JSON.parse(authStateString);
            if (authState && authState.email) {
              setUserName(authState.email);
+           }
+           if (authState && authState.role) {
+             setUserRole(authState.role);
            }
          }
        } catch (error) {
@@ -62,17 +66,19 @@ const ThankYouPage = () => {
           <p className="text-gray-600">Your faculty appraisal form has been successfully submitted.</p>
         </div>
 
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-gray-700 mb-3 font-semibold">Please upload your finalised form in this drive:</p>
-          <a 
-            href="https://drive.google.com/drive/folders/1dmjuw2_KPnzHMCdz2dLj6plx0BRjp6mM" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-800 underline break-all"
-          >
-            https://drive.google.com/drive/folders/1dmjuw2_KPnzHMCdz2dLj6plx0BRjp6mM
-          </a>
-        </div>
+        {userRole === "principal" && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-gray-700 mb-3 font-semibold">Please upload your finalised form in this drive:</p>
+            <a 
+              href="https://drive.google.com/drive/folders/1dmjuw2_KPnzHMCdz2dLj6plx0BRjp6mM" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline break-all"
+            >
+              https://drive.google.com/drive/folders/1dmjuw2_KPnzHMCdz2dLj6plx0BRjp6mM
+            </a>
+          </div>
+        )}
 
         <div className="flex flex-col items-center">
           <p className="text-gray-500 mb-4">Please click on this button to go back to instruction page.</p>

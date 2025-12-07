@@ -21,8 +21,8 @@ export const roleAccess = {
   principal: { 
     editable: [], 
     visible: ['self', 'hod', 'external'],
-    canEditRemarks: false, // Cannot edit section-wise remarks (HOD-only)
-    canViewRemarks: true // Can view section-wise remarks (read-only)
+    canEditRemarks: true, // Can add section-wise remarks
+    canViewRemarks: true // Can view section-wise remarks
     // Note: Principal CAN edit RemarksPrincipal field via RoleBasedTextarea
   },
   admin: { 
