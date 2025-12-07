@@ -201,26 +201,22 @@ const Page2 = ({ formData, setFormData, onNext, onPrevious, userRole, isReadOnly
                 Signature Name of the Faculty Member
               </td>
               <td className="border border-gray-300 px-4 py-2">
-                {/* <input
+                <input
                   type="text"
                   name="name"
-                  value={formData.name}
+                  value={formData.name || ''}
                   onChange={handleChangeSignature}
                   className="border border-gray-400 rounded px-2 py-1 w-full"
-                /> */}
-              <input type="text" value={formData.name} disabled className="border border-gray-400 rounded px-2 py-1 w-full" />              </td>
+                />
+              </td>
               <td className="border border-gray-300 px-4 py-2">Signature Name of the HoD</td>
               <td className="border border-gray-300 px-4 py-2">
                 <input
                   type="text"
                   name="HODName"
-                  value={formData.HODName}
+                  value={formData.HODName || ''}
                   onChange={handleChangeSignature}
-                  readOnly={userRole !== 'hod' && userRole !== 'admin'}
-                  disabled={userRole !== 'hod' && userRole !== 'admin'}
-                  className={`border border-gray-400 rounded px-2 py-1 w-full ${
-                    userRole !== 'hod' && userRole !== 'admin' ? 'bg-gray-100 text-gray-600' : ''
-                  }`}
+                  className="border border-gray-400 rounded px-2 py-1 w-full"
                 />
               </td>
             </tr>
@@ -232,27 +228,19 @@ const Page2 = ({ formData, setFormData, onNext, onPrevious, userRole, isReadOnly
                 <input
                   type="text"
                   name="externalEvaluatorName"
-                  value={formData.externalEvaluatorName}
+                  value={formData.externalEvaluatorName || ''}
                   onChange={handleChangeSignature}
-                  readOnly={userRole !== 'external' && userRole !== 'admin'}
-                  disabled={userRole !== 'external' && userRole !== 'admin'}
-                  className={`border border-gray-400 rounded px-2 py-1 w-full ${
-                    userRole !== 'external' && userRole !== 'admin' ? 'bg-gray-100 text-gray-600' : ''
-                  }`}
+                  className="border border-gray-400 rounded px-2 py-1 w-full"
                 />
               </td>
               <td className="border border-gray-300 px-4 py-2">Signature Name of the Principal</td>
               <td className="border border-gray-300 px-4 py-2">
                 <input
                   type="text"
-                  name="principleName"
-                  value={formData.principleName}
+                  name="principalName"
+                  value={formData.principalName || ''}
                   onChange={handleChangeSignature}
-                  readOnly={userRole !== 'principal' && userRole !== 'admin'}
-                  disabled={userRole !== 'principal' && userRole !== 'admin'}
-                  className={`border border-gray-400 rounded px-2 py-1 w-full ${
-                    userRole !== 'principal' && userRole !== 'admin' ? 'bg-gray-100 text-gray-600' : ''
-                  }`}
+                  className="border border-gray-400 rounded px-2 py-1 w-full"
                 />
               </td>
             </tr>
