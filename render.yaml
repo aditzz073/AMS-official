@@ -1,0 +1,46 @@
+services:
+  # Backend Service
+  - type: web
+    name: ams-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd Backend && npm install
+    startCommand: cd Backend && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: CLOUDINARY_NAME
+        sync: false
+      - key: CLOUDINARY_KEY
+        sync: false
+      - key: CLOUDINARY_SECRET
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+
+  # Frontend Service (Static Site)
+  - type: web
+    name: ams-frontend
+    env: static
+    region: oregon
+    plan: free
+    buildCommand: cd Frontend && npm install && npm run build
+    staticPublishPath: ./Frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
