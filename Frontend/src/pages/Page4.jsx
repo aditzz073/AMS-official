@@ -181,7 +181,7 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
           <thead className="bg-gray-200">
             <tr className="bg-gray-200">
               <th className="border border-gray-300 px-4 py-2">2.1</th>
-              <th className="border border-gray-300 px-4 py-2">Professional Development</th>
+              <th className="border border-gray-300 px-4 py-2">Professional Development (maximum marks 22)</th>
               <th className="border border-gray-300 px-4 py-2">Self-Evaluation</th>
               <th className="border border-gray-300 px-4 py-2">Evaluation by HOD</th>
               <th className="border border-gray-300 px-4 py-2">
@@ -193,19 +193,11 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <tr>
               <td className="border px-4 py-2">2.1.1</td>
               <td className="border px-4 py-2">
-                <ol>
-                  <li>Qualification improvement</li>
-                  <li>
-                    (Ph. D / Post Doctorate –{" "}
-                    <span className="text-red-500">10 points</span>)
-                  </li>
-                  <li>
-                    (Ph. D registered –{" "}
-                    <span className="text-red-500">4 points</span>) and for every
-                    progress report submission (–{" "}
-                    <span className="text-red-500">1 point</span>)
-                  </li>
-                </ol>
+                Qualification improvement<br />
+                (Ph. D / Post Doctorate – <span className="text-blue-600 font-semibold">10 Marks</span>)<br />
+                (Ph. D registered – <span className="text-blue-600 font-semibold">4 Marks</span>) and for every progress report submission<br />
+                – <span className="text-blue-600 font-semibold">1 Marks</span><br />
+                <span className="text-red-600 font-semibold">(Max: 10 Marks)</span>
               </td>
               <td className="border px-4 py-2">
               <div className="flex flex-col items-center space-y-2">
@@ -262,12 +254,8 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <tr>
               <td className="border px-4 py-2">2.1.2</td>
               <td className="border px-4 py-2">
-                Acquiring status of Certified trainer for skill development
-                courses from reputed organization.
-                <br />
-                <span className="text-red-500">
-                  (02 points each) (Max: 4 points)
-                </span>
+                Acquiring status of Certified trainer for skill development courses from
+                reputed organization. <span className="text-blue-600 font-semibold">(02 Marks each)</span> <span className="text-red-600 font-semibold">(Max: 4 Marks)</span>
               </td>
               <td className="border px-4 py-2">
               <div className="flex flex-col items-center space-y-2">
@@ -325,12 +313,8 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
               <td className="border px-4 py-2">2.1.3</td>
               <td className="border px-4 py-2">
                 Certification of International / National repute from reputed
-                organization (e.g. EdX, MOOC from some best central
-                universities/IITs/NITs/NPTEL etc.)
-                <br />
-                <span className="text-red-500">
-                  (02 points each) (Max: 4 points)
-                </span>
+                organization (e.g. EdX, MOOC from some best central universities
+                /IITs/ NITs/ NPTEL etc.) <span className="text-blue-600 font-semibold">(02 Marks each)</span> <span className="text-red-600 font-semibold">(Max: 4 Marks)</span>
               </td>
               <td className="border px-4 py-2">
               <div className="flex flex-col items-center space-y-2">
@@ -389,15 +373,8 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
               <td className="border px-4 py-2">
                 Awards/ Recognition/ Any other achievement through professional
                 bodies of National/International repute (e.g. Best Teacher, Young
-                Scientist award given by ISTE).
-                <br />
-                <span className="text-red-500">
-                  (02 points each) (Max: 4 points)
-                </span>
-                <br />
-                <span className="text-green-500">
-                  (Verification for 2.1: Certificate/letter/report)
-                </span>
+                Scientist award given by ISTE). <span className="text-blue-600 font-semibold">(02 Marks each)</span> <span className="text-red-600 font-semibold">(Max: 4 Marks)</span><br />
+                <span className="text-green-600 font-italic">(Verification for 2.1 : Certificate/letter/report)</span>
               </td>
               <td className="border px-4 py-2">
               <div className="flex flex-col items-center space-y-2">
@@ -469,7 +446,7 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
           <thead>
             <tr className="bg-gray-200">
               <th className="border border-gray-300 px-4 py-2">2.2</th>
-              <th className="border border-gray-300 px-4 py-2">Research Achievements (RA)</th>
+              <th className="border border-gray-300 px-4 py-2">Research Achievements (RA) (maximum marks 68)</th>
               <th className="border border-gray-300 px-4 py-2">Self-Evaluation</th>
               <th className="border border-gray-300 px-4 py-2">Evaluation by HOD</th>
               <th className="border border-gray-300 px-4 py-2">
@@ -481,19 +458,12 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <tr>
               <td className="border px-4 py-2">2.2.1</td>
               <td className="border px-4 py-2">
-                <ol>
-                  <li>
-                    <b>Research Publication (journals)</b>
-                  </li>
-                  <li>Number of articles in refereed International Journals</li>
-                  <li>
-                    <span className="text-red-500">
-                      (For 2 publication: Scopus indexed - 5 points, Web of
-                      Science indexed – 3 points, and UGC care list – 2 points)
-                      H-index {">"} 5: 2 points, Citation {">"} 10: 2 points
-                    </span>
-                  </li>
-                </ol>
+                <b>Research Publication (journals)</b><br />
+                Number of articles in refereed International Journals<br />
+                <span className="text-blue-600 font-semibold">(For 2 publication : Scopus indexed -5 Marks, Web of Science indexed – 3 Marks and UGC care list – 2 Marks)</span><br />
+                <span className="text-blue-600 font-semibold">H-index{">"} 5 : 2 Marks</span><br />
+                <span className="text-blue-600 font-semibold">Citation.{">"}10 : 2 Marks</span><br />
+                <span className="text-blue-600 font-semibold">No publication : 0 marks,</span> <span className="text-red-600 font-semibold">(Max: 9 marks)</span>
               </td>
               {/* <td className="border px-4 py-2">
                 Scopus – 5<br />
@@ -555,18 +525,9 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <tr>
               <td className="border px-4 py-2">2.2.2</td>
               <td className="border px-4 py-2">
-                <ol>
-                  <li>
-                    <b>Full paper publication in Conference Proceedings</b>
-                  </li>
-                  <li>
-                    <span className="text-red-500">
-                      (For publication in International Conference Proceedings – 3
-                      points, and National Conference Proceedings – 2 points)
-                      (Egs. Springer, Elsevier, IEEE, and ACM etc.)
-                    </span>
-                  </li>
-                </ol>
+                <b>Full paper publication in Conference Proceedings</b><br />
+                <span className="text-blue-600 font-semibold">(For publication in International Conference Proceedings- 3 Marks, and National Conference Proceedings – 2 Marks) (Egs. Springer / Elesevier/ IEEE and ACM etc.)</span><br />
+                <span className="text-red-600 font-semibold">(Max: 3 marks)</span>
               </td>
               <td className="border px-4 py-2">
               <div className="flex flex-col items-center space-y-2">
@@ -967,17 +928,41 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 <div>
                   UG – 1 point for every awarded group <span className="text-blue-600">(max. 2 Marks)</span>
                 </div>
-                <div className="mt-1">
-                  Degree awarded (Nos.): --------
+                <div className="mt-1 flex items-center gap-2">
+                  Degree awarded (Nos.): 
+                  <input
+                    type="text"
+                    placeholder="_____"
+                    className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                    value={formData.PDRC228DegreeAwarded1 || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, PDRC228DegreeAwarded1: e.target.value }))}
+                    disabled={userRole !== 'faculty'}
+                  />
                 </div>
-                <div>
+                <div className="flex items-center gap-2">
                   Ph. D (Awarded/In progress) <span className="text-blue-600">(3/2)</span>
                 </div>
-                <div>
-                  Degree awarded (Nos.): --------
+                <div className="flex items-center gap-2">
+                  Degree awarded (Nos.): 
+                  <input
+                    type="text"
+                    placeholder="_____"
+                    className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                    value={formData.PDRC228DegreeAwarded2 || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, PDRC228DegreeAwarded2: e.target.value }))}
+                    disabled={userRole !== 'faculty'}
+                  />
                 </div>
-                <div>
-                  Number of research scholars under guidance : -----------
+                <div className="flex items-center gap-2">
+                  Number of research scholars under guidance : 
+                  <input
+                    type="text"
+                    placeholder="_____"
+                    className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                    value={formData.PDRC228ResearchScholars || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, PDRC228ResearchScholars: e.target.value }))}
+                    disabled={userRole !== 'faculty'}
+                  />
                 </div>
                 <div className="mt-1">
                   <span className="text-red-600">(Max: 8 marks)</span>
@@ -1027,6 +1012,83 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border px-4 py-2">
               <RoleBasedInput
                 fieldKey="PDRC228External"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-2 w-full"
+              />
+            </td>
+            </tr>
+
+            {/* 2.2.9 - Involvement of student in Research activities */}
+            <tr>
+              <td className="border px-4 py-2">2.2.9</td>
+              <td className="border px-4 py-2">
+                <div>
+                  <strong>Involvement of student in Research activities</strong>
+                </div>
+                <div className="mt-1">
+                  <span className="text-blue-600 font-semibold">(1 point for each of the following activity :)</span>
+                </div>
+                <ul className="list-disc ml-6 mt-2">
+                  <li>Encourage the students to pursue Masters and Ph. D.</li>
+                  <li>Encourage students to participate in research related activities.</li>
+                  <li>Inculcate research culture in the institute by arranging motivational lectures to emphasize/or provide awareness of research, patent, copyrights, research tools etc.</li>
+                  <li>Undertake projects with specialized themes and social needs.</li>
+                  <li>Strengthen association with research organizations such as DRDO, ARAI, IISc, ISRO etc.</li>
+                  <li>Promote interdisciplinary projects</li>
+                </ul>
+                <div className="mt-2">
+                  <span className="text-red-600 font-semibold">(Max: 6 marks)</span>
+                </div>
+                <div className="mt-1">
+                  <span className="text-green-600 font-italic">(Verification for 2.1 to 2.9: Published paper/URL/Books/ Certificate / account details/notification/letter/report)</span>
+                </div>
+              </td>
+              <td className="border px-4 py-2">
+                <div className="flex flex-col items-center space-y-2">
+                  <RoleBasedInput
+                    fieldKey="PDRC229Self"
+                    userRole={userRole}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                    className="border p-2 w-full"
+                  />
+                  {canEditColumn('self') ? (
+                    <div className="flex flex-col items-center mt-2 w-full">
+                      <input
+                        type="file"
+                        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                        onChange={(e) => handleImageUpload(e, "PDRC229Self")}
+                        className="text-xs w-full"
+                      />
+                      <button
+                        onClick={() => showImagePreview("PDRC229Self")}
+                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                      >
+                        View Evidence
+                      </button>
+                    </div>
+                  ):<><button
+                    onClick={() => showImagePreview("PDRC229Self")}
+                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                  >
+                    View Evidence
+                  </button></>}
+                </div>
+              </td>
+              <td className="border px-4 py-2">
+              <RoleBasedInput
+                fieldKey="PDRC229HoD"
+                userRole={userRole}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                className="border p-2 w-full"
+              />
+            </td>
+            <td className="border px-4 py-2">
+              <RoleBasedInput
+                fieldKey="PDRC229External"
                 userRole={userRole}
                 formData={formData}
                 handleInputChange={handleInputChange}

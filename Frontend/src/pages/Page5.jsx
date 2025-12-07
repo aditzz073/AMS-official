@@ -170,7 +170,7 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
   console.log(formData);
   return (
     <div className="p-6  min-h-screen">
-        <h3 id="head_pdrc" className="text-xl font-bold text-center"> 3. Contribution at Department Level (CDL)</h3>
+        <h3 id="head_pdrc" className="text-xl font-bold text-center"> 3. Contribution at Departmental Level (CDL) <span className="text-blue-600">(maximum marks 50)</span></h3>
         <table className="border-3 border-gray-300 w-full">
             <thead>
                 <tr className="bg-gray-200">
@@ -186,32 +186,58 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     {
                         id: "3.1",
                         no:"31",
-                        description:
-                            "Contribution in conducting the activities of professional bodies (like IEEE, CSI, IETE etc.) either for the students or faculty members (5 points for activity like FDP, SDP, Seminar, workshop etc. conducted with individual as a main resource person)",
+                        description: (
+                            <>
+                                Contribution in conducting the activities of professional bodies (like IEEE, CSI, IETE etc.) either for the students or faculty members<br />
+                                <span className="text-blue-600 font-semibold">(5 Marks for activity like FDP, SDP, Seminar, workshop etc. conducted with individual as a main resource person)</span> <span className="text-red-600 font-semibold">(Max: 5 marks)</span>
+                            </>
+                        ),
                     },
                     {
                         id: "3.2",
                         no:"32",
-                        description:
-                            "Organizing Training program (FDP/SDP/STTP/Workshop/Seminar etc.) / Organization of short term training courses (Coordinator: Co-Coordinator: Member = 10:8:6 for 2-week duration)",
+                        description: (
+                            <>
+                                Organizing Training program (FDP/SDP/STTP/Workshop/Seminar etc.) / Organization of short term training courses<br />
+                                <span className="text-blue-600 font-semibold">Two week duration : Coordinator: Co-Coordinator: Member = (10:8:6)</span><br />
+                                <span className="text-blue-600 font-semibold">One week : Coordinator: Co-Coordinator: Member = (6:4:2)</span><br />
+                                <span className="text-blue-600 font-semibold">Less than one week : Coordinator: Co-Coordinator: Member = (5:3:1)</span> <span className="text-red-600 font-semibold">(Max: 10 marks)</span>
+                            </>
+                        ),
                     },
                     {
                         id: "3.3",
                         no:"33",
-                        description:
-                            "Participation in Training Program / Participation in short term training courses (10 points for two-week duration, 8 points for one week, 2 points for less than one week)",
+                        description: (
+                            <>
+                                Participation in Training Program / Participation in short term training courses<br />
+                                <span className="text-blue-600 font-semibold">Two week duration (10 Marks) / One week (8 Marks) / for less than one week (2 Marks),</span> <span className="text-red-600 font-semibold">(Max: 10 marks)</span>
+                            </>
+                        ),
                     },
                     {
                         id: "3.4",
                         no:"34",
-                        description:
-                            "Internal Revenue Generation (IRG) through FDP / SDP / STTP / Workshop / Seminar / Conference / Consultancy (Rs.25,000 and above - Coordinator: Co-Coordinator: Member = 10:8:5)",
+                        description: (
+                            <>
+                                Internal Revenue Generation (IRG) : Other than the research grant IRG through<br />
+                                FDP/SDP/STTP/Workshop/Seminar/Conference/Consultancy<br />
+                                <span className="text-blue-600 font-semibold">(Rs.25,000 and above -Coordinator: Co-Coordinator: Member = (10:8:5))</span> <span className="text-red-600 font-semibold">[Max: 10 marks]</span>
+                            </>
+                        ),
                     },
                     {
                         id: "3.5",
                         no:"35",
-                        description:
-                            "Department level Governance/responsibilities assigned (NBA/NAAC/NIRF Coordinator/Member, IQAC Coordinator/Member, Other Departmental Coordinators/Member)",
+                        description: (
+                            <>
+                                Department level Governance/responsibilities assigned<br />
+                                <span className="text-blue-600 font-semibold">NBA/NAAC/NIRF Coordinator/Member - 5/3</span><br />
+                                <span className="text-blue-600 font-semibold">IQAC Coordinator/Member - 5/3</span><br />
+                                <span className="text-blue-600 font-semibold">Other Departmental Coordinators/Member - 5/3</span><br />
+                                <span className="text-green-600 font-italic">(Verification for 3 : Office order/Attendance/ Certificate/ letter/report)</span> <span className="text-red-600 font-semibold">(Max: 15 marks)</span>
+                            </>
+                        ),
                     },
                 ].map((row, index) => (
                     <tr key={row.id}>
@@ -328,8 +354,16 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                         <div className="mt-1">
                             Any other DSI level responsibility allotted : <span className="text-blue-600">2 Marks</span>
                         </div>
-                        <div className="mt-1">
-                            ( PI specify): --------------------
+                        <div className="mt-1 flex items-center gap-2">
+                            ( PI specify): 
+                            <input
+                                type="text"
+                                placeholder="____________________"
+                                className="border-b border-gray-400 px-2 py-1 w-64 focus:outline-none focus:border-blue-500"
+                                value={formData.CIL4PISpecify || ''}
+                                onChange={(e) => setFormData(prev => ({ ...prev, CIL4PISpecify: e.target.value }))}
+                                disabled={userRole !== 'faculty'}
+                            />
                         </div>
                         <div className="mt-2 text-green-600">
                             <em>(Verification for 4 : Office order/Attendance/ Certificate/ Account details/letter/report)</em> <span className="text-red-600">(Max: 30 marks)</span>

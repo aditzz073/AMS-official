@@ -184,7 +184,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                 colSpan="4"
                 className="border border-gray-300 px-4 py-2 text-left"
               >
-                Teaching Learning Activities
+                Teaching Learning Activities - (maximum marks 50)
               </th>
             </tr>
             <tr>
@@ -211,12 +211,51 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     academic calendar
                   </li>
                   <span className="text-red-600">
-                    (100% compliance = 10 points)
+                    (100% compliance = 10 Marks)
                   </span>
                   <ul className="list-disc ml-4">
-                    <li>Total number of lectures allocated: 40</li>
-                    <li>Total number of lectures taken: 40</li>
-                    <li>SEMESTER No.: 6</li>
+                    <li className="flex items-center gap-2">
+                      SEMESTER No.: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-20 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP111SemesterNo || ''}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          TLP111SemesterNo: e.target.value
+                        }))}
+                        disabled={!canEditColumn('self')}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      Total number of lectures allocated: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-20 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP111LecturesAllocated || ''}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          TLP111LecturesAllocated: e.target.value
+                        }))}
+                        disabled={!canEditColumn('self')}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      Total number of lectures taken: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-20 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP111LecturesTaken || ''}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          TLP111LecturesTaken: e.target.value
+                        }))}
+                        disabled={!canEditColumn('self')}
+                      />
+                    </li>
                     <li>Makeup lectures may be counted as against any leave</li>
                   </ul>
                 </ol>
@@ -274,20 +313,83 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
             <tr>
               <td className="border border-gray-300 px-4 py-2">1.1.2</td>
               <td className="border border-gray-300 px-4 py-2">
-                <ol>
-                  <li>
-                    Tutorials, practical, contact hours undertaken as percentage
-                    of those allocated
+                Tutorials, practical, contact hours undertaken as percentage of those actual allocated as per academic calendar <span className="text-blue-600 font-semibold">(100% compliance = 10 Marks)</span>
+                <div className="mt-2">
+                  <strong>SEMESTER No.: </strong>
+                  <input
+                    type="text"
+                    placeholder="____"
+                    className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
+                    value={formData.TLP112Semester1 || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, TLP112Semester1: e.target.value }))}
+                    disabled={userRole !== 'faculty'}
+                  />
+                </div>
+                <ul className="list-none ml-4 mt-1">
+                  <li className="flex items-center gap-2">
+                    No. of hours of tutorials, practical allocated: 
+                    <input
+                      type="text"
+                      placeholder="_________"
+                      className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                      value={formData.TLP112S1Allocated || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, TLP112S1Allocated: e.target.value }))}
+                      disabled={userRole !== 'faculty'}
+                    />
                   </li>
-                  <span className="text-red-600">
-                    (100% compliance = 10 points)
-                  </span>
-                  <ul className="list-disc ml-4">
-                    <li>SEMESTER No.: 7</li>
-                    <li>Total number of tutorials allocated: 40</li>
-                    <li>Total number of tutorials taken: 40</li>
-                  </ul>
-                </ol>
+                  <li className="flex items-center gap-2">
+                    No. of hours of tutorials, practical taken: 
+                    <input
+                      type="text"
+                      placeholder="_______"
+                      className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                      value={formData.TLP112S1Taken || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, TLP112S1Taken: e.target.value }))}
+                      disabled={userRole !== 'faculty'}
+                    />
+                  </li>
+                </ul>
+                <div className="mt-2">
+                  <strong>SEMESTER No.: </strong>
+                  <input
+                    type="text"
+                    placeholder="____"
+                    className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
+                    value={formData.TLP112Semester2 || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, TLP112Semester2: e.target.value }))}
+                    disabled={userRole !== 'faculty'}
+                  />
+                </div>
+                <ul className="list-none ml-4 mt-1">
+                  <li className="flex items-center gap-2">
+                    No. of hours of tutorials, practical allocated: 
+                    <input
+                      type="text"
+                      placeholder="_________"
+                      className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                      value={formData.TLP112S2Allocated || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, TLP112S2Allocated: e.target.value }))}
+                      disabled={userRole !== 'faculty'}
+                    />
+                  </li>
+                  <li className="flex items-center gap-2">
+                    No. of hours of tutorials, practical taken: 
+                    <input
+                      type="text"
+                      placeholder="_______"
+                      className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                      value={formData.TLP112S2Taken || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, TLP112S2Taken: e.target.value }))}
+                      disabled={userRole !== 'faculty'}
+                    />
+                  </li>
+                </ul>
+                <ul className="list-disc ml-6 mt-2">
+                  <li>Remedial lecturers may be counted as against any leave</li>
+                </ul>
+                <div className="mt-1">
+                  <span className="text-blue-600 font-semibold">(Max: 10 marks)</span>
+                </div>
               </td>
               <td className="border border-gray-300 px-4 py-2 text-center">
                 <div className="flex flex-col items-center space-y-2">
@@ -341,16 +443,9 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
             <tr>
               <td className="border border-gray-300 px-4 py-2">1.1.3</td>
               <td className="border border-gray-300 px-4 py-2">
-                Extra Lectures, Remedial Lectures/Practical or other teaching
-                duties
-                <span className="text-red-600">
-                  {" "}
-                  (2 hour excess per week = 4 points for each semester)
-                </span>
-                <br />
-                <span className="text-green-600">
-                  Verification: Official attendance record
-                </span>
+                Extra Lectures, Remedial Lectures/Practical or other teaching duties<br />
+                <span className="text-blue-600 font-semibold">(2-hour excess per week = 4 Marks for each semester)</span> <span className="text-red-600 font-semibold">(Max: 8 marks)</span><br />
+                <span className="text-green-600 font-italic">(Verification for 1.1.1 to 1.1.3: Official attendance record)</span>
               </td>
               <td className="border border-gray-300 px-4 py-2 text-center">
                 <div className="flex flex-col items-center space-y-2">
@@ -404,9 +499,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
             <tr className="bg-white">
               <td className="border border-gray-300 px-4 py-2">1.1.4</td>
               <td className="border border-gray-300 px-4 py-2">
-                Semester End Examination duties (Question paper setting,
-                evaluation of answer scripts etc.){" "}
-                <span className="text-red-500">(100% compliance = 4 points/sem)</span>
+                Semester End Examination duties (Question paper setting, evaluation of answer scripts etc.) as per duties allotted <span className="text-blue-600 font-semibold">(100% compliance = 4 Marks/sem)</span> <span className="text-red-600 font-semibold">(Max: 8 marks)</span>
               </td>
               <td className="border border-gray-300 px-4 py-2 text-center">
                 <div className="flex flex-col items-center space-y-2">
@@ -621,31 +714,133 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
               <td className="border border-gray-300 px-4 py-2">1.2.1</td>
               <td className="border border-gray-300 px-4 py-2">
                 <div>
-                  <strong>Attendance of Students above 85%</strong> <span className="text-red-600">(5 marks for each semester)</span>
+                  <strong>Attendance of Students above 85%</strong> <span className="text-blue-600 font-semibold">(5 marks for each semester)</span>
                 </div>
                 <div className="mt-2">
-                  <strong>SEMESTER No.:</strong>
+                  <strong>SEMESTER No.: </strong>
+                  <input
+                    type="text"
+                    placeholder="____"
+                    className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
+                    value={formData.TLP121Semester1 || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      TLP121Semester1: e.target.value
+                    }))}
+                    disabled={userRole !== 'faculty'}
+                  />
                   <ul className="list-disc ml-6 mt-1">
-                    <li>1. Theory 1...........................</li>
-                    <li>2. Theory 2...........................</li>
-                    <li>3. Practical 1/Tutorial 1...........</li>
-                    <li>4. Practical 2/ Tutorial 2..........</li>
+                    <li className="flex items-center gap-2">
+                      1. Theory 1: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP121S1Theory1 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S1Theory1: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      2. Theory 2: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP121S1Theory2 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S1Theory2: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      3. Practical 1/Tutorial 1: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP121S1Practical1 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S1Practical1: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      4. Practical 2/ Tutorial 2: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP121S1Practical2 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S1Practical2: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
                   </ul>
                 </div>
                 <div className="mt-2">
-                  <strong>SEMESTER No.:</strong>
+                  <strong>SEMESTER No.: </strong>
+                  <input
+                    type="text"
+                    placeholder="____"
+                    className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
+                    value={formData.TLP121Semester2 || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      TLP121Semester2: e.target.value
+                    }))}
+                    disabled={userRole !== 'faculty'}
+                  />
                   <ul className="list-disc ml-6 mt-1">
-                    <li>1. Theory 1...........................</li>
-                    <li>2. Theory 2...........................</li>
-                    <li>3. Practical 1/Tutorial 1...........</li>
-                    <li>4. Practical 2/ Tutorial 2..........</li>
+                    <li className="flex items-center gap-2">
+                      1. Theory 1: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP121S2Theory1 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S2Theory1: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      2. Theory 2: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP121S2Theory2 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S2Theory2: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      3. Practical 1/Tutorial 1: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP121S2Practical1 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S2Practical1: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      4. Practical 2/ Tutorial 2: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP121S2Practical2 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S2Practical2: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
                   </ul>
                 </div>
                 <div className="mt-2 text-blue-600">
                   * Average of the student's attendance in the entire Theory/Practical work load assigned during the entire academic year.
                 </div>
-                <div className="mt-1 text-green-600">
-                  (Max: 10 marks) (Verification 1.2.1 : Official attendance record)
+                <div className="mt-1">
+                  <span className="text-blue-600 font-semibold">(Max: 10 marks)</span> <span className="text-green-600 font-italic">(Verification 1.2.1 : Official attendance record)</span>
                 </div>
               </td>
               <td className="border border-gray-300 px-4 py-2 text-center">
@@ -702,31 +897,127 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
               <td className="border border-gray-300 px-4 py-2">1.2.2</td>
               <td className="border border-gray-300 px-4 py-2">
                 <div>
-                  <strong>Student feedback (TH/PR)</strong> <span className="text-red-600">(5 marks for each semester)</span>
+                  <strong>Student feedback (TH/PR)</strong> <span className="text-blue-600 font-semibold">(5 marks for each semester)</span>
                 </div>
                 <div className="mt-2">
-                  <strong>SEMESTER No.:</strong>
+                  <strong>SEMESTER No.: </strong>
+                  <input
+                    type="text"
+                    placeholder="____"
+                    className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
+                    value={formData.TLP122Semester1 || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, TLP122Semester1: e.target.value }))}
+                    disabled={userRole !== 'faculty'}
+                  />
                   <ul className="list-disc ml-6 mt-1">
-                    <li>1. Theory 1...........................</li>
-                    <li>2. Theory 2...........................</li>
-                    <li>3. Practical 1........................</li>
-                    <li>4. Practical 2........................</li>
+                    <li className="flex items-center gap-2">
+                      1. Theory 1: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP122S1Theory1 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S1Theory1: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      2. Theory 2: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP122S1Theory2 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S1Theory2: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      3. Practical 1: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP122S1Practical1 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S1Practical1: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      4. Practical 2: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP122S1Practical2 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S1Practical2: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
                   </ul>
                 </div>
                 <div className="mt-2">
-                  <strong>SEMESTER No.:</strong>
+                  <strong>SEMESTER No.: </strong>
+                  <input
+                    type="text"
+                    placeholder="____"
+                    className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
+                    value={formData.TLP122Semester2 || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, TLP122Semester2: e.target.value }))}
+                    disabled={userRole !== 'faculty'}
+                  />
                   <ul className="list-disc ml-6 mt-1">
-                    <li>1. Theory 1...........................</li>
-                    <li>2. Theory 2...........................</li>
-                    <li>3. Practical 1........................</li>
-                    <li>4. Practical 2........................</li>
+                    <li className="flex items-center gap-2">
+                      1. Theory 1: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP122S2Theory1 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S2Theory1: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      2. Theory 2: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP122S2Theory2 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S2Theory2: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      3. Practical 1: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP122S2Practical1 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S2Practical1: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      4. Practical 2: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP122S2Practical2 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S2Practical2: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
                   </ul>
                 </div>
                 <div className="mt-2 text-blue-600">
                   * Score proportional to average of percentage of <strong>"Student's feedback"</strong> obtained for all assigned theory and practical Subjects in both the Semester.
                 </div>
-                <div className="mt-1 text-green-600">
-                  (Max: 10 marks) (Verification 1.3.2 : Official feedback record/report)
+                <div className="mt-1">
+                  <span className="text-blue-600 font-semibold">(Max: 10 marks)</span> <span className="text-green-600 font-italic">(Verification 1.3.2 : Official feedback record/report)</span>
                 </div>
               </td>
               <td className="border border-gray-300 px-4 py-2 text-center">
@@ -783,24 +1074,120 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
               <td className="border border-gray-300 px-4 py-2">1.2.3</td>
               <td className="border border-gray-300 px-4 py-2">
                 <div>
-                  <strong>Results of students(TH/PR)</strong> <span className="text-red-600">(5 marks for each semester)</span>
+                  <strong>Results of students(TH/PR)</strong> <span className="text-blue-600 font-semibold">(5 marks for each semester)</span>
                 </div>
                 <div className="mt-2">
-                  <strong>SEMESTER No.:</strong>
+                  <strong>SEMESTER No.: </strong>
+                  <input
+                    type="text"
+                    placeholder="____"
+                    className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
+                    value={formData.TLP123Semester1 || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, TLP123Semester1: e.target.value }))}
+                    disabled={userRole !== 'faculty'}
+                  />
                   <ul className="list-disc ml-6 mt-1">
-                    <li>1. Theory 1...........................</li>
-                    <li>2. Theory 2...........................</li>
-                    <li>3. Practical 1........................</li>
-                    <li>4. Practical 2........................</li>
+                    <li className="flex items-center gap-2">
+                      1. Theory 1: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP123S1Theory1 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S1Theory1: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      2. Theory 2: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP123S1Theory2 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S1Theory2: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      3. Practical 1: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP123S1Practical1 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S1Practical1: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      4. Practical 2: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP123S1Practical2 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S1Practical2: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
                   </ul>
                 </div>
                 <div className="mt-2">
-                  <strong>SEMESTER No.:</strong>
+                  <strong>SEMESTER No.: </strong>
+                  <input
+                    type="text"
+                    placeholder="____"
+                    className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
+                    value={formData.TLP123Semester2 || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, TLP123Semester2: e.target.value }))}
+                    disabled={userRole !== 'faculty'}
+                  />
                   <ul className="list-disc ml-6 mt-1">
-                    <li>1. Theory 1...........................</li>
-                    <li>2. Theory 2...........................</li>
-                    <li>3. Practical 1........................</li>
-                    <li>4. Practical 2........................</li>
+                    <li className="flex items-center gap-2">
+                      1. Theory 1: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP123S2Theory1 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S2Theory1: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      2. Theory 2: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP123S2Theory2 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S2Theory2: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      3. Practical 1: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP123S2Practical1 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S2Practical1: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      4. Practical 2: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP123S2Practical2 || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S2Practical2: e.target.value }))}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
                   </ul>
                 </div>
                 <div className="mt-2 text-blue-600">
@@ -809,8 +1196,8 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                 <div className="text-blue-600">
                   If the results are less by 10% compared to the average of three years – <strong>'0' Marks</strong> and in between give proportional Marks.
                 </div>
-                <div className="mt-1 text-green-600">
-                  (Max: 10 marks) (Verification 1.3.3 : Official result)
+                <div className="mt-1">
+                  <span className="text-blue-600 font-semibold">(Max: 10 marks)</span> <span className="text-green-600 font-italic">(Verification 1.3.3 : Official result)</span>
                 </div>
               </td>
               <td className="border border-gray-300 px-4 py-2 text-center">

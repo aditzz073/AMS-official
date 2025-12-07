@@ -220,13 +220,13 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
   return (
     <div className='p-6  min-h-screen'>
       <h3 id="head_pdrc" className="text-xl font-bold mb-4 text-center">
-        5. Interaction with the Outside World (IOW) / External Interface (EI)
+        5. Interaction with the Outside World (IOW) / External Interface (EI) <span className="text-blue-600">(maximum marks 50)</span>
       </h3>
       <table className="border border-gray-300 w-full">
         <thead>
           <tr className="bg-gray-200 ">
             <td className="border border-gray-300 p-2">5</td>
-            <td className="border border-gray-300 p-2">Interaction with outside world: <span className="">A = 10 points, B = 4 points per activity</span></td>
+            <td className="border border-gray-300 p-2">Interaction with outside world : <span className="text-blue-600 font-semibold">A= 10 Marks, B = 4 Marks per activity</span></td>
             <td className="border border-gray-300 p-2">Self-Evaluation</td>
             <td className="border border-gray-300 p-2">Evaluation by HOD</td>
             <td className="border border-gray-300 p-2">Evaluation by External Audit Member</td>
@@ -694,6 +694,11 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 handleInputChange={handleInputChange}
                 className="border p-1 w-full"
               />
+            </td>
+          </tr>
+          <tr>
+            <td className="border border-gray-300 p-2" colSpan="5">
+              <span className="text-red-600 font-semibold">(Max: 50 marks)</span> <span className="text-green-600 font-italic">(Verification for 5 : Office order/Attendance/ Certificate/ Account details/letter/report)</span>
             </td>
           </tr>
         </tbody>
