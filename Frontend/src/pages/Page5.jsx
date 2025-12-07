@@ -361,7 +361,11 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                                 placeholder="____________________"
                                 className="border-b border-gray-400 px-2 py-1 w-64 focus:outline-none focus:border-blue-500"
                                 value={formData.CIL4PISpecify || ''}
-                                onChange={(e) => setFormData(prev => ({ ...prev, CIL4PISpecify: e.target.value }))}
+                                onChange={(e) => {
+                                    const updatedData = { ...formData, CIL4PISpecify: e.target.value };
+                                    setFormData(updatedData);
+                                    localStorage.setItem('formData', JSON.stringify(updatedData));
+                                }}
                                 disabled={userRole !== 'faculty'}
                             />
                         </div>

@@ -8,6 +8,16 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
   const [previewImages, setPreviewImages] = useState({});
   const { canEditColumn } = useRoleBasedData(userRole, formData);
 
+  // Helper function to handle text input changes with localStorage
+  const handleTextInputChange = (fieldName, value) => {
+    const updatedData = {
+      ...formData,
+      [fieldName]: value
+    };
+    setFormData(updatedData);
+    localStorage.setItem('formData', JSON.stringify(updatedData));
+  };
+
   const handleInputChange = (e, key) => {
     const { value } = e.target;
     if(value<0 || value>10){
@@ -221,11 +231,15 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-20 focus:outline-none focus:border-blue-500"
                         value={formData.TLP111SemesterNo || ''}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          TLP111SemesterNo: e.target.value
-                        }))}
-                        disabled={!canEditColumn('self')}
+                        onChange={(e) => {
+                          const updatedData = {
+                            ...formData,
+                            TLP111SemesterNo: e.target.value
+                          };
+                          setFormData(updatedData);
+                          localStorage.setItem('formData', JSON.stringify(updatedData));
+                        }}
+                        disabled={userRole !== 'faculty'}
                       />
                     </li>
                     <li className="flex items-center gap-2">
@@ -235,11 +249,15 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-20 focus:outline-none focus:border-blue-500"
                         value={formData.TLP111LecturesAllocated || ''}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          TLP111LecturesAllocated: e.target.value
-                        }))}
-                        disabled={!canEditColumn('self')}
+                        onChange={(e) => {
+                          const updatedData = {
+                            ...formData,
+                            TLP111LecturesAllocated: e.target.value
+                          };
+                          setFormData(updatedData);
+                          localStorage.setItem('formData', JSON.stringify(updatedData));
+                        }}
+                        disabled={userRole !== 'faculty'}
                       />
                     </li>
                     <li className="flex items-center gap-2">
@@ -249,11 +267,15 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-20 focus:outline-none focus:border-blue-500"
                         value={formData.TLP111LecturesTaken || ''}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          TLP111LecturesTaken: e.target.value
-                        }))}
-                        disabled={!canEditColumn('self')}
+                        onChange={(e) => {
+                          const updatedData = {
+                            ...formData,
+                            TLP111LecturesTaken: e.target.value
+                          };
+                          setFormData(updatedData);
+                          localStorage.setItem('formData', JSON.stringify(updatedData));
+                        }}
+                        disabled={userRole !== 'faculty'}
                       />
                     </li>
                     <li>Makeup lectures may be counted as against any leave</li>
@@ -321,7 +343,11 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     placeholder="____"
                     className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
                     value={formData.TLP112Semester1 || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, TLP112Semester1: e.target.value }))}
+                    onChange={(e) => {
+                      const updatedData = { ...formData, TLP112Semester1: e.target.value };
+                      setFormData(updatedData);
+                      localStorage.setItem('formData', JSON.stringify(updatedData));
+                    }}
                     disabled={userRole !== 'faculty'}
                   />
                 </div>
@@ -333,7 +359,11 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                       placeholder="_________"
                       className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                       value={formData.TLP112S1Allocated || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, TLP112S1Allocated: e.target.value }))}
+                      onChange={(e) => {
+                        const updatedData = { ...formData, TLP112S1Allocated: e.target.value };
+                        setFormData(updatedData);
+                        localStorage.setItem('formData', JSON.stringify(updatedData));
+                      }}
                       disabled={userRole !== 'faculty'}
                     />
                   </li>
@@ -344,7 +374,11 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                       placeholder="_______"
                       className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                       value={formData.TLP112S1Taken || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, TLP112S1Taken: e.target.value }))}
+                      onChange={(e) => {
+                        const updatedData = { ...formData, TLP112S1Taken: e.target.value };
+                        setFormData(updatedData);
+                        localStorage.setItem('formData', JSON.stringify(updatedData));
+                      }}
                       disabled={userRole !== 'faculty'}
                     />
                   </li>
@@ -356,7 +390,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     placeholder="____"
                     className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
                     value={formData.TLP112Semester2 || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, TLP112Semester2: e.target.value }))}
+                    onChange={(e) => handleTextInputChange('TLP112Semester2', e.target.value)}
                     disabled={userRole !== 'faculty'}
                   />
                 </div>
@@ -368,7 +402,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                       placeholder="_________"
                       className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                       value={formData.TLP112S2Allocated || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, TLP112S2Allocated: e.target.value }))}
+                      onChange={(e) => handleTextInputChange('TLP112S2Allocated', e.target.value)}
                       disabled={userRole !== 'faculty'}
                     />
                   </li>
@@ -379,7 +413,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                       placeholder="_______"
                       className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                       value={formData.TLP112S2Taken || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, TLP112S2Taken: e.target.value }))}
+                      onChange={(e) => handleTextInputChange('TLP112S2Taken', e.target.value)}
                       disabled={userRole !== 'faculty'}
                     />
                   </li>
@@ -723,10 +757,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     placeholder="____"
                     className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
                     value={formData.TLP121Semester1 || ''}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      TLP121Semester1: e.target.value
-                    }))}
+                    onChange={(e) => handleTextInputChange('TLP121Semester1', e.target.value)}
                     disabled={userRole !== 'faculty'}
                   />
                   <ul className="list-disc ml-6 mt-1">
@@ -737,7 +768,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP121S1Theory1 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S1Theory1: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP121S1Theory1', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -748,7 +779,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP121S1Theory2 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S1Theory2: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP121S1Theory2', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -759,7 +790,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP121S1Practical1 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S1Practical1: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP121S1Practical1', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -770,7 +801,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP121S1Practical2 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S1Practical2: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP121S1Practical2', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -783,10 +814,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     placeholder="____"
                     className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
                     value={formData.TLP121Semester2 || ''}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      TLP121Semester2: e.target.value
-                    }))}
+                    onChange={(e) => handleTextInputChange('TLP121Semester2', e.target.value)}
                     disabled={userRole !== 'faculty'}
                   />
                   <ul className="list-disc ml-6 mt-1">
@@ -797,7 +825,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP121S2Theory1 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S2Theory1: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP121S2Theory1', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -808,7 +836,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP121S2Theory2 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S2Theory2: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP121S2Theory2', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -819,7 +847,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP121S2Practical1 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S2Practical1: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP121S2Practical1', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -830,7 +858,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP121S2Practical2 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP121S2Practical2: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP121S2Practical2', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -906,7 +934,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     placeholder="____"
                     className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
                     value={formData.TLP122Semester1 || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, TLP122Semester1: e.target.value }))}
+                    onChange={(e) => handleTextInputChange('TLP122Semester1', e.target.value)}
                     disabled={userRole !== 'faculty'}
                   />
                   <ul className="list-disc ml-6 mt-1">
@@ -917,7 +945,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP122S1Theory1 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S1Theory1: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP122S1Theory1', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -928,7 +956,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP122S1Theory2 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S1Theory2: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP122S1Theory2', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -939,7 +967,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP122S1Practical1 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S1Practical1: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP122S1Practical1', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -950,7 +978,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP122S1Practical2 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S1Practical2: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP122S1Practical2', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -963,7 +991,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     placeholder="____"
                     className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
                     value={formData.TLP122Semester2 || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, TLP122Semester2: e.target.value }))}
+                    onChange={(e) => handleTextInputChange('TLP122Semester2', e.target.value)}
                     disabled={userRole !== 'faculty'}
                   />
                   <ul className="list-disc ml-6 mt-1">
@@ -974,7 +1002,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP122S2Theory1 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S2Theory1: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP122S2Theory1', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -985,7 +1013,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP122S2Theory2 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S2Theory2: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP122S2Theory2', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -996,7 +1024,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP122S2Practical1 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S2Practical1: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP122S2Practical1', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -1007,7 +1035,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP122S2Practical2 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP122S2Practical2: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP122S2Practical2', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -1083,7 +1111,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     placeholder="____"
                     className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
                     value={formData.TLP123Semester1 || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, TLP123Semester1: e.target.value }))}
+                    onChange={(e) => handleTextInputChange('TLP123Semester1', e.target.value)}
                     disabled={userRole !== 'faculty'}
                   />
                   <ul className="list-disc ml-6 mt-1">
@@ -1094,7 +1122,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP123S1Theory1 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S1Theory1: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP123S1Theory1', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -1105,7 +1133,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP123S1Theory2 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S1Theory2: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP123S1Theory2', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -1116,7 +1144,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP123S1Practical1 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S1Practical1: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP123S1Practical1', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -1127,7 +1155,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP123S1Practical2 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S1Practical2: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP123S1Practical2', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -1140,7 +1168,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     placeholder="____"
                     className="border-b border-gray-400 px-2 py-1 w-16 focus:outline-none focus:border-blue-500"
                     value={formData.TLP123Semester2 || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, TLP123Semester2: e.target.value }))}
+                    onChange={(e) => handleTextInputChange('TLP123Semester2', e.target.value)}
                     disabled={userRole !== 'faculty'}
                   />
                   <ul className="list-disc ml-6 mt-1">
@@ -1151,7 +1179,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP123S2Theory1 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S2Theory1: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP123S2Theory1', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -1162,7 +1190,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP123S2Theory2 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S2Theory2: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP123S2Theory2', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -1173,7 +1201,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP123S2Practical1 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S2Practical1: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP123S2Practical1', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>
@@ -1184,7 +1212,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         placeholder="_____"
                         className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                         value={formData.TLP123S2Practical2 || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, TLP123S2Practical2: e.target.value }))}
+                        onChange={(e) => handleTextInputChange('TLP123S2Practical2', e.target.value)}
                         disabled={userRole !== 'faculty'}
                       />
                     </li>

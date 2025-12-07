@@ -9,6 +9,16 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
   const [previewImages, setPreviewImages] = useState({});
   const { canEditColumn } = useRoleBasedData(userRole, formData);
 
+  // Helper function to handle text input changes with localStorage
+  const handleTextInputChange = (fieldName, value) => {
+    const updatedData = {
+      ...formData,
+      [fieldName]: value
+    };
+    setFormData(updatedData);
+    localStorage.setItem('formData', JSON.stringify(updatedData));
+  };
+
   const handleInputChange = (e, key) => {
     const { value } = e.target;
     if(value<0 || value>10){
@@ -935,7 +945,7 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     placeholder="_____"
                     className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                     value={formData.PDRC228DegreeAwarded1 || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, PDRC228DegreeAwarded1: e.target.value }))}
+                    onChange={(e) => handleTextInputChange('PDRC228DegreeAwarded1', e.target.value)}
                     disabled={userRole !== 'faculty'}
                   />
                 </div>
@@ -949,7 +959,7 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     placeholder="_____"
                     className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                     value={formData.PDRC228DegreeAwarded2 || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, PDRC228DegreeAwarded2: e.target.value }))}
+                    onChange={(e) => handleTextInputChange('PDRC228DegreeAwarded2', e.target.value)}
                     disabled={userRole !== 'faculty'}
                   />
                 </div>
@@ -960,7 +970,7 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     placeholder="_____"
                     className="border-b border-gray-400 px-2 py-1 w-24 focus:outline-none focus:border-blue-500"
                     value={formData.PDRC228ResearchScholars || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, PDRC228ResearchScholars: e.target.value }))}
+                    onChange={(e) => handleTextInputChange('PDRC228ResearchScholars', e.target.value)}
                     disabled={userRole !== 'faculty'}
                   />
                 </div>

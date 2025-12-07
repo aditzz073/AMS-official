@@ -151,11 +151,22 @@ const evaluationSchema = new mongoose.Schema({
   TLP111HoD: { type: String },
   TLP111Self: { type: String },
   TLP111SelfImage: { type: String },
+  // Section 1.1.1 faculty input fields
+  TLP111SemesterNo: { type: String },
+  TLP111LecturesAllocated: { type: String },
+  TLP111LecturesTaken: { type: String },
   
   TLP112External: { type: String },
   TLP112HoD: { type: String },
   TLP112Self: { type: String },
   TLP112SelfImage: { type: String },
+  // Section 1.1.2 faculty input fields
+  TLP112Semester1: { type: String },
+  TLP112S1Allocated: { type: String },
+  TLP112S1Taken: { type: String },
+  TLP112Semester2: { type: String },
+  TLP112S2Allocated: { type: String },
+  TLP112S2Taken: { type: String },
   
   TLP113External: { type: String },
   TLP113HoD: { type: String },
@@ -181,16 +192,49 @@ const evaluationSchema = new mongoose.Schema({
   TLP121HoD: { type: String },
   TLP121Self: { type: String },
   TLP121SelfImage: { type: String },
+  // Section 1.2.1 faculty input fields
+  TLP121Semester1: { type: String },
+  TLP121S1Theory1: { type: String },
+  TLP121S1Theory2: { type: String },
+  TLP121S1Practical1: { type: String },
+  TLP121S1Practical2: { type: String },
+  TLP121Semester2: { type: String },
+  TLP121S2Theory1: { type: String },
+  TLP121S2Theory2: { type: String },
+  TLP121S2Practical1: { type: String },
+  TLP121S2Practical2: { type: String },
   
   TLP122External: { type: String },
   TLP122HoD: { type: String },
   TLP122Self: { type: String },
   TLP122SelfImage: { type: String },
+  // Section 1.2.2 faculty input fields
+  TLP122Semester1: { type: String },
+  TLP122S1Theory1: { type: String },
+  TLP122S1Theory2: { type: String },
+  TLP122S1Practical1: { type: String },
+  TLP122S1Practical2: { type: String },
+  TLP122Semester2: { type: String },
+  TLP122S2Theory1: { type: String },
+  TLP122S2Theory2: { type: String },
+  TLP122S2Practical1: { type: String },
+  TLP122S2Practical2: { type: String },
   
   TLP123External: { type: String },
   TLP123HoD: { type: String },
   TLP123Self: { type: String },
   TLP123SelfImage: { type: String },
+  // Section 1.2.3 faculty input fields
+  TLP123Semester1: { type: String },
+  TLP123S1Theory1: { type: String },
+  TLP123S1Theory2: { type: String },
+  TLP123S1Practical1: { type: String },
+  TLP123S1Practical2: { type: String },
+  TLP123Semester2: { type: String },
+  TLP123S2Theory1: { type: String },
+  TLP123S2Theory2: { type: String },
+  TLP123S2Practical1: { type: String },
+  TLP123S2Practical2: { type: String },
   
   PDRC224External: { type: String },
   PDRC224HoD: { type: String },
@@ -216,6 +260,13 @@ const evaluationSchema = new mongoose.Schema({
   PDRC228HoD: { type: String },
   PDRC228Self: { type: String },
   PDRC228SelfImage: { type: String },
+  // Section 2.2.8 faculty input fields
+  PDRC228DegreeAwarded1: { type: String },
+  PDRC228DegreeAwarded2: { type: String },
+  PDRC228ResearchScholars: { type: String },
+  
+  // Section 4 faculty input field
+  CIL4PISpecify: { type: String },
 
   // Section-wise remarks (HOD-only editable)
   remarks: {
