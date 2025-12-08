@@ -1,42 +1,46 @@
-import nodemailer from 'nodemailer';
 import { logger, maskEmail } from './securityLogger.js';
-
-// Create reusable transporter
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
-    auth: {
-      user: process.env.SMTP_EMAIL,
-      pass: process.env.SMTP_PASSWORD
-    },
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 5000, // 5 seconds
-    socketTimeout: 10000, // 10 seconds
-    pool: true, // Use connection pooling
-    maxConnections: 5,
-    maxMessages: 100,
-    rateDelta: 1000, // 1 second between messages
-    rateLimit: 5 // Max 5 messages per rateDelta
-  });
-};
 
 // Generate 6-digit OTP
 export const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
+// Send email via Resend API
+const sendEmailViaResend = async (to, subject, html, text) => {
+  const RESEND_API_KEY = process.env.RESEND_API_KEY;
+  const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev';
+
+  if (!RESEND_API_KEY) {
+    throw new Error('RESEND_API_KEY not configured');
+  }
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${RESEND_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: subject,
+      html: html,
+      text: text
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to send email');
+  }
+
+  return await response.json();
+};
+
 // Send OTP email
 export const sendOTPEmail = async (email, otp) => {
   try {
-    const transporter = createTransporter();
-
-    const mailOptions = {
-      from: `"Appraisal Management System" <${process.env.SMTP_EMAIL}>`,
-      to: email,
-      subject: 'Your Account Verification OTP',
-      html: `
+    const html = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -114,13 +118,13 @@ export const sendOTPEmail = async (email, otp) => {
           </div>
         </body>
         </html>
-      `,
-      text: `Your OTP for creating your account is: ${otp}\n\nValid for 10 minutes. Do not share this code with anyone.`
-    };
+      `;
 
-    const info = await transporter.sendMail(mailOptions);
+    const text = `Your OTP for creating your account is: ${otp}\n\nValid for 10 minutes. Do not share this code with anyone.`;
+
+    const result = await sendEmailViaResend(email, 'Your Account Verification OTP', html, text);
     logger.success('OTP email sent', maskEmail(email));
-    return { success: true, messageId: info.messageId };
+    return { success: true, messageId: result.id };
   } catch (error) {
     logger.error('Email sending error', error);
     throw new Error('Failed to send OTP email');
@@ -130,13 +134,7 @@ export const sendOTPEmail = async (email, otp) => {
 // Send welcome email after successful registration
 export const sendWelcomeEmail = async (email, role) => {
   try {
-    const transporter = createTransporter();
-
-    const mailOptions = {
-      from: `"Appraisal Management System" <${process.env.SMTP_EMAIL}>`,
-      to: email,
-      subject: 'Welcome to Appraisal Management System',
-      html: `
+    const html = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -200,11 +198,11 @@ export const sendWelcomeEmail = async (email, role) => {
           </div>
         </body>
         </html>
-      `,
-      text: `Welcome to Appraisal Management System!\n\nYour account has been successfully created with the role of ${role}.\n\nYou can now log in and start using the system.`
-    };
+      `;
 
-    await transporter.sendMail(mailOptions);
+    const text = `Welcome to Appraisal Management System!\n\nYour account has been successfully created with the role of ${role}.\n\nYou can now log in and start using the system.`;
+
+    await sendEmailViaResend(email, 'Welcome to Appraisal Management System', html, text);
     console.log('Welcome email sent to:', email);
   } catch (error) {
     console.error('Welcome email error:', error);
@@ -215,13 +213,7 @@ export const sendWelcomeEmail = async (email, role) => {
 // Send Password Reset OTP email
 export const sendPasswordResetOTP = async (email, otp, role) => {
   try {
-    const transporter = createTransporter();
-
-    const mailOptions = {
-      from: `"Appraisal Management System" <${process.env.SMTP_EMAIL}>`,
-      to: email,
-      subject: 'Password Reset OTP',
-      html: `
+    const html = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -328,13 +320,13 @@ export const sendPasswordResetOTP = async (email, otp, role) => {
           </div>
         </body>
         </html>
-      `,
-      text: `Password Reset OTP\n\nWe received a request to reset your password.\n\nYour OTP: ${otp}\n\nValid for 10 minutes.\n\nDo not share this code with anyone.\n\nIf you didn't request this, please ignore this email.`
-    };
+      `;
 
-    const info = await transporter.sendMail(mailOptions);
+    const text = `Password Reset OTP\n\nWe received a request to reset your password.\n\nYour OTP: ${otp}\n\nValid for 10 minutes.\n\nDo not share this code with anyone.\n\nIf you didn't request this, please ignore this email.`;
+
+    const result = await sendEmailViaResend(email, 'Password Reset OTP', html, text);
     logger.success('Password reset OTP sent', maskEmail(email));
-    return { success: true, messageId: info.messageId };
+    return { success: true, messageId: result.id };
   } catch (error) {
     logger.error('Password reset email error', error);
     throw new Error('Failed to send password reset email');
