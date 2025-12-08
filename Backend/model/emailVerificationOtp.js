@@ -45,7 +45,7 @@ emailVerificationOtpSchema.methods.isValid = function() {
   return !this.isUsed && this.expiresAt > new Date();
 };
 
-// Static method to check rate limiting (max 3 OTP requests per hour)
+// Static method to check rate limiting (max 6 OTP requests per hour)
 emailVerificationOtpSchema.statics.checkRateLimit = async function(email) {
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
   const recentOtps = await this.countDocuments({
@@ -53,7 +53,7 @@ emailVerificationOtpSchema.statics.checkRateLimit = async function(email) {
     createdAt: { $gte: oneHourAgo }
   });
   
-  return recentOtps < 3;
+  return recentOtps < 6;
 };
 
 export default mongoose.model('EmailVerificationOtp', emailVerificationOtpSchema);

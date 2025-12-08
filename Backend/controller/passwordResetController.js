@@ -34,12 +34,12 @@ export const requestPasswordReset = async (req, res) => {
       });
     }
 
-    // Check rate limiting (max 3 OTPs per hour)
+    // Check rate limiting (max 6 OTPs per hour)
     const canSendOTP = await PasswordResetOtp.checkRateLimit(email);
     if (!canSendOTP) {
       return res.status(429).json({
         success: false,
-        message: 'Too many password reset requests. Please try again after an hour.'
+        message: 'Too many OTP requests. Please try again after an hour.'
       });
     }
 

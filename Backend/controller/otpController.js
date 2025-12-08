@@ -35,7 +35,7 @@ export const requestOTP = async (req, res) => {
       });
     }
 
-    // Check rate limiting (max 3 OTPs per hour)
+    // Check rate limiting (max 6 OTPs per hour)
     const canSendOTP = await EmailVerificationOtp.checkRateLimit(email);
     if (!canSendOTP) {
       return res.status(429).json({

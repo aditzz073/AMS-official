@@ -39,14 +39,14 @@ passwordResetOtpSchema.methods.isValid = function() {
   return this.expiresAt > new Date() && !this.isUsed;
 };
 
-// Static method to check rate limiting (max 3 OTPs per hour)
+// Static method to check rate limiting (max 6 OTPs per hour)
 passwordResetOtpSchema.statics.checkRateLimit = async function(email) {
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
   const recentOtps = await this.countDocuments({
     email,
     createdAt: { $gte: oneHourAgo }
   });
-  return recentOtps < 3;
+  return recentOtps < 6;
 };
 
 // Static method to invalidate all previous OTPs for an email
