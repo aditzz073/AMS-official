@@ -5,13 +5,24 @@ export const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// Send email via Resend API
+// Send email via Resend API with fallback to console for testing
 const sendEmailViaResend = async (to, subject, html, text) => {
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev';
+  const VERIFIED_EMAIL = process.env.SMTP_EMAIL; // Your verified email
 
   if (!RESEND_API_KEY) {
     throw new Error('RESEND_API_KEY not configured');
+  }
+
+  // For Resend free tier, redirect all emails to verified address
+  // Log the original recipient for testing
+  const actualRecipient = to;
+  const testRecipient = VERIFIED_EMAIL || to;
+
+  console.log(`📧 Email intended for: ${actualRecipient}`);
+  if (actualRecipient !== testRecipient) {
+    console.log(`📧 Redirected to verified email: ${testRecipient}`);
   }
 
   const response = await fetch('https://api.resend.com/emails', {
@@ -22,8 +33,8 @@ const sendEmailViaResend = async (to, subject, html, text) => {
     },
     body: JSON.stringify({
       from: FROM_EMAIL,
-      to: [to],
-      subject: subject,
+      to: [testRecipient], // Send to your verified email
+      subject: `[For: ${actualRecipient}] ${subject}`, // Include original recipient in subject
       html: html,
       text: text
     })
