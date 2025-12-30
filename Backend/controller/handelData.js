@@ -122,13 +122,25 @@ const filterDataForRole = (data, userRole) => {
 // Function to upload file to Cloudinary
 const uploadToCloudinary = async (filePath, employeeCode, fieldName) => {
   try {
+    console.log(`[CLOUDINARY] Uploading file: ${fieldName} for employee: ${employeeCode}`);
+    
+    // Determine the correct resource type based on file extension
+    const fileExtension = filePath.split('.').pop().toLowerCase();
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+    const resourceType = imageExtensions.includes(fileExtension) ? 'image' : 'raw';
+    
+    console.log(`[CLOUDINARY] File type detected: ${fileExtension}, using resource_type: ${resourceType}`);
+    
     // Upload the file to cloudinary in a folder based on employeeCode
     const result = await cloudinary.uploader.upload(filePath, {
-      resource_type: "auto", // Automatically detect file type (image, video, or raw)
+      resource_type: resourceType,
       folder: `employees/${employeeCode}`,
       public_id: `${fieldName}-${Date.now()}`,
-      access_mode: "public" // Ensure files are publicly accessible
+      type: 'upload',
+      access_control: [{ access_type: 'anonymous' }] // Make publicly accessible
     });
+    
+    console.log(`[CLOUDINARY] Upload successful: ${result.secure_url}`);
     
     // Delete the file from local storage
     fs.unlinkSync(filePath);
@@ -280,6 +292,14 @@ const createOrUpdateEmployee = async (req, res) => {
             const file = files[0];
             // Use employeeCode for folder structure (backward compatibility)
             const folderIdentifier = updateData.employeeCode || targetEmail.split('@')[0];
+            
+            // Validate folder identifier
+            if (!folderIdentifier || folderIdentifier === 'undefined') {
+              console.error(`[ERROR] Invalid folderIdentifier for ${fieldName}. employeeCode: ${updateData.employeeCode}, email: ${targetEmail}`);
+              throw new Error('Employee code is required for file uploads. Please ensure employee code is set.');
+            }
+            
+            console.log(`[UPLOAD] Processing file upload: ${fieldName} for ${folderIdentifier}`);
             const cloudinaryUrl = await uploadToCloudinary(file.path, folderIdentifier, fieldName);
             updateData[fieldName] = cloudinaryUrl;
           }
