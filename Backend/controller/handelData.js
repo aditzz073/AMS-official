@@ -140,12 +140,19 @@ const uploadToCloudinary = async (filePath, employeeCode, fieldName) => {
       access_control: [{ access_type: 'anonymous' }] // Make publicly accessible
     });
     
-    console.log(`[CLOUDINARY] Upload successful: ${result.secure_url}`);
+    // Fix the URL if it's a non-image file but got image URL
+    let finalUrl = result.secure_url;
+    if (resourceType === 'raw' && finalUrl.includes('/image/upload/')) {
+      finalUrl = finalUrl.replace('/image/upload/', '/raw/upload/');
+      console.log(`[CLOUDINARY] Fixed URL path from /image/upload/ to /raw/upload/`);
+    }
+    
+    console.log(`[CLOUDINARY] Upload successful: ${finalUrl}`);
     
     // Delete the file from local storage
     fs.unlinkSync(filePath);
     
-    return result.secure_url;
+    return finalUrl;
   } catch (error) {
     // Delete the file from local storage if upload fails
     if (fs.existsSync(filePath)) {
