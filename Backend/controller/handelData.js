@@ -99,7 +99,13 @@ const filterDataForRole = (data, userRole) => {
   ];
   
   // Replace non-visible field values with empty string
+  // IMPORTANT: Skip image/file fields (ending with 'Image') to preserve uploaded file URLs
   Object.keys(filteredData).forEach(key => {
+    // Skip image fields - they should always be visible if they exist
+    if (key.endsWith('Image')) {
+      return;
+    }
+    
     for (const { pattern, type } of fieldPatterns) {
       if (pattern.test(key)) {
         if (!permissions.visible.includes(type)) {
@@ -118,9 +124,10 @@ const uploadToCloudinary = async (filePath, employeeCode, fieldName) => {
   try {
     // Upload the file to cloudinary in a folder based on employeeCode
     const result = await cloudinary.uploader.upload(filePath, {
-      resource_type: "raw",
+      resource_type: "auto", // Automatically detect file type (image, video, or raw)
       folder: `employees/${employeeCode}`,
-      public_id: `${fieldName}-${Date.now()}`
+      public_id: `${fieldName}-${Date.now()}`,
+      access_mode: "public" // Ensure files are publicly accessible
     });
     
     // Delete the file from local storage
