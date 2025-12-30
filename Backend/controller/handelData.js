@@ -127,32 +127,25 @@ const uploadToCloudinary = async (filePath, employeeCode, fieldName) => {
     // Determine the correct resource type based on file extension
     const fileExtension = filePath.split('.').pop().toLowerCase();
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-    const resourceType = imageExtensions.includes(fileExtension) ? 'image' : 'raw';
+    const isImage = imageExtensions.includes(fileExtension);
     
-    console.log(`[CLOUDINARY] File type detected: ${fileExtension}, using resource_type: ${resourceType}`);
+    console.log(`[CLOUDINARY] File type: ${fileExtension}, isImage: ${isImage}`);
     
-    // Upload the file to cloudinary in a folder based on employeeCode
+    // Use 'image' for images, 'raw' for documents (PDF delivery is now enabled in Cloudinary)
     const result = await cloudinary.uploader.upload(filePath, {
-      resource_type: resourceType,
+      resource_type: isImage ? 'image' : 'raw',
       folder: `employees/${employeeCode}`,
-      public_id: `${fieldName}-${Date.now()}`,
-      type: 'upload',
-      access_control: [{ access_type: 'anonymous' }] // Make publicly accessible
+      public_id: `${fieldName}-${Date.now()}`
     });
     
-    // Fix the URL if it's a non-image file but got image URL
-    let finalUrl = result.secure_url;
-    if (resourceType === 'raw' && finalUrl.includes('/image/upload/')) {
-      finalUrl = finalUrl.replace('/image/upload/', '/raw/upload/');
-      console.log(`[CLOUDINARY] Fixed URL path from /image/upload/ to /raw/upload/`);
-    }
-    
-    console.log(`[CLOUDINARY] Upload successful: ${finalUrl}`);
+    console.log(`[CLOUDINARY] Upload successful!`);
+    console.log(`[CLOUDINARY] URL: ${result.secure_url}`);
+    console.log(`[CLOUDINARY] Resource type: ${result.resource_type}, Format: ${result.format}`);
     
     // Delete the file from local storage
     fs.unlinkSync(filePath);
     
-    return finalUrl;
+    return result.secure_url;
   } catch (error) {
     // Delete the file from local storage if upload fails
     if (fs.existsSync(filePath)) {
