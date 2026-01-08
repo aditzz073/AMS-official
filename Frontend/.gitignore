@@ -11,12 +11,11 @@ dist
 dist-ssr
 *.local
 
-# Environment variables
+# Environment variables - ignore ALL .env files except examples
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
+!.env.*.example
 
 # Editor directories and files
 .vscode/*

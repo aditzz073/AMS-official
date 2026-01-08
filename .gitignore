@@ -5,12 +5,11 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json
 
-# Environment variables
+# Environment variables - ignore ALL .env files except examples
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
+!.env.*.example
 
 # Build outputs
 dist/
