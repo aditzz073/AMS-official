@@ -6,14 +6,36 @@ import useRoleBasedData from "../hooks/useRoleBasedData";
 
 const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole }) => {
   const [previewImages, setPreviewImages] = useState({});
-  const { canEditColumn } = useRoleBasedData(userRole, formData);
+  const { canEditColumn, canViewColumn } = useRoleBasedData(userRole, formData);
 
   const handleInputChange = (e, key) => {
     const { value } = e.target;
-    if(value<0 || value>10){
-      toast.error("Value should be between range of 0-10");
-      return
+    
+    // Define max marks for specific fields (only applies to faculty, hod, external - NOT principal)
+    const maxMarks = {
+      // Section 3.1, 3.2, 3.3 - max 5
+      'CIL1Self': 5, 'CIL1HoD': 5, 'CIL1External': 5,
+      'CIL2Self': 5, 'CIL2HoD': 5, 'CIL2External': 5,
+      'CIL3Self': 5, 'CIL3HoD': 5, 'CIL3External': 5,
+      // Section 3.4 - max 10 (CDL34)
+      'CDL34Self': 10, 'CDL34HoD': 10, 'CDL34External': 10,
+      // Section 3.5 - max 15 (CDL35)
+      'CDL35Self': 15, 'CDL35HoD': 15, 'CDL35External': 15,
+      // Section 4 CIL4 - max 30
+      'CIL4Self': 30, 'CIL4HoD': 30, 'CIL4External': 30,
+    };
+    
+    // Get the max value for this field (default 10)
+    const maxValue = maxMarks[key] || 10;
+    
+    // Skip validation for principal role
+    if (userRole !== 'principal') {
+      if(value < 0 || value > maxValue){
+        toast.error(`Value should be between 0-${maxValue}`);
+        return;
+      }
     }
+    
     setFormData((prev) => {
       const updatedData = {
         ...prev,
@@ -27,36 +49,41 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
   };
   const handleImageUpload = (e, key) => {
     const file = e.target.files[0];
-    const MAX_FILE_SIZE = 1024 * 1024; // 1MB
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (matching backend limit)
 
 
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
-        toast.error("File size exceeds 1MB. Please upload a smaller file.");
+        toast.error("File size exceeds 10MB. Please upload a smaller file.");
         return;
       }
 
+      // For preview, create a data URL
       const reader = new FileReader();
 
       reader.onloadend = () => {
-        const imageUrl = reader.result;
-
+        const dataUrl = reader.result;
         setPreviewImages(prev => ({
           ...prev,
-          [key]: imageUrl
+          [key]: dataUrl
         }));
-
+        
+        // Store the data URL so it persists across reloads
         setFormData(prev => {
           const updatedData = {
             ...prev,
-            [`${key}Image`]: imageUrl
+            [`${key}Image`]: dataUrl
           };
-
-          localStorage.setItem("formData", JSON.stringify(updatedData));
+          
+          // Save to localStorage
+          try {
+            localStorage.setItem("formData", JSON.stringify(updatedData));
+          } catch (error) {
+            console.error('[Page5] Error saving to localStorage:', error);
+          }
           return updatedData;
         });
       };
-
       reader.readAsDataURL(file);
     }
   };
@@ -67,6 +94,15 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
       alert("No file uploaded for this field");
       return;
     }
+    
+    // Handle File objects (newly uploaded files not yet submitted)
+    if (fileUrl instanceof File || fileUrl instanceof Blob) {
+      const blobUrl = URL.createObjectURL(fileUrl);
+      window.open(blobUrl, "_blank");
+      return;
+    }
+    
+    // Handle data URLs (base64 encoded files)
     if(fileUrl.startsWith('data:')){
 
 
@@ -148,19 +184,51 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
     } else {
       alert("Pop-up blocked. Please allow pop-ups for this site to view the file.");
     }
-  }else{
+  } else {
+    // Handle Cloudinary URLs or other external URLs
     if (!fileUrl) {
       console.error("No file uploaded for this field");
       return;
-  }
+    }
 
-  window.open(fileUrl, "_blank");
+    // Detect file type from URL
+    const urlLower = fileUrl.toLowerCase();
+    const isPDF = urlLower.includes('.pdf') || urlLower.includes('/raw/upload/');
+    const isImage = urlLower.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)/i);
+    
+    // Add cache-busting timestamp to prevent old file caching
+    const cacheBustedUrl = fileUrl.includes('?') ? `${fileUrl}&t=${Date.now()}` : `${fileUrl}?t=${Date.now()}`;
+    
+    // For PDFs from Cloudinary (raw uploads), open with proper handling
+    if (isPDF) {
+      const newWindow = window.open();
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head>
+              <title>PDF Preview</title>
+              <style>
+                body { margin: 0; padding: 0; overflow: hidden; }
+                iframe { border: none; width: 100vw; height: 100vh; }
+              </style>
+            </head>
+            <body>
+              <iframe src="${cacheBustedUrl}" type="application/pdf"></iframe>
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+      } else {
+        // Fallback: direct link
+        window.open(cacheBustedUrl, "_blank");
+      }
+    } else {
+      // For images and other files, open directly
+      window.open(cacheBustedUrl, "_blank");
+    }
   }
-
+    
   };
-
-  // Validation removed - allow smooth navigation with optional fields
-  // Backend will handle any required field validation on submission
 
   const handleNext = () => {
     // No validation - proceed directly
@@ -177,7 +245,9 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     <td className="border border-gray-300 p-2">3</td>
                     <td className="border border-gray-300 p-2">Professional Involvement (PI)</td>
                     <td className="border border-gray-300 p-2">Self-Evaluation</td>
-                    <td className="border border-gray-300 p-2">Evaluation by HOD</td>
+                    {canViewColumn('hod') && (
+                      <td className="border border-gray-300 p-2">Evaluation by HOD</td>
+                    )}
                     <td className="border border-gray-300 p-2">Evaluation by External Audit Member</td>
                 </tr>
             </thead>
@@ -251,8 +321,9 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                                 formData={formData}
                                 handleInputChange={handleInputChange}
                                 className="w-full p-2 border"
+                                max={row.no === "35" ? "15" : "5"}
                             />
-                            {canEditColumn('self') ? (
+                            {canEditColumn('self') && (
                 <div className="flex flex-col items-center mt-2 w-full">
                   <input
                     type="file"
@@ -260,31 +331,31 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     onChange={(e) => handleImageUpload(e, `CDL${row.no}Self`)}
                     className="text-xs w-full"
                   />
-                    <button
-                    onClick={() => showImagePreview(`CDL${row.no}Self`)}
-                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                  >
-                    View Evidence
-                  </button>
                 </div>
+              )}
               
-              ):<><button
-              onClick={() => showImagePreview(`CDL${row.no}Self`)}
-              className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-            >
-              View Evidence
-            </button></>}
+              {formData[`CDL${row.no}SelfImage`] && canViewColumn('self') && (
+                <button
+                  onClick={() => showImagePreview(`CDL${row.no}Self`)}
+                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                >
+                  View Evidence
+                </button>
+              )}
                             </div>
                         </td>
-                        <td className="border p-2">
-                            <RoleBasedInput
-                                fieldKey={`CDL${row.no}HoD`}
-                                userRole={userRole}
-                                formData={formData}
-                                handleInputChange={handleInputChange}
-                                className="w-full p-2 border"
-                            />
-                        </td>
+                        {canViewColumn('hod') && (
+                          <td className="border p-2">
+                              <RoleBasedInput
+                                  fieldKey={`CDL${row.no}HoD`}
+                                  userRole={userRole}
+                                  formData={formData}
+                                  handleInputChange={handleInputChange}
+                                  className="w-full p-2 border"
+                                  max="5"
+                              />
+                          </td>
+                        )}
                         <td className="border p-2">
                             <RoleBasedInput
                                 fieldKey={`CDL${row.no}External`}
@@ -292,6 +363,7 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                                 formData={formData}
                                 handleInputChange={handleInputChange}
                                 className="w-full p-2 border"
+                                max={row.no === "35" ? "15" : "5"}
                             />
                         </td>
                     </tr>
@@ -318,7 +390,9 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     <td className="border border-gray-300 p-2">4.</td>
                     <td className="border border-gray-300 p-2">Institutional level Governance responsibilities assigned</td>
                     <td className="border border-gray-300 p-2">Self-Evaluation</td>
-                    <td className="border border-gray-300 p-2">Evaluation by HOD</td>
+                    {canViewColumn('hod') && (
+                      <td className="border border-gray-300 p-2">Evaluation by HOD</td>
+                    )}
                     <td className="border border-gray-300 p-2">Evaluation by External Audit Member</td>
                 </tr>
             </thead>
@@ -381,8 +455,9 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                                 formData={formData}
                                 handleInputChange={handleInputChange}
                                 className="w-full p-2 border"
+                                max="30"
                             />
-                            {canEditColumn('self') ? (
+                            {canEditColumn('self') && (
                                 <div className="flex flex-col items-center mt-2 w-full">
                                     <input
                                         type="file"
@@ -390,30 +465,31 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                                         onChange={(e) => handleImageUpload(e, "CIL4Self")}
                                         className="text-xs w-full"
                                     />
-                                    <button
-                                        onClick={() => showImagePreview("CIL4Self")}
-                                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                                    >
-                                        View Evidence
-                                    </button>
                                 </div>
-                            ):<><button
-                                onClick={() => showImagePreview("CIL4Self")}
-                                className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                            >
-                                View Evidence
-                            </button></>}
+                            )}
+                            
+                            {formData.CIL4SelfImage && canViewColumn('self') && (
+                                <button
+                                    onClick={() => showImagePreview("CIL4Self")}
+                                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                                >
+                                    View Evidence
+                                </button>
+                            )}
                         </div>
                     </td>
-                    <td className="border p-2">
-                        <RoleBasedInput
-                            fieldKey="CIL4HoD"
-                            userRole={userRole}
-                            formData={formData}
-                            handleInputChange={handleInputChange}
-                            className="w-full p-2 border"
-                        />
-                    </td>
+                    {canViewColumn('hod') && (
+                      <td className="border p-2">
+                          <RoleBasedInput
+                              fieldKey="CIL4HoD"
+                              userRole={userRole}
+                              formData={formData}
+                              handleInputChange={handleInputChange}
+                              className="w-full p-2 border"
+                              max="30"
+                          />
+                      </td>
+                    )}
                     <td className="border p-2">
                         <RoleBasedInput
                             fieldKey="CIL4External"
@@ -421,6 +497,7 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                             formData={formData}
                             handleInputChange={handleInputChange}
                             className="w-full p-2 border"
+                            max="30"
                         />
                     </td>
                 </tr>

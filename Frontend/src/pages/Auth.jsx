@@ -164,6 +164,9 @@ const Auth = () => {
     
     dispatch(setToken({ token: data.token, user: data.user }))
     
+    // Clear old form data to ensure fresh fetch from database
+    localStorage.removeItem("formData");
+    
     // Set auto logout after token expires
     setTimeout(() => {
       handleLogout();

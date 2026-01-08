@@ -18,7 +18,15 @@ const Page6 = lazy(() => import("./pages/Page6"));
 const Page7 = lazy(() => import("./pages/Page7"));
 
 const App = () => {
-  const [currentPage, setCurrentPage] = useState(0);
+  // Persist currentPage across reloads
+  const [currentPage, setCurrentPage] = useState(() => {
+    try {
+      const savedPage = localStorage.getItem("currentPage");
+      return savedPage ? parseInt(savedPage, 10) : 0;
+    } catch (e) {
+      return 0;
+    }
+  });
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isReadOnly, setIsReadOnly] = useState(false);
@@ -45,29 +53,55 @@ const App = () => {
   };
 
   // Load formData from localStorage or set default values
+  // All roles should persist their data - HOD/Principal/External can save their evaluations
   const [formData, setFormData] = useState(() => {
-    const savedData = localStorage.getItem("formData");
-    return savedData
-      ? JSON.parse(savedData)
-      : {
-          email: "",
-          employeeCode: "",
-          name: "",
-          designation: "",
-          college: "DSCE",
-          campus: "Kumarswamy Layout (Campus 1)",
-          department: "Information Science and Engineering",
-          joiningDate: "",
-          periodOfAssessment: "",
-          categoriesTotal,
-          totalSelf: "",
-          totalHoD: "",
-          totalExternal: "",
-          HODName: "",
-          externalEvaluatorName: "",
-          principleName: "",
-        };
+    try {
+      // Try to load saved data for all roles
+      const savedData = localStorage.getItem("formData");
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        console.log('[APP] Loaded formData from localStorage');
+        return parsedData;
+      }
+    } catch (e) {
+      console.error('[APP] Error loading formData from localStorage:', e);
+    }
+    
+    // Default empty formData if nothing saved
+    console.log('[APP] Starting with empty formData');
+    return {
+      email: "",
+      employeeCode: "",
+      name: "",
+      designation: "",
+      college: "DSCE",
+      campus: "Kumarswamy Layout (Campus 1)",
+      department: "Information Science and Engineering",
+      joiningDate: "",
+      periodOfAssessment: "",
+      categoriesTotal,
+      totalSelf: "",
+      totalHoD: "",
+      totalExternal: "",
+      HODName: "",
+      externalEvaluatorName: "",
+      principleName: "",
+    };
   });
+
+  // Debug: Log formData changes to track image field persistence
+  useEffect(() => {
+    const imageFields = Object.keys(formData).filter(k => k.endsWith('Image') && formData[k]);
+    if (imageFields.length > 0) {
+      console.log('[APP] FormData has', imageFields.length, 'image URLs');
+      console.log('[APP] Sample fields:', imageFields.slice(0, 3).map(k => {
+        const val = formData[k];
+        if (val instanceof File) return `${k}: [File: ${val.name}, ${val.size} bytes]`;
+        if (typeof val === 'string') return `${k}: ${val.substring(0, 50)}...`;
+        return `${k}: [${typeof val}]`;
+      }));
+    }
+  }, [formData]);
 
   // Check user role from localStorage and set readonly flag
   useEffect(() => {
@@ -103,8 +137,70 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("formData", JSON.stringify(formData));
+    // Save formData to localStorage, converting File objects to data URLs for persistence
+    const saveFormData = async () => {
+      try {
+        const dataForStorage = { ...formData };
+        
+        // Convert File objects to data URLs so they persist across reloads
+        for (const key of Object.keys(dataForStorage)) {
+          // Handle single File objects
+          if (dataForStorage[key] instanceof File) {
+            const file = dataForStorage[key];
+            const dataUrl = await fileToDataURL(file);
+            dataForStorage[key] = dataUrl;
+          }
+          // Handle arrays of File objects (for multiple uploads)
+          else if (Array.isArray(dataForStorage[key])) {
+            const hasFiles = dataForStorage[key].some(item => item instanceof File);
+            if (hasFiles) {
+              const convertedArray = await Promise.all(
+                dataForStorage[key].map(async item => {
+                  if (item instanceof File) {
+                    return await fileToDataURL(item);
+                  }
+                  return item;
+                })
+              );
+              dataForStorage[key] = convertedArray;
+            }
+          }
+        }
+        
+        localStorage.setItem("formData", JSON.stringify(dataForStorage));
+        
+        // Debug: Track image fields in formData
+        const imageFields = Object.keys(formData).filter(k => k.endsWith('Image') && formData[k]);
+        if (imageFields.length > 0) {
+          console.log('[APP] FormData saved with', imageFields.length, 'image fields');
+        }
+      } catch (error) {
+        console.error('[APP] Error saving formData to localStorage:', error);
+        // Don't throw - allow app to continue even if localStorage fails
+      }
+    };
+    
+    saveFormData();
   }, [formData]);
+
+  // Save currentPage to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem("currentPage", currentPage.toString());
+    } catch (error) {
+      console.error('[APP] Error saving currentPage:', error);
+    }
+  }, [currentPage]);
+
+  // Helper function to convert File to data URL
+  const fileToDataURL = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleNext = () => {
     // No strict validation - allow navigation with optional fields
@@ -113,11 +209,18 @@ const App = () => {
       // Silently allow progression - backend will handle validation if needed
       console.warn("Proceeding without email/employeeCode - ensure backend allows partial saves");
     }
+    console.log('[APP] Navigating to page', currentPage + 1, '- Image fields:', Object.keys(formData).filter(k => k.endsWith('Image') && formData[k]).length);
     setCurrentPage((prev) => prev + 1);
   };
 
   const handlePrevious = () => {
+    console.log('[APP] Navigating to page', currentPage - 1, '- Image fields:', Object.keys(formData).filter(k => k.endsWith('Image') && formData[k]).length);
     setCurrentPage((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+
+  const handleBackToInstructions = () => {
+    console.log('[APP] Navigating back to instructions page');
+    setCurrentPage(0);
   };
 
   const handleLogout = async () => {
@@ -130,6 +233,7 @@ const App = () => {
       localStorage.removeItem("token");
       localStorage.removeItem("authState");
       localStorage.removeItem("formData");
+      localStorage.removeItem("currentPage");
       
       // Dispatch logout action to Redux
       dispatch(logout());

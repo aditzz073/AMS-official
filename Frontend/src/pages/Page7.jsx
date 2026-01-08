@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import axiosInstance from '../helper/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { useRoleBasedData } from '../hooks/useRoleBasedData';
+import useRoleBasedData from '../hooks/useRoleBasedData';
 import RoleBasedTextarea from '../components/RoleBasedTextarea';
 import RemarksBox from '../components/RemarksBox';
 import { generateSimpleFPMIPDF } from '../utils/simplePdfGenerator';
 
 const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
   const navigate=useNavigate()
-  const { getSubmissionData } = useRoleBasedData(userRole, formData);
+  const { getSubmissionData, canViewColumn } = useRoleBasedData(userRole, formData);
   
   const handleInputChange = (e) => {
     const {name, value } = e.target;
@@ -35,6 +35,16 @@ const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
     
     const evaluationData = new FormData();
     
+    console.log('=== FINAL FORM SUBMISSION ===');
+    console.log('Total fields in formData:', Object.keys(filteredFormData).length);
+    
+    // Count image fields
+    const imageFields = Object.keys(filteredFormData).filter(k => k.endsWith('Image'));
+    const imageUrls = imageFields.filter(k => {
+      const val = filteredFormData[k];
+      return typeof val === 'string' && (val.startsWith('http://') || val.startsWith('https://'));
+    });
+    console.log(`Image fields: ${imageFields.length} total, ${imageUrls.length} with Cloudinary URLs`);
 
     for (const [key, value] of Object.entries(filteredFormData)) {
       if (value === null || value === undefined) continue;
@@ -54,34 +64,23 @@ const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
         }
         evaluationData.append(key, JSON.stringify(remarksObj));
       }
-      else if (key.endsWith('Image') && typeof value === 'string' && value.startsWith('data:')) {
-        try {
-          const [dataInfo, base64Data] = value.split(',');
-          const mimeType = dataInfo.match(/data:(.*?);/)[1];
-          
-          const extension = mimeType.split('/')[1];
-          const fileName = `${key}.${extension}`;
-          
-          const byteCharacters = atob(base64Data);
-          const byteArrays = [];
-          
-          for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-            const slice = byteCharacters.slice(offset, offset + 512);
-            const byteNumbers = new Array(slice.length);
-            
-            for (let i = 0; i < slice.length; i++) {
-              byteNumbers[i] = slice.charCodeAt(i);
-            }
-            
-            byteArrays.push(new Uint8Array(byteNumbers));
-          }
-          
-          const blob = new Blob(byteArrays, { type: mimeType });
-          const file = new File([blob], fileName, { type: mimeType });
-          
-          evaluationData.append(key, file);
-        } catch (error) {
+      else if (key.endsWith('Image')) {
+        // CRITICAL FIX: Send File objects to backend for Cloudinary upload
+        // Also send existing Cloudinary URLs
+        if (value instanceof File || value instanceof Blob) {
+          // New file upload - send to backend for Cloudinary upload
+          console.log(`Including new file upload: ${key} (${value.size} bytes, ${value.type})`);
           evaluationData.append(key, value);
+        }
+        else if (typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'))) {
+          // Already uploaded to Cloudinary, send the URL as-is
+          const displayUrl = value.length > 60 ? value.substring(0, 60) + '...' : value;
+          console.log(`Including existing image URL: ${key} = ${displayUrl}`);
+          evaluationData.append(key, value);
+        }
+        // Skip FILE_PENDING markers and base64 (shouldn't exist anymore)
+        else if (value !== 'FILE_PENDING') {
+          console.log(`Skipping invalid value for ${key}:`, typeof value);
         }
       }
       else {
@@ -96,31 +95,49 @@ const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
         }
       });
       
+      console.log('=== SUBMISSION RESPONSE ===');
+      console.log('Response:', response.data);
+      
       if (response?.data?.success) {
         // Show success message
         toast.success("Form submitted successfully!");
         
         // Generate and download PDF after successful submission
         try {
-          const filename = generateSimpleFPMIPDF(formData);
+          const filename = generateSimpleFPMIPDF(formData, userRole);
           toast.success(`PDF report generated: ${filename}`);
         } catch (pdfError) {
+          console.error('PDF generation error:', pdfError);
           toast.error("Form submitted successfully, but PDF generation failed.");
         }
         
         // Clean up localStorage
         localStorage.removeItem("selectedEmployeeCode");
         localStorage.removeItem("formData");
-        // localStorage.clear();
         
         // Navigate to thank you page
-        // delete axiosInstance.defaults.headers.common["Authorization"];
         navigate("/tankyouPage")
       } else {
-        toast.error("Form submission failed. Please try again.");
+        console.error('Submission failed:', response.data);
+        toast.error(response.data?.message || "Form submission failed. Please try again.");
       }
     } catch (error) {
-      toast.error("An error occurred while submitting the form. Please try again.");
+      console.error('=== SUBMISSION ERROR ===');
+      console.error('Error:', error);
+      console.error('Response data:', error.response?.data);
+      console.error('Response status:', error.response?.status);
+      
+      const errorMessage = error.response?.data?.message 
+        || error.response?.data?.error 
+        || error.message 
+        || "An error occurred while submitting the form";
+      
+      toast.error(errorMessage);
+      
+      // Show detailed error in console for debugging
+      if (error.response?.data?.details) {
+        console.error('Error details:', error.response.data.details);
+      }
     }
   };
   
@@ -172,18 +189,22 @@ const Page7 = ({formData,setFormData,onPrevious,isReadOnly,userRole}) => {
         Note: The evaluation of score is based on taking average of three (Self, HoD, External Audit Member)
       </p>
 
-      <div className="mt-4">
-        <label className="block text-lg font-semibold">Remarks by HoD:</label>
-        <RoleBasedTextarea
-          name="RemarksHoD"
-          userRole={userRole}
-          formData={formData}
-          handleInputChange={handleInputChange}
-          allowedRoles={['hod', 'external', 'principal']}
-          editableRoles={['hod']}
-        />
+      {canViewColumn('hod') && (
+        <div className="mt-4">
+          <label className="block text-lg font-semibold">Remarks by HoD:</label>
+          <RoleBasedTextarea
+            name="RemarksHoD"
+            userRole={userRole}
+            formData={formData}
+            handleInputChange={handleInputChange}
+            allowedRoles={['hod', 'external', 'principal']}
+            editableRoles={['hod']}
+          />
+        </div>
+      )}
 
-        <label className="block text-lg font-semibold mt-4">Remarks by External Auditor:</label>
+      <div className="mt-4">
+        <label className="block text-lg font-semibold">Remarks by External Auditor:</label>
         <RoleBasedTextarea
           name="RemarksExternal"
           userRole={userRole}

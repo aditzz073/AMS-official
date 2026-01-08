@@ -7,14 +7,14 @@ import { requestOTP, verifyOTP, resendOTP } from "../controller/otpController.js
 import { requestPasswordReset, verifyResetOTP, resetPassword, resendResetOTP } from "../controller/passwordResetController.js"
 import { getRemarks, updateRemarks, bulkUpdateRemarks } from "../controller/remarksController.js"
 import { getLoginLogs, getLoginStats, closeStaleSession } from "../controller/loginLogController.js"
-import uploadFields from "../middleware/multerMiddleware.js"
+import uploadFields, { handleMulterError } from "../middleware/multerMiddleware.js"
 import { protect, adminOnly } from "../middleware/auth.js"
 import { loginLimiter, apiLimiter, otpLimiter, passwordResetLimiter, adminLimiter } from "../middleware/rateLimiter.js"
 
 const router=express.Router()
 
 router.post("/total",evaluateScores)
-router.post("/addData", protect, uploadFields, createOrUpdateEmployee) // Protected route
+router.post("/addData", protect, uploadFields, handleMulterError, createOrUpdateEmployee) // Protected route with error handling
 router.get("/getData/:id", protect, getEmployeeById) // Protected route - id can be email or employeeCode
 router.get("/getEmpCode", protect, getAllEmployeeCodes) // Protected route
 

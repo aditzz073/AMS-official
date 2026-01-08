@@ -6,7 +6,7 @@ import { useRoleBasedData } from "../hooks/useRoleBasedData";
 
 const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole }) => {
   const [previewImages, setPreviewImages] = useState({});
-  const { canEditColumn } = useRoleBasedData(userRole, formData);
+  const { canEditColumn, canViewColumn } = useRoleBasedData(userRole, formData);
 
   // Helper function to handle text input changes with localStorage
   const handleTextInputChange = (fieldName, value) => {
@@ -20,10 +20,28 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
 
   const handleInputChange = (e, key) => {
     const { value } = e.target;
-    if(value<0 || value>10){
-      toast.error("Value should be between range of 0-10");
-      return
+    
+    // Define max marks for specific fields (only applies to faculty, hod, external - NOT principal)
+    const maxMarks = {
+      // Section 1.1.3, 1.1.4, 1.1.6 - max 8
+      'TLP113Self': 8, 'TLP113HoD': 8, 'TLP113External': 8,
+      'TLP114Self': 8, 'TLP114HoD': 8, 'TLP114External': 8,
+      'TLP116Self': 8, 'TLP116HoD': 8, 'TLP116External': 8,
+      // Section 1.1.5 - max 6
+      'TLP115Self': 6, 'TLP115HoD': 6, 'TLP115External': 6,
+    };
+    
+    // Get the max value for this field (default 10)
+    const maxValue = maxMarks[key] || 10;
+    
+    // Skip validation for principal role
+    if (userRole !== 'principal') {
+      if(value < 0 || value > maxValue){
+        toast.error(`Value should be between 0-${maxValue}`);
+        return;
+      }
     }
+    
     setFormData((prev) => {
       const updatedData = {
         ...prev,
@@ -38,36 +56,40 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
 
   const handleImageUpload = (e, key) => {
     const file = e.target.files[0];
-    const MAX_FILE_SIZE = 1024 * 1024; // 1MB
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (matching backend limit)
 
   
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
-        toast.error("File size exceeds 1MB. Please upload a smaller file.");
+        toast.error("File size exceeds 10MB. Please upload a smaller file.");
         return;
       }
   
+      // For preview, create a data URL
       const reader = new FileReader();
-  
       reader.onloadend = () => {
-        const imageUrl = reader.result;
-  
+        const dataUrl = reader.result;
         setPreviewImages(prev => ({
           ...prev,
-          [key]: imageUrl
+          [key]: dataUrl
         }));
-  
+        
+        // Store the data URL so it persists across reloads
         setFormData(prev => {
           const updatedData = {
             ...prev,
-            [`${key}Image`]: imageUrl
+            [`${key}Image`]: dataUrl
           };
-  
-          localStorage.setItem("formData", JSON.stringify(updatedData));
+          
+          // Save to localStorage
+          try {
+            localStorage.setItem("formData", JSON.stringify(updatedData));
+          } catch (error) {
+            console.error('[Page3] Error saving to localStorage:', error);
+          }
           return updatedData;
         });
       };
-  
       reader.readAsDataURL(file);
     }
   };
@@ -78,6 +100,15 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
       alert("No file uploaded for this field");
       return;
     }
+    
+    // Handle File objects (newly uploaded files not yet submitted)
+    if (fileUrl instanceof File || fileUrl instanceof Blob) {
+      const blobUrl = URL.createObjectURL(fileUrl);
+      window.open(blobUrl, "_blank");
+      return;
+    }
+    
+    // Handle data URLs (base64 encoded files)
     if(fileUrl.startsWith('data:')){
     
     
@@ -159,13 +190,48 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
     } else {
       alert("Pop-up blocked. Please allow pop-ups for this site to view the file.");
     }
-  }else{
+  } else {
+    // Handle Cloudinary URLs or other external URLs
     if (!fileUrl) {
       console.error("No file uploaded for this field");
       return;
-  }
+    }
 
-  window.open(fileUrl, "_blank");
+    // Detect file type from URL
+    const urlLower = fileUrl.toLowerCase();
+    const isPDF = urlLower.includes('.pdf') || urlLower.includes('/raw/upload/');
+    const isImage = urlLower.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)/i);
+    
+    // Add cache-busting timestamp to prevent old file caching
+    const cacheBustedUrl = fileUrl.includes('?') ? `${fileUrl}&t=${Date.now()}` : `${fileUrl}?t=${Date.now()}`;
+    
+    // For PDFs from Cloudinary (raw uploads), open with proper handling
+    if (isPDF) {
+      const newWindow = window.open();
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head>
+              <title>PDF Preview</title>
+              <style>
+                body { margin: 0; padding: 0; overflow: hidden; }
+                iframe { border: none; width: 100vw; height: 100vh; }
+              </style>
+            </head>
+            <body>
+              <iframe src="${cacheBustedUrl}" type="application/pdf"></iframe>
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+      } else {
+        // Fallback: direct link
+        window.open(cacheBustedUrl, "_blank");
+      }
+    } else {
+      // For images and other files, open directly
+      window.open(cacheBustedUrl, "_blank");
+    }
   }
     
   };
@@ -203,9 +269,11 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
               <th className="border border-gray-300 px-4 py-2">
                 Self-Evaluation
               </th>
-              <th className="border border-gray-300 px-4 py-2">
-                Evaluation by HoD
-              </th>
+              {canViewColumn('hod') && (
+                <th className="border border-gray-300 px-4 py-2">
+                  Evaluation by HoD
+                </th>
+              )}
               <th className="border border-gray-300 px-4 py-2">
                 Evaluation by External Audit Member
               </th>
@@ -280,6 +348,64 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     </li>
                     <li>Makeup lectures may be counted as against any leave</li>
                   </ul>
+                  <br />
+                  <ul className="list-disc ml-4">
+                    <li className="flex items-center gap-2">
+                      SEMESTER No.: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-20 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP111SemesterNo2 || ''}
+                        onChange={(e) => {
+                          const updatedData = {
+                            ...formData,
+                            TLP111SemesterNo2: e.target.value
+                          };
+                          setFormData(updatedData);
+                          localStorage.setItem('formData', JSON.stringify(updatedData));
+                        }}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      Total number of lectures allocated: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-20 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP111LecturesAllocated2 || ''}
+                        onChange={(e) => {
+                          const updatedData = {
+                            ...formData,
+                            TLP111LecturesAllocated2: e.target.value
+                          };
+                          setFormData(updatedData);
+                          localStorage.setItem('formData', JSON.stringify(updatedData));
+                        }}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li className="flex items-center gap-2">
+                      Total number of lectures taken: 
+                      <input
+                        type="text"
+                        placeholder="_____"
+                        className="border-b border-gray-400 px-2 py-1 w-20 focus:outline-none focus:border-blue-500"
+                        value={formData.TLP111LecturesTaken2 || ''}
+                        onChange={(e) => {
+                          const updatedData = {
+                            ...formData,
+                            TLP111LecturesTaken2: e.target.value
+                          };
+                          setFormData(updatedData);
+                          localStorage.setItem('formData', JSON.stringify(updatedData));
+                        }}
+                        disabled={userRole !== 'faculty'}
+                      />
+                    </li>
+                    <li>Makeup lectures may be counted as against any leave</li>
+                  </ul>
                 </ol>
               </td>
               <td className="border border-gray-300 px-4 py-2 text-center">
@@ -290,7 +416,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     formData={formData}
                     handleInputChange={handleInputChange}
                   />
-                  {canEditColumn('self') ? (
+                  {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -298,31 +424,29 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         onChange={(e) => handleImageUpload(e, "TLP111Self")}
                         className="text-xs w-full"
                       />
-                          
-                          <button
-                        onClick={() => showImagePreview("TLP111Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
-                    
-                  ):<><button
-                  onClick={() => showImagePreview("TLP111Self")}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                >
-                  View Evidence
-                </button></>}
+                  )}
+                  
+                  {formData.TLP111SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("TLP111Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
               </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                  <RoleBasedInput
-                    fieldKey="TLP111HoD"
-                    userRole={userRole}
-                    formData={formData}
-                    handleInputChange={handleInputChange}
-                  />
-              </td>
+              {canViewColumn('hod') && (
+                <td className="border border-gray-300 px-4 py-2 text-center">
+                    <RoleBasedInput
+                      fieldKey="TLP111HoD"
+                      userRole={userRole}
+                      formData={formData}
+                      handleInputChange={handleInputChange}
+                    />
+                </td>
+              )}
               <td className="border border-gray-300 px-4 py-2 text-center">
                   <RoleBasedInput
                     fieldKey="TLP111External"
@@ -433,7 +557,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     formData={formData}
                     handleInputChange={handleInputChange}
                   />
-                  {canEditColumn('self') ? (
+                  {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -441,30 +565,29 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         onChange={(e) => handleImageUpload(e, "TLP112Self")}
                         className="text-xs w-full"
                       />
-                        <button
-                        onClick={() => showImagePreview("TLP112Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
+                  )}
                   
-                  ):<><button
-                  onClick={() => showImagePreview("TLP112Self")}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                >
-                  View Evidence
-                </button></>}
+                  {formData.TLP112SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("TLP112Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
               </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                  <RoleBasedInput
-                    fieldKey="TLP112HoD"
-                    userRole={userRole}
-                    formData={formData}
-                    handleInputChange={handleInputChange}
-                  />
-              </td>
+              {canViewColumn('hod') && (
+                <td className="border border-gray-300 px-4 py-2 text-center">
+                    <RoleBasedInput
+                      fieldKey="TLP112HoD"
+                      userRole={userRole}
+                      formData={formData}
+                      handleInputChange={handleInputChange}
+                    />
+                </td>
+              )}
               <td className="border border-gray-300 px-4 py-2 text-center">
                   <RoleBasedInput
                     fieldKey="TLP112External"
@@ -488,8 +611,9 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     userRole={userRole}
                     formData={formData}
                     handleInputChange={handleInputChange}
+                    max="8"
                   />
-                  {canEditColumn('self') ? (
+                  {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -497,36 +621,37 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         onChange={(e) => handleImageUpload(e, "TLP113Self")}
                         className="text-xs w-full"
                       />
-                        <button
-                        onClick={() => showImagePreview("TLP113Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
+                  )}
                   
-                  ):<><button
-                  onClick={() => showImagePreview("TLP113Self")}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                >
-                  View Evidence
-                </button></>}
+                  {formData.TLP113SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("TLP113Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
               </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                  <RoleBasedInput
-                    fieldKey="TLP113HoD"
-                    userRole={userRole}
-                    formData={formData}
-                    handleInputChange={handleInputChange}
-                  />
-              </td>
+              {canViewColumn('hod') && (
+                <td className="border border-gray-300 px-4 py-2 text-center">
+                    <RoleBasedInput
+                      fieldKey="TLP113HoD"
+                      userRole={userRole}
+                      formData={formData}
+                      handleInputChange={handleInputChange}
+                      max="8"
+                    />
+                </td>
+              )}
               <td className="border border-gray-300 px-4 py-2 text-center">
                   <RoleBasedInput
                     fieldKey="TLP113External"
                     userRole={userRole}
                     formData={formData}
                     handleInputChange={handleInputChange}
+                    max="8"
                   />
               </td>
             </tr>
@@ -542,8 +667,9 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     userRole={userRole}
                     formData={formData}
                     handleInputChange={handleInputChange}
+                    max="8"
                   />
-                  {canEditColumn('self') ? (
+                  {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -551,36 +677,37 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         onChange={(e) => handleImageUpload(e, "TLP114Self")}
                         className="text-xs w-full"
                       />
-                        <button
-                        onClick={() => showImagePreview("TLP114Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
+                  )}
                   
-                  ):<><button
-                  onClick={() => showImagePreview("TLP114Self")}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                >
-                  View Evidence
-                </button></>}
+                  {formData.TLP114SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("TLP114Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
               </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                  <RoleBasedInput
-                    fieldKey="TLP114HoD"
-                    userRole={userRole}
-                    formData={formData}
-                    handleInputChange={handleInputChange}
-                  />
-              </td>
+              {canViewColumn('hod') && (
+                <td className="border border-gray-300 px-4 py-2 text-center">
+                    <RoleBasedInput
+                      fieldKey="TLP114HoD"
+                      userRole={userRole}
+                      formData={formData}
+                      handleInputChange={handleInputChange}
+                      max="8"
+                    />
+                </td>
+              )}
               <td className="border border-gray-300 px-4 py-2 text-center">
                   <RoleBasedInput
                     fieldKey="TLP114External"
                     userRole={userRole}
                     formData={formData}
                     handleInputChange={handleInputChange}
+                    max="8"
                   />
               </td>
             </tr>
@@ -602,8 +729,9 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     userRole={userRole}
                     formData={formData}
                     handleInputChange={handleInputChange}
+                    max="6"
                   />
-                  {canEditColumn('self') ? (
+                  {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -611,35 +739,37 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         onChange={(e) => handleImageUpload(e, "TLP115Self")}
                         className="text-xs w-full"
                       />
-                      <button
-                        onClick={() => showImagePreview("TLP115Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
-                  ):<><button
-                    onClick={() => showImagePreview("TLP115Self")}
-                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                  >
-                    View Evidence
-                  </button></>}
+                  )}
+                  
+                  {formData.TLP115SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("TLP115Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
               </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                <RoleBasedInput
-                  fieldKey="TLP115HoD"
-                  userRole={userRole}
-                  formData={formData}
-                  handleInputChange={handleInputChange}
-                />
-              </td>
+              {canViewColumn('hod') && (
+                <td className="border border-gray-300 px-4 py-2 text-center">
+                  <RoleBasedInput
+                    fieldKey="TLP115HoD"
+                    userRole={userRole}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                    max="6"
+                  />
+                </td>
+              )}
               <td className="border border-gray-300 px-4 py-2 text-center">
                 <RoleBasedInput
                   fieldKey="TLP115External"
                   userRole={userRole}
                   formData={formData}
                   handleInputChange={handleInputChange}
+                  max="6"
                 />
               </td>
             </tr>
@@ -670,8 +800,9 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     userRole={userRole}
                     formData={formData}
                     handleInputChange={handleInputChange}
+                    max="8"
                   />
-                  {canEditColumn('self') ? (
+                  {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -679,35 +810,37 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         onChange={(e) => handleImageUpload(e, "TLP116Self")}
                         className="text-xs w-full"
                       />
-                      <button
-                        onClick={() => showImagePreview("TLP116Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
-                  ):<><button
-                    onClick={() => showImagePreview("TLP116Self")}
-                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                  >
-                    View Evidence
-                  </button></>}
+                  )}
+                  
+                  {formData.TLP116SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("TLP116Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
               </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                <RoleBasedInput
-                  fieldKey="TLP116HoD"
-                  userRole={userRole}
-                  formData={formData}
-                  handleInputChange={handleInputChange}
-                />
-              </td>
+              {canViewColumn('hod') && (
+                <td className="border border-gray-300 px-4 py-2 text-center">
+                  <RoleBasedInput
+                    fieldKey="TLP116HoD"
+                    userRole={userRole}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                    max="8"
+                  />
+                </td>
+              )}
               <td className="border border-gray-300 px-4 py-2 text-center">
                 <RoleBasedInput
                   fieldKey="TLP116External"
                   userRole={userRole}
                   formData={formData}
                   handleInputChange={handleInputChange}
+                  max="8"
                 />
               </td>
             </tr>
@@ -734,9 +867,11 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
               <th className="border border-gray-300 px-4 py-2">
                 Self-Evaluation
               </th>
-              <th className="border border-gray-300 px-4 py-2">
-                Evaluation by HoD
-              </th>
+              {canViewColumn('hod') && (
+                <th className="border border-gray-300 px-4 py-2">
+                  Evaluation by HoD
+                </th>
+              )}
               <th className="border border-gray-300 px-4 py-2">
                 Evaluation by External Audit Member
               </th>
@@ -879,7 +1014,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     formData={formData}
                     handleInputChange={handleInputChange}
                   />
-                  {canEditColumn('self') ? (
+                  {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -887,29 +1022,29 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         onChange={(e) => handleImageUpload(e, "TLP121Self")}
                         className="text-xs w-full"
                       />
-                      <button
-                        onClick={() => showImagePreview("TLP121Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
-                  ):<><button
-                    onClick={() => showImagePreview("TLP121Self")}
-                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                  >
-                    View Evidence
-                  </button></>}
+                  )}
+                  
+                  {formData.TLP121SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("TLP121Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
               </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                <RoleBasedInput
-                  fieldKey="TLP121HoD"
-                  userRole={userRole}
-                  formData={formData}
-                  handleInputChange={handleInputChange}
-                />
-              </td>
+              {canViewColumn('hod') && (
+                <td className="border border-gray-300 px-4 py-2 text-center">
+                  <RoleBasedInput
+                    fieldKey="TLP121HoD"
+                    userRole={userRole}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                  />
+                </td>
+              )}
               <td className="border border-gray-300 px-4 py-2 text-center">
                 <RoleBasedInput
                   fieldKey="TLP121External"
@@ -1056,7 +1191,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     formData={formData}
                     handleInputChange={handleInputChange}
                   />
-                  {canEditColumn('self') ? (
+                  {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -1064,29 +1199,29 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         onChange={(e) => handleImageUpload(e, "TLP122Self")}
                         className="text-xs w-full"
                       />
-                      <button
-                        onClick={() => showImagePreview("TLP122Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
-                  ):<><button
-                    onClick={() => showImagePreview("TLP122Self")}
-                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                  >
-                    View Evidence
-                  </button></>}
+                  )}
+                  
+                  {formData.TLP122SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("TLP122Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
               </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                <RoleBasedInput
-                  fieldKey="TLP122HoD"
-                  userRole={userRole}
-                  formData={formData}
-                  handleInputChange={handleInputChange}
-                />
-              </td>
+              {canViewColumn('hod') && (
+                <td className="border border-gray-300 px-4 py-2 text-center">
+                  <RoleBasedInput
+                    fieldKey="TLP122HoD"
+                    userRole={userRole}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                  />
+                </td>
+              )}
               <td className="border border-gray-300 px-4 py-2 text-center">
                 <RoleBasedInput
                   fieldKey="TLP122External"
@@ -1236,7 +1371,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     formData={formData}
                     handleInputChange={handleInputChange}
                   />
-                  {canEditColumn('self') ? (
+                  {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -1244,29 +1379,29 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                         onChange={(e) => handleImageUpload(e, "TLP123Self")}
                         className="text-xs w-full"
                       />
-                      <button
-                        onClick={() => showImagePreview("TLP123Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
-                  ):<><button
-                    onClick={() => showImagePreview("TLP123Self")}
-                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                  >
-                    View Evidence
-                  </button></>}
+                  )}
+                  
+                  {formData.TLP123SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("TLP123Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
               </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                <RoleBasedInput
-                  fieldKey="TLP123HoD"
-                  userRole={userRole}
-                  formData={formData}
-                  handleInputChange={handleInputChange}
-                />
-              </td>
+              {canViewColumn('hod') && (
+                <td className="border border-gray-300 px-4 py-2 text-center">
+                  <RoleBasedInput
+                    fieldKey="TLP123HoD"
+                    userRole={userRole}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                  />
+                </td>
+              )}
               <td className="border border-gray-300 px-4 py-2 text-center">
                 <RoleBasedInput
                   fieldKey="TLP123External"

@@ -99,13 +99,20 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
   const handleEmployeeSelect = async (e) => {
     const selectedIdentifier = e.target.value; // Can be email or employeeCode
     
-    // Update form data with selected identifier
-    const updatedData = { 
-      ...formData, 
+    // CRITICAL FIX: Clear ALL existing formData including image fields to prevent old data caching
+    // This ensures each faculty's data is loaded completely fresh
+    const resetData = {
+      email: selectedIdentifier.includes('@') ? selectedIdentifier : '',
       employeeCode: selectedIdentifier.includes('@') ? '' : selectedIdentifier,
-      email: selectedIdentifier.includes('@') ? selectedIdentifier : ''
+      college: formData.college || "DSCE",
+      campus: formData.campus || "Kumarswamy Layout (Campus 1)",
+      department: formData.department || "Information Science and Engineering"
     };
-    setFormData(updatedData);
+    
+    // Clear all formData including image URLs
+    setFormData(resetData);
+    setCurFormData(resetData);
+    localStorage.removeItem("formData"); // Clear cached data
     
     // Save selected identifier to localStorage
     localStorage.setItem("selectedEmployeeIdentifier", selectedIdentifier);
@@ -139,10 +146,40 @@ const Page1 = ({ catTotal, formData, setFormData,onPrevious, onNext }) => {
     try {
       const response = await axiosInstance.get(`/getData/${encodeURIComponent(targetIdentifier)}`);
       
+      console.log('=== DATA RETRIEVAL ON LOGIN ===');
+      console.log('Identifier:', targetIdentifier);
+      console.log('Success:', response?.data?.success);
+      
       if (response?.data?.success) {
-        setMessage({ text: "Employee data loaded successfully!", type: "success" });
-        setFormData(response?.data?.data);
-        localStorage.setItem("formData", JSON.stringify(response?.data?.data));
+        const loadedData = response?.data?.data;
+        const imageFields = Object.keys(loadedData || {}).filter(k => k.endsWith('Image') && loadedData[k]);
+        console.log('=== FILES LOADED FOR:', targetIdentifier, '===');
+        console.log('Total image fields with URLs:', imageFields.length);
+        console.log('Image fields:', imageFields);
+        console.log('Sample URLs:', imageFields.slice(0, 3).map(k => {
+          const val = loadedData[k];
+          if (val instanceof File) return `${k}: [File: ${val.name}]`;
+          if (typeof val === 'string') return `${k}: ${val.substring(0, 60)}...`;
+          return `${k}: [${typeof val}]`;
+        }));
+        
+        setMessage({ text: `Employee data loaded successfully! (${imageFields.length} files found)`, type: "success" });
+        
+        // CRITICAL: Set formData with freshly loaded data FIRST
+        // Then update localStorage as a cache backup
+        // This ensures components using formData prop get fresh data immediately
+        setFormData(loadedData);
+        setCurFormData(loadedData);
+        
+        // Save to localStorage AFTER state update (not before)
+        localStorage.setItem("formData", JSON.stringify(loadedData));
+        
+        // Verify formData was set correctly
+        console.log('=== FORMDATA UPDATED ===');
+        console.log('Email:', loadedData.email);
+        console.log('EmployeeCode:', loadedData.employeeCode);
+        console.log('First 5 image fields:', Object.keys(loadedData).filter(k => k.endsWith('Image') && loadedData[k]).slice(0, 5));
+        
         return true;
       } else {
         setMessage({ 

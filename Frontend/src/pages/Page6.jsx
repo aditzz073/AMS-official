@@ -7,7 +7,7 @@ import useRoleBasedData from "../hooks/useRoleBasedData";
 
 const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole }) => {
   const [previewImages, setPreviewImages] = useState({});
-  const { canEditColumn } = useRoleBasedData(userRole, formData);
+  const { canEditColumn, canViewColumn } = useRoleBasedData(userRole, formData);
 
   const handleInputChange = (e, key) => {
     const { value } = e.target;
@@ -78,36 +78,41 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
 
   const handleImageUpload = (e, key) => {
     const file = e.target.files[0];
-    const MAX_FILE_SIZE = 1024 * 1024; // 1MB
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (matching backend limit)
 
   
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
-        toast.error("File size exceeds 1MB. Please upload a smaller file.");
+        toast.error("File size exceeds 10MB. Please upload a smaller file.");
         return;
       }
   
+      // For preview, create a data URL
       const reader = new FileReader();
   
       reader.onloadend = () => {
-        const imageUrl = reader.result;
-  
+        const dataUrl = reader.result;
         setPreviewImages(prev => ({
           ...prev,
-          [key]: imageUrl
+          [key]: dataUrl
         }));
-  
+        
+        // Store the data URL so it persists across reloads
         setFormData(prev => {
           const updatedData = {
             ...prev,
-            [`${key}Image`]: imageUrl
+            [`${key}Image`]: dataUrl
           };
-  
-          localStorage.setItem("formData", JSON.stringify(updatedData));
+          
+          // Save to localStorage
+          try {
+            localStorage.setItem("formData", JSON.stringify(updatedData));
+          } catch (error) {
+            console.error('[Page6] Error saving to localStorage:', error);
+          }
           return updatedData;
         });
       };
-  
       reader.readAsDataURL(file);
     }
   };
@@ -118,6 +123,15 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
       alert("No file uploaded for this field");
       return;
     }
+    
+    // Handle File objects (newly uploaded files not yet submitted)
+    if (fileUrl instanceof File || fileUrl instanceof Blob) {
+      const blobUrl = URL.createObjectURL(fileUrl);
+      window.open(blobUrl, "_blank");
+      return;
+    }
+    
+    // Handle data URLs (base64 encoded files)
     if(fileUrl.startsWith('data:')){
     
     
@@ -199,12 +213,47 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
     } else {
       alert("Pop-up blocked. Please allow pop-ups for this site to view the file.");
     }
-  }else{
+  } else {
+    // Handle Cloudinary URLs or other external URLs
     if (!fileUrl) {
       return;
-  }
+    }
 
-  window.open(fileUrl, "_blank");
+    // Detect file type from URL
+    const urlLower = fileUrl.toLowerCase();
+    const isPDF = urlLower.includes('.pdf') || urlLower.includes('/raw/upload/');
+    const isImage = urlLower.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)/i);
+    
+    // Add cache-busting timestamp to prevent old file caching
+    const cacheBustedUrl = fileUrl.includes('?') ? `${fileUrl}&t=${Date.now()}` : `${fileUrl}?t=${Date.now()}`;
+    
+    // For PDFs from Cloudinary (raw uploads), open with proper handling
+    if (isPDF) {
+      const newWindow = window.open();
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head>
+              <title>PDF Preview</title>
+              <style>
+                body { margin: 0; padding: 0; overflow: hidden; }
+                iframe { border: none; width: 100vw; height: 100vh; }
+              </style>
+            </head>
+            <body>
+              <iframe src="${cacheBustedUrl}" type="application/pdf"></iframe>
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+      } else {
+        // Fallback: direct link
+        window.open(cacheBustedUrl, "_blank");
+      }
+    } else {
+      // For images and other files, open directly
+      window.open(cacheBustedUrl, "_blank");
+    }
   }
     
   };
@@ -228,7 +277,9 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
             <td className="border border-gray-300 p-2">5</td>
             <td className="border border-gray-300 p-2">Interaction with outside world : <span className="text-blue-600 font-semibold">A= 10 Marks, B = 4 Marks per activity</span></td>
             <td className="border border-gray-300 p-2">Self-Evaluation</td>
-            <td className="border border-gray-300 p-2">Evaluation by HOD</td>
+            {canViewColumn('hod') && (
+              <td className="border border-gray-300 p-2">Evaluation by HOD</td>
+            )}
             <td className="border border-gray-300 p-2">Evaluation by External Audit Member</td>
           </tr>
         </thead>
@@ -249,7 +300,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 handleInputChange={handleInputChange}
                 className="border p-1 w-full"
               />
-                {canEditColumn('self') ? (
+                {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -257,31 +308,30 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                         onChange={(e) => handleImageUpload(e, "IOW511Self")}
                         className="text-xs w-full"
                       />
-                        <button
-                        onClick={() => showImagePreview("IOW511Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
+                  )}
                   
-                  ):<><button
-                  onClick={() => showImagePreview("IOW511Self")}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                >
-                  View Evidence
-                </button></>}
+                  {formData.IOW511SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("IOW511Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
             </td>
-            <td className="border border-gray-300 p-2">
-              <RoleBasedInput
-                fieldKey="IOW511HoD"
-                userRole={userRole}
-                formData={formData}
-                handleInputChange={handleInputChange}
-                className="border p-1 w-full"
-              />
-            </td>
+            {canViewColumn('hod') && (
+              <td className="border border-gray-300 p-2">
+                <RoleBasedInput
+                  fieldKey="IOW511HoD"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                  className="border p-1 w-full"
+                />
+              </td>
+            )}
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
                 fieldKey="IOW511External"
@@ -304,7 +354,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 handleInputChange={handleInputChange}
                 className="border p-1 w-full"
               />
-                {canEditColumn('self') ? (
+                {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -312,31 +362,30 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                         onChange={(e) => handleImageUpload(e, "IOW512Self")}
                         className="text-xs w-full"
                       />
-                        <button
-                        onClick={() => showImagePreview("IOW512Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
+                  )}
                   
-                  ):<><button
-                  onClick={() => showImagePreview("IOW512Self")}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                >
-                  View Evidence
-                </button></>}
+                  {formData.IOW512SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("IOW512Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
             </td>
-            <td className="border border-gray-300 p-2">
-              <RoleBasedInput
-                fieldKey="IOW512HoD"
-                userRole={userRole}
-                formData={formData}
-                handleInputChange={handleInputChange}
-                className="border p-1 w-full"
-              />
-            </td>
+            {canViewColumn('hod') && (
+              <td className="border border-gray-300 p-2">
+                <RoleBasedInput
+                  fieldKey="IOW512HoD"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                  className="border p-1 w-full"
+                />
+              </td>
+            )}
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
                 fieldKey="IOW512External"
@@ -359,7 +408,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 handleInputChange={handleInputChange}
                 className="border p-1 w-full"
               />
-                {canEditColumn('self') ? (
+                {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -367,31 +416,30 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                         onChange={(e) => handleImageUpload(e, "IOW513Self")}
                         className="text-xs w-full"
                       />
-                        <button
-                        onClick={() => showImagePreview("IOW513Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
+                  )}
                   
-                  ):<><button
-                  onClick={() => showImagePreview("IOW513Self")}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                >
-                  View Evidence
-                </button></>}
+                  {formData.IOW513SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("IOW513Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
             </td>
-            <td className="border border-gray-300 p-2">
-              <RoleBasedInput
-                fieldKey="IOW513HoD"
-                userRole={userRole}
-                formData={formData}
-                handleInputChange={handleInputChange}
-                className="border p-1 w-full"
-              />
-            </td>
+            {canViewColumn('hod') && (
+              <td className="border border-gray-300 p-2">
+                <RoleBasedInput
+                  fieldKey="IOW513HoD"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                  className="border p-1 w-full"
+                />
+              </td>
+            )}
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
                 fieldKey="IOW513External"
@@ -433,7 +481,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 handleInputChange={handleInputChange}
                 className="border p-1 w-full"
               />
-                {canEditColumn('self') ? (
+                {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -441,31 +489,30 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                         onChange={(e) => handleImageUpload(e, "IOW521Self")}
                         className="text-xs w-full"
                       />
-                        <button
-                        onClick={() => showImagePreview("IOW521Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
+                  )}
                   
-                  ):<><button
-                  onClick={() => showImagePreview("IOW521Self")}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                >
-                  View Evidence
-                </button></>}
+                  {formData.IOW521SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("IOW521Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
             </td>
-            <td className="border border-gray-300 p-2">
-              <RoleBasedInput
-                fieldKey="IOW521HoD"
-                userRole={userRole}
-                formData={formData}
-                handleInputChange={handleInputChange}
-                className="border p-1 w-full"
-              />
-            </td>
+            {canViewColumn('hod') && (
+              <td className="border border-gray-300 p-2">
+                <RoleBasedInput
+                  fieldKey="IOW521HoD"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                  className="border p-1 w-full"
+                />
+              </td>
+            )}
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
                 fieldKey="IOW521External"
@@ -488,7 +535,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 handleInputChange={handleInputChange}
                 className="border p-1 w-full"
               />
-                {canEditColumn('self') ? (
+                {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -496,31 +543,30 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                         onChange={(e) => handleImageUpload(e, "IOW522Self")}
                         className="text-xs w-full"
                       />
-                        <button
-                        onClick={() => showImagePreview("IOW522Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
+                  )}
                   
-                  ):<><button
-                  onClick={() => showImagePreview("IOW522Self")}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                >
-                  View Evidence
-                </button></>}
+                  {formData.IOW522SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("IOW522Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
             </td>
-            <td className="border border-gray-300 p-2">
-              <RoleBasedInput
-                fieldKey="IOW522HoD"
-                userRole={userRole}
-                formData={formData}
-                handleInputChange={handleInputChange}
-                className="border p-1 w-full"
-              />
-            </td>
+            {canViewColumn('hod') && (
+              <td className="border border-gray-300 p-2">
+                <RoleBasedInput
+                  fieldKey="IOW522HoD"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                  className="border p-1 w-full"
+                />
+              </td>
+            )}
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
                 fieldKey="IOW522External"
@@ -543,7 +589,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 handleInputChange={handleInputChange}
                 className="border p-1 w-full"
               />
-                {canEditColumn('self') ? (
+                {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -551,31 +597,30 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                         onChange={(e) => handleImageUpload(e, "IOW523Self")}
                         className="text-xs w-full"
                       />
-                        <button
-                        onClick={() => showImagePreview("IOW523Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
+                  )}
                   
-                  ):<><button
-                  onClick={() => showImagePreview("IOW523Self")}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                >
-                  View Evidence
-                </button></>}
+                  {formData.IOW523SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("IOW523Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
             </td>
-            <td className="border border-gray-300 p-2">
-              <RoleBasedInput
-                fieldKey="IOW523HoD"
-                userRole={userRole}
-                formData={formData}
-                handleInputChange={handleInputChange}
-                className="border p-1 w-full"
-              />
-            </td>
+            {canViewColumn('hod') && (
+              <td className="border border-gray-300 p-2">
+                <RoleBasedInput
+                  fieldKey="IOW523HoD"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                  className="border p-1 w-full"
+                />
+              </td>
+            )}
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
                 fieldKey="IOW523External"
@@ -598,7 +643,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 handleInputChange={handleInputChange}
                 className="border p-1 w-full"
               />
-                {canEditColumn('self') ? (
+                {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -606,20 +651,17 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                         onChange={(e) => handleImageUpload(e, "IOW524Self")}
                         className="text-xs w-full"
                       />
-                        <button
-                        onClick={() => showImagePreview("IOW524Self")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                      >
-                        View Evidence
-                      </button>
                     </div>
+                  )}
                   
-                  ):<><button
-                  onClick={() => showImagePreview("IOW524Self")}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                >
-                  View Evidence
-                </button></>}
+                  {formData.IOW524SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("IOW524Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
             </td>
             <td className="border border-gray-300 p-2">
@@ -653,7 +695,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 handleInputChange={handleInputChange}
                 className="border p-1 w-full"
               />
-                {canEditColumn('self') ? (
+                {canEditColumn('self') && (
                     <div className="flex flex-col items-center mt-2 w-full">
                       <input
                         type="file"
@@ -661,20 +703,17 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                         onChange={(e) => handleImageUpload(e, "IOW525Self")}
                         className="text-xs w-full"
                       />
-                         <button
-                         onClick={() => showImagePreview("IOW525Self")}
-                         className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                       >
-                         View Evidence
-                       </button>
                     </div>
+                  )}
                   
-                  ):<><button
-                  onClick={() => showImagePreview("IOW525Self")}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
-                >
-                  View Evidence
-                </button></>}
+                  {formData.IOW525SelfImage && canViewColumn('self') && (
+                    <button
+                      onClick={() => showImagePreview("IOW525Self")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
+                    >
+                      View Evidence
+                    </button>
+                  )}
                 </div>
             </td>
             <td className="border border-gray-300 p-2">

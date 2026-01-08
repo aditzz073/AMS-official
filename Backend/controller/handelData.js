@@ -30,15 +30,15 @@ const parseDateYYYYMM = (dateString) => {
 const roleAccess = {
   faculty: { 
     editable: ['self'], 
-    visible: ['self'] 
+    visible: ['self', 'hod'] // Faculty can VIEW HOD marks (read-only)
   },
   hod: { 
     editable: ['hod'], 
     visible: ['self', 'hod'] 
   },
   external: { 
-    editable: ['external'], 
-    visible: ['self', 'external'] // External cannot see HOD column
+    editable: [], // RESTRICTED: External Evaluator cannot edit any marks
+    visible: ['self'] // RESTRICTED: External Evaluator can only VIEW faculty marks (self column)
   },
   principal: { 
     editable: [], 
@@ -283,6 +283,8 @@ const createOrUpdateEmployee = async (req, res) => {
     
     // Process uploaded files (if any)
     if (req.files) {      
+      console.log('[FILES] Processing', Object.keys(req.files).length, 'file uploads');
+      
       // Process each uploaded file and upload to Cloudinary
       for (const [fieldName, files] of Object.entries(req.files)) {
         if (files && files.length > 0) {
@@ -309,10 +311,17 @@ const createOrUpdateEmployee = async (req, res) => {
             console.log(`[UPLOAD] Processing file upload: ${fieldName} for ${folderIdentifier}`);
             const cloudinaryUrl = await uploadToCloudinary(file.path, folderIdentifier, fieldName);
             updateData[fieldName] = cloudinaryUrl;
+            console.log(`[UPLOAD] Added to updateData: ${fieldName} = ${cloudinaryUrl}`);
           }
         }
       }
     }
+    
+    // Log what we're about to save
+    console.log('[SAVE] Updating database for email:', targetEmail);
+    console.log('[SAVE] Employee code:', updateData.employeeCode);
+    const imageFieldsToSave = Object.keys(updateData).filter(k => k.endsWith('Image'));
+    console.log('[SAVE] Image fields in updateData:', imageFieldsToSave.length, imageFieldsToSave);
     
     // Update or create the employee evaluation record
     const updatedEmployee = await Evaluation.findOneAndUpdate(
@@ -320,6 +329,10 @@ const createOrUpdateEmployee = async (req, res) => {
       updateData,
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
+    
+    // Log saved image fields for debugging
+    const savedImages = Object.keys(updatedEmployee.toObject()).filter(k => k.endsWith('Image') && updatedEmployee[k]);
+    console.log(`[SUCCESS] Saved employee data for ${targetEmail} with ${savedImages.length} image URLs:`, savedImages);
     
     return res.status(200).json({
       success: true,
@@ -383,6 +396,10 @@ const getEmployeeById = async (req, res) => {
               ...filterDataForRole(evaluation, userRole)
             };
         }
+        
+        // Log image fields for debugging
+        const imageFields = Object.keys(responseData).filter(k => k.endsWith('Image') && responseData[k]);
+        console.log(`[GET] Returning data for ${targetIdentifier} with ${imageFields.length} image URLs:`, imageFields.slice(0, 5));
 
         return res.status(200).json({
           success: true, 

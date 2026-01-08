@@ -37,6 +37,7 @@ const ThankYouPage = () => {
          // Clean up local storage and state
          localStorage.removeItem("token");
          localStorage.removeItem("authState");
+         localStorage.removeItem("currentPage");
          localStorage.clear();
          
          // Clear axios headers
@@ -83,7 +84,10 @@ const ThankYouPage = () => {
         <div className="flex flex-col items-center">
           <p className="text-gray-500 mb-4">Please click on this button to go back to instruction page.</p>
           <button 
-            onClick={()=>navigate("/page")}
+            onClick={()=>{
+              localStorage.setItem("currentPage", "0");
+              navigate("/page");
+            }}
             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded transition duration-300"
           >
             Back to Instructions

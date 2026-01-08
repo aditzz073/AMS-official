@@ -2,7 +2,7 @@
 export const roleAccess = {
   faculty: { 
     editable: ['self'], 
-    visible: ['self'],
+    visible: ['self', 'hod'], // Faculty can VIEW HOD marks (read-only)
     canEditRemarks: false,
     canViewRemarks: false
   },
@@ -13,10 +13,10 @@ export const roleAccess = {
     canViewRemarks: true
   },
   external: { 
-    editable: ['external'], 
-    visible: ['self', 'external'], // External cannot see HOD column
-    canEditRemarks: true, // External can add section remarks
-    canViewRemarks: true
+    editable: [], // RESTRICTED: External Evaluator cannot edit any marks
+    visible: ['self'], // RESTRICTED: External Evaluator can only VIEW faculty marks (self column)
+    canEditRemarks: false, // RESTRICTED: Cannot edit remarks
+    canViewRemarks: true // Can view existing remarks
   },
   principal: { 
     editable: [], 

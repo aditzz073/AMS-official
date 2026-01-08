@@ -265,6 +265,11 @@ const evaluationSchema = new mongoose.Schema({
   PDRC228DegreeAwarded2: { type: String },
   PDRC228ResearchScholars: { type: String },
   
+  PDRC229External: { type: String },
+  PDRC229HoD: { type: String },
+  PDRC229Self: { type: String },
+  PDRC229SelfImage: { type: String },
+  
   // Section 4 faculty input field
   CIL4PISpecify: { type: String },
 
