@@ -32,6 +32,9 @@ app.use(cors({
     credentials: true
 })) 
 
+// Serve uploaded documents (PDFs, docs, etc.)
+app.use('/uploads/documents', express.static('uploads/documents'));
+
 app.use("/app",router)
 
 export default app

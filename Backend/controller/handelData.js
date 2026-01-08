@@ -122,43 +122,51 @@ const filterDataForRole = (data, userRole) => {
 // Function to upload file to Cloudinary
 const uploadToCloudinary = async (filePath, employeeCode, fieldName) => {
   try {
-    console.log(`[CLOUDINARY] Uploading file: ${fieldName} for employee: ${employeeCode}`);
+    console.log(`[CLOUDINARY] Starting upload process...`);
+    console.log(`[CLOUDINARY] File path: ${filePath}`);
+    console.log(`[CLOUDINARY] Employee: ${employeeCode}, Field: ${fieldName}`);
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File not found at path: ${filePath}`);
+    }
     
     // Determine the correct resource type based on file extension
     const fileExtension = filePath.split('.').pop().toLowerCase();
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-    const resourceType = imageExtensions.includes(fileExtension) ? 'image' : 'raw';
+    const isImage = imageExtensions.includes(fileExtension);
     
-    console.log(`[CLOUDINARY] File type detected: ${fileExtension}, using resource_type: ${resourceType}`);
+    const resourceType = isImage ? 'image' : 'raw';
+    console.log(`[CLOUDINARY] File extension: ${fileExtension}`);
+    console.log(`[CLOUDINARY] Is image: ${isImage}`);
+    console.log(`[CLOUDINARY] Using resource_type: ${resourceType}`);
     
-    // Upload the file to cloudinary in a folder based on employeeCode
+    // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(filePath, {
       resource_type: resourceType,
       folder: `employees/${employeeCode}`,
-      public_id: `${fieldName}-${Date.now()}`,
-      type: 'upload',
-      access_control: [{ access_type: 'anonymous' }] // Make publicly accessible
+      public_id: `${fieldName}-${Date.now()}`
     });
     
-    // Fix the URL if it's a non-image file but got image URL
-    let finalUrl = result.secure_url;
-    if (resourceType === 'raw' && finalUrl.includes('/image/upload/')) {
-      finalUrl = finalUrl.replace('/image/upload/', '/raw/upload/');
-      console.log(`[CLOUDINARY] Fixed URL path from /image/upload/ to /raw/upload/`);
-    }
-    
-    console.log(`[CLOUDINARY] Upload successful: ${finalUrl}`);
+    console.log(`[CLOUDINARY] ✅ Upload successful!`);
+    console.log(`[CLOUDINARY] URL: ${result.secure_url}`);
+    console.log(`[CLOUDINARY] Returned resource_type: ${result.resource_type}`);
+    console.log(`[CLOUDINARY] Format: ${result.format}`);
     
     // Delete the file from local storage
     fs.unlinkSync(filePath);
+    console.log(`[CLOUDINARY] Local file deleted`);
     
-    return finalUrl;
+    return result.secure_url;
   } catch (error) {
+    console.error('[CLOUDINARY] ❌ Upload failed!');
+    console.error('[CLOUDINARY] Error:', error.message);
+    
     // Delete the file from local storage if upload fails
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
+      console.log('[CLOUDINARY] Cleaned up local file after error');
     }
-    console.error('Error uploading to Cloudinary:', error);
     throw error;
   }
 };
