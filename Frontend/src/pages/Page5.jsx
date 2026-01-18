@@ -58,7 +58,7 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
         return;
       }
 
-      // For preview, create a data URL
+      // Create data URL for preview ONLY
       const reader = new FileReader();
 
       reader.onloadend = () => {
@@ -67,24 +67,32 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
           ...prev,
           [key]: dataUrl
         }));
-        
-        // Store the data URL so it persists across reloads
-        setFormData(prev => {
-          const updatedData = {
-            ...prev,
-            [`${key}Image`]: dataUrl
-          };
-          
-          // Save to localStorage
-          try {
-            localStorage.setItem("formData", JSON.stringify(updatedData));
-          } catch (error) {
-            console.error('[Page5] Error saving to localStorage:', error);
-          }
-          return updatedData;
-        });
       };
       reader.readAsDataURL(file);
+      
+      // Store the actual File object for backend upload
+      setFormData(prev => {
+        const updatedData = {
+          ...prev,
+          [`${key}Image`]: file
+        };
+        
+        // Note: We don't save File objects to localStorage (they can't be serialized)
+        // Only save the rest of the formData
+        try {
+          const dataToSave = { ...updatedData };
+          // Remove File objects before saving to localStorage
+          Object.keys(dataToSave).forEach(k => {
+            if (dataToSave[k] instanceof File) {
+              delete dataToSave[k];
+            }
+          });
+          localStorage.setItem("formData", JSON.stringify(dataToSave));
+        } catch (error) {
+          console.error('[Page5] Error saving to localStorage:', error);
+        }
+        return updatedData;
+      });
     }
   };
 

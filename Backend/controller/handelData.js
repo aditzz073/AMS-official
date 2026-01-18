@@ -264,6 +264,16 @@ const createOrUpdateEmployee = async (req, res) => {
     ];
     basicInfoFieldNames.forEach(field => delete updateData[field]);
     
+    // Log what we received from frontend
+    const receivedImageFields = Object.keys(updateData).filter(k => k.endsWith('Image'));
+    console.log('[RECEIVED] Image fields from frontend:', receivedImageFields.length, receivedImageFields.slice(0, 5));
+    receivedImageFields.slice(0, 3).forEach(field => {
+      const val = updateData[field];
+      const type = typeof val;
+      const preview = type === 'string' ? (val.length > 60 ? val.substring(0, 60) + '...' : val) : `[${type}]`;
+      console.log(`  ${field}: ${preview}`);
+    });
+    
     // Add email and employeeCode to evaluation
     updateData.email = targetEmail;
     updateData.employeeCode = basicInfo?.employeeCode || employeeCode;
@@ -286,7 +296,13 @@ const createOrUpdateEmployee = async (req, res) => {
     
     // Validate role-based field access
     if (userRole) {
+      const beforeValidation = Object.keys(updateData).filter(k => k.endsWith('Image')).length;
       updateData = validateRoleBasedFields(userRole, updateData);
+      const afterValidation = Object.keys(updateData).filter(k => k.endsWith('Image')).length;
+      console.log(`[VALIDATION] Image fields before: ${beforeValidation}, after: ${afterValidation}`);
+      if (beforeValidation !== afterValidation) {
+        console.warn('[VALIDATION] Some image fields were removed by role validation!');
+      }
     }
     
     // Process uploaded files (if any)
@@ -338,9 +354,23 @@ const createOrUpdateEmployee = async (req, res) => {
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
     
-    // Log saved image fields for debugging
-    const savedImages = Object.keys(updatedEmployee.toObject()).filter(k => k.endsWith('Image') && updatedEmployee[k]);
-    console.log(`[SUCCESS] Saved employee data for ${targetEmail} with ${savedImages.length} image URLs:`, savedImages);
+    // Verify what was actually saved
+    const savedData = updatedEmployee.toObject();
+    const savedImageFields = Object.keys(savedData).filter(k => k.endsWith('Image') && savedData[k]);
+    console.log(`[SUCCESS] ✅ Saved employee data for ${targetEmail}`);
+    console.log(`[SUCCESS] Employee code: ${savedData.employeeCode}`);
+    console.log(`[SUCCESS] Total image fields saved: ${savedImageFields.length}`);
+    if (savedImageFields.length > 0) {
+      console.log(`[SUCCESS] Image fields:`, savedImageFields.slice(0, 5));
+      console.log(`[SUCCESS] Sample URLs:`);
+      savedImageFields.slice(0, 3).forEach(field => {
+        const url = savedData[field];
+        const preview = url.length > 60 ? url.substring(0, 60) + '...' : url;
+        console.log(`  ${field}: ${preview}`);
+      });
+    } else {
+      console.log(`[SUCCESS] ⚠️  WARNING: No image fields were saved!`);
+    }
     
     return res.status(200).json({
       success: true,
@@ -405,9 +435,22 @@ const getEmployeeById = async (req, res) => {
             };
         }
         
-        // Log image fields for debugging
+        // Log what we're returning
         const imageFields = Object.keys(responseData).filter(k => k.endsWith('Image') && responseData[k]);
-        console.log(`[GET] Returning data for ${targetIdentifier} with ${imageFields.length} image URLs:`, imageFields.slice(0, 5));
+        console.log(`[GET] 📤 Returning data for ${targetIdentifier}`);
+        console.log(`[GET] Email: ${responseData.email}, Employee code: ${responseData.employeeCode}`);
+        console.log(`[GET] Total image fields: ${imageFields.length}`);
+        if (imageFields.length > 0) {
+          console.log(`[GET] Image fields:`, imageFields.slice(0, 5));
+          console.log(`[GET] Sample URLs:`);
+          imageFields.slice(0, 3).forEach(field => {
+            const url = responseData[field];
+            const preview = url.length > 60 ? url.substring(0, 60) + '...' : url;
+            console.log(`  ${field}: ${preview}`);
+          });
+        } else {
+          console.log(`[GET] ⚠️  WARNING: No image fields found in database!`);
+        }
 
         return res.status(200).json({
           success: true, 
