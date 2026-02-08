@@ -1,3 +1,4 @@
+import { log } from 'node:console';
 import EmailVerificationOtp from '../model/emailVerificationOtp.js';
 import User from '../model/user.js';
 import { generateOTP, sendOTPEmail } from '../utils/emailService.js';
@@ -59,8 +60,7 @@ export const requestOTP = async (req, res) => {
       email,
       otp,
       expiresAt
-    });
-
+    });   
     // Send OTP email
     await sendOTPEmail(email, otp);
 

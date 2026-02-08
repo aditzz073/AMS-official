@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import nodemailer from "nodemailer";
 dotenv.config(); // Load .env variables
 
 import app from "./app.js";
@@ -28,6 +29,16 @@ cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_KEY,
   api_secret: process.env.CLOUDINARY_SECRET,
+});
+
+export const transporter = nodemailer.createTransport({
+  service: "gmail",
+  port: 465,
+  secure:true,
+  auth: {
+    user: process.env.GMAIL_APP_ID,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
 });
 
 const PORT = process.env.PORT || 5000;

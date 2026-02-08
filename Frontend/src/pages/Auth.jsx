@@ -61,8 +61,8 @@ const Auth = () => {
       if (value.trim() === "") {
         setEmailError("");
       } else {
-        const validation = validateEmail(value);
-        setEmailError(validation.isValid ? "" : validation.message);
+        // const validation = validateEmail(value);
+        // setEmailError(validation.isValid ? "" : validation.message);
       }
     }
   };
