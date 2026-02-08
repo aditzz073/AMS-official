@@ -39,6 +39,9 @@ export const transporter = nodemailer.createTransport({
     user: process.env.GMAIL_APP_ID,
     pass: process.env.GMAIL_APP_PASSWORD,
   },
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 
 const PORT = process.env.PORT || 5000;
