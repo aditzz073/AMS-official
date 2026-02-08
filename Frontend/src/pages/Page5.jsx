@@ -87,7 +87,7 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
               delete dataToSave[k];
             }
           });
-          localStorage.setItem("formData", JSON.stringify(dataToSave));
+          localStorage.setItem("formData", dataToSave);
         } catch (error) {
           console.error('[Page5] Error saving to localStorage:', error);
         }

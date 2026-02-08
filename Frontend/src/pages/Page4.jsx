@@ -109,7 +109,7 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
               delete dataToSave[k];
             }
           });
-          localStorage.setItem("formData", JSON.stringify(dataToSave));
+          localStorage.setItem("formData", dataToSave);
         } catch (error) {
           console.error('[Page4] Error saving to localStorage:', error);
         }
@@ -119,62 +119,79 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
   };
 
   // Handle multiple file uploads
-  const handleMultipleImageUpload = (e, key) => {
-    const files = Array.from(e.target.files);
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
+const handleMultipleImageUpload = (e, key) => {
+  const files = Array.from(e.target.files);
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-    // Check each file size
-    const oversizedFiles = files.filter(file => file.size > MAX_FILE_SIZE);
-    if (oversizedFiles.length > 0) {
-      toast.error(`${oversizedFiles.length} file(s) exceed 10MB. Please upload smaller files.`);
-      return;
-    }
+  if (!files.length) return;
 
-    if (files.length > 0) {
-      // Get existing files if any
-      const existingFiles = formData[`${key}Image`];
-      const currentFiles = Array.isArray(existingFiles) ? existingFiles : (existingFiles ? [existingFiles] : []);
+  // Check file sizes
+  const oversizedFiles = files.filter(file => file.size > MAX_FILE_SIZE);
+  if (oversizedFiles.length > 0) {
+    toast.error(`${oversizedFiles.length} file(s) exceed 10MB.`);
+    return;
+  }
 
-      // Convert new files to data URLs for persistence
-      const filePromises = files.map((file, index) => {
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            setPreviewImages(prev => ({
-              ...prev,
-              [`${key}_${currentFiles.length + index}`]: reader.result
-            }));
-            resolve(reader.result);
-          };
-          reader.readAsDataURL(file);
-        });
+  // Get existing files if any
+  const existingFiles = formData[`${key}Image`];
+  const currentFiles = Array.isArray(existingFiles)
+    ? existingFiles
+    : existingFiles
+    ? [existingFiles]
+    : [];
+
+  // Convert each file to base64 for preview
+  files.forEach((file, index) => {
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const dataUrl = reader.result;
+
+      // Save preview
+      setPreviewImages(prev => ({
+        ...prev,
+        [`${key}_${currentFiles.length + index}`]: dataUrl
+      }));
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+  // Store actual File objects in state
+  setFormData(prev => {
+    const updatedData = {
+      ...prev,
+      [`${key}Image`]: [...currentFiles, ...files]
+    };
+
+    // Remove File objects before saving to localStorage
+    try {
+      const dataToSave = { ...updatedData };
+
+      Object.keys(dataToSave).forEach(k => {
+        if (dataToSave[k] instanceof File) {
+          delete dataToSave[k];
+        }
+
+        // Also remove arrays containing File objects
+        if (Array.isArray(dataToSave[k])) {
+          dataToSave[k] = dataToSave[k].filter(
+            item => !(item instanceof File)
+          );
+        }
       });
 
-      // Wait for all files to be converted
-      Promise.all(filePromises).then(dataUrls => {
-        // Combine existing and new data URLs
-        const allFiles = [...currentFiles, ...dataUrls];
-
-        // Store all files in formData
-        setFormData(prev => {
-          const updatedData = {
-            ...prev,
-            [`${key}Image`]: allFiles
-          };
-
-          // Save to localStorage
-          try {
-            localStorage.setItem("formData", JSON.stringify(updatedData));
-          } catch (error) {
-            console.error('[Page4] Error saving to localStorage:', error);
-          }
-          return updatedData;
-        });
-
-        toast.success(`${files.length} file(s) uploaded successfully`);
-      });
+      localStorage.setItem("formData", JSON.stringify(dataToSave));
+    } catch (error) {
+      console.error("[Page4] Error saving to localStorage:", error);
     }
-  };
+
+    return updatedData;
+  });
+
+  toast.success(`${files.length} file(s) uploaded successfully`);
+};
+
 
   // Remove a specific file from multiple uploads
   const removeFileFromMultipleUpload = (key, fileIndex) => {
@@ -190,7 +207,7 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
 
       // Save to localStorage
       try {
-        localStorage.setItem("formData", JSON.stringify(updatedData));
+        localStorage.setItem("formData", updatedData);
       } catch (error) {
         console.error('[Page4] Error saving to localStorage:', error);
       }
