@@ -19,9 +19,7 @@ build/
 logs
 *.log
 
-# Uploads folder - contains user uploaded files
-Backend/uploads/
-uploads/
+
 
 # IDE and editor files
 .vscode/
