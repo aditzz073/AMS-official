@@ -31,18 +31,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_SECRET,
 });
 
-export const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.GMAIL_APP_ID,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
-});
 
 const PORT = process.env.PORT || 5000;
 

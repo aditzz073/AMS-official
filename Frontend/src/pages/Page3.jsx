@@ -53,196 +53,239 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
       return updatedData;
     });
   };
+const handleImageUpload = (e, key) => {
+  const file = e.target.files[0];
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-  const handleImageUpload = (e, key) => {
-    const file = e.target.files[0];
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (matching backend limit)
+  if (!file) return;
 
-  
-    if (file) {
-      if (file.size > MAX_FILE_SIZE) {
-        toast.error("File size exceeds 10MB. Please upload a smaller file.");
-        return;
-      }
-  
-      // Create data URL for preview ONLY
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result;
-        setPreviewImages(prev => ({
-          ...prev,
-          [key]: dataUrl
-        }));
-      };
-      reader.readAsDataURL(file);
-      
-      // Store the actual File object for backend upload
-      setFormData(prev => {
-        const updatedData = {
-          ...prev,
-          [`${key}Image`]: file
-        };
-        
-        // Note: We don't save File objects to localStorage (they can't be serialized)
-        // Only save the rest of the formData
-        try {
-          const dataToSave = { ...updatedData };
-          // Remove File objects before saving to localStorage
-          Object.keys(dataToSave).forEach(k => {
-            if (dataToSave[k] instanceof File) {
-              delete dataToSave[k];
-            }
-          });
-          localStorage.setItem("formData", JSON.stringify(dataToSave));
-        } catch (error) {
-          console.error('[Page3] Error saving to localStorage:', error);
-        }
-        return updatedData;
-      });
-    }
-  };
-
-  const showImagePreview = (key) => {
-    const fileUrl = formData[`${key}Image`];
-    if (!fileUrl) {
-      alert("No file uploaded for this field");
-      return;
-    }
-    
-    // Handle File objects (newly uploaded files not yet submitted)
-    if (fileUrl instanceof File || fileUrl instanceof Blob) {
-      const blobUrl = URL.createObjectURL(fileUrl);
-      window.open(blobUrl, "_blank");
-      return;
-    }
-    
-    // Handle data URLs (base64 encoded files)
-    if(fileUrl.startsWith('data:')){
-    
-    
-    // Create a blob from the data URL
-    const byteString = atob(fileUrl.split(',')[1]);
-    const mimeString = fileUrl.split(',')[0].split(':')[1].split(';')[0];
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    
-    for (let i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-    }
-    
-    const blob = new Blob([ab], { type: mimeString });
-    const blobUrl = URL.createObjectURL(blob);
-    
-    // Open in new tab using the blob URL
-    const newWindow = window.open();
-    if (newWindow) {
-      newWindow.document.write(`
-        <html>
-          <head>
-            <title>File Preview</title>
-            <style>
-              body {
-                margin: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-                background-color: #f0f0f0;
-              }
-              img, embed, iframe {
-                max-width: 100%;
-                max-height: 90vh;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-              }
-              .container {
-                text-align: center;
-                padding: 20px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-      `);
-      
-      // Different handling based on file type
-      if (mimeString.startsWith('image/')) {
-        newWindow.document.write(`<img src="${blobUrl}" alt="Preview" />`);
-      } else if (mimeString === 'application/pdf') {
-        newWindow.document.write(`<embed src="${blobUrl}" type="application/pdf" width="800px" height="600px" />`);
-      } else if (mimeString.includes('word') || mimeString.includes('excel') || mimeString.includes('powerpoint')) {
-        // For office documents
-        newWindow.document.write(`
-          <div>
-            <h3>Office document preview</h3>
-            <p>This type of document cannot be previewed directly in the browser.</p>
-            <a href="${blobUrl}" download="document">Download File</a>
-          </div>
-        `);
-      } else {
-        // Generic file handling
-        newWindow.document.write(`
-          <div>
-            <h3>File preview</h3>
-            <p>This type of file (${mimeString}) may not display correctly in the browser.</p>
-            <a href="${blobUrl}" download="file">Download File</a>
-          </div>
-        `);
-      }
-      
-      newWindow.document.write(`
-            </div>
-          </body>
-        </html>
-      `);
-      newWindow.document.close();
-    } else {
-      alert("Pop-up blocked. Please allow pop-ups for this site to view the file.");
-    }
-  } else {
-    // Handle Cloudinary URLs or other external URLs
-    if (!fileUrl) {
-      console.error("No file uploaded for this field");
-      return;
-    }
-
-    // Detect file type from URL
-    const urlLower = fileUrl.toLowerCase();
-    const isPDF = urlLower.includes('.pdf') || urlLower.includes('/raw/upload/');
-    const isImage = urlLower.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)/i);
-    
-    // Add cache-busting timestamp to prevent old file caching
-    const cacheBustedUrl = fileUrl.includes('?') ? `${fileUrl}&t=${Date.now()}` : `${fileUrl}?t=${Date.now()}`;
-    
-    // For PDFs from Cloudinary (raw uploads), open with proper handling
-    if (isPDF) {
-      const newWindow = window.open();
-      if (newWindow) {
-        newWindow.document.write(`
-          <html>
-            <head>
-              <title>PDF Preview</title>
-              <style>
-                body { margin: 0; padding: 0; overflow: hidden; }
-                iframe { border: none; width: 100vw; height: 100vh; }
-              </style>
-            </head>
-            <body>
-              <iframe src="${cacheBustedUrl}" type="application/pdf"></iframe>
-            </body>
-          </html>
-        `);
-        newWindow.document.close();
-      } else {
-        // Fallback: direct link
-        window.open(cacheBustedUrl, "_blank");
-      }
-    } else {
-      // For images and other files, open directly
-      window.open(cacheBustedUrl, "_blank");
-    }
+  if (file.size > MAX_FILE_SIZE) {
+    toast.error("File size exceeds 10MB. Please upload a smaller file.");
+    return;
   }
+
+  // Store File object only in state (NOT localStorage)
+  setFormData(prev => ({
+    ...prev,
+    [`${key}Image`]: file
+  }));
+
+  // Optional: clear input value so same file can be re-selected
+  e.target.value = "";
+};
+
+  // const handleImageUpload = (e, key) => {
+  //   const file = e.target.files[0];
+  //   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (matching backend limit)
+
+  
+  //   if (file) {
+  //     if (file.size > MAX_FILE_SIZE) {
+  //       toast.error("File size exceeds 10MB. Please upload a smaller file.");
+  //       return;
+  //     }
+  
+  //     // Create data URL for preview ONLY
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       const dataUrl = reader.result;
+  //       setPreviewImages(prev => ({
+  //         ...prev,
+  //         [key]: dataUrl
+  //       }));
+  //     };
+  //     reader.readAsDataURL(file);
+      
+  //     // Store the actual File object for backend upload
+  //     setFormData(prev => {
+  //       const updatedData = {
+  //         ...prev,
+  //         [`${key}Image`]: file
+  //       };
+        
+  //       // Note: We don't save File objects to localStorage (they can't be serialized)
+  //       // Only save the rest of the formData
+  //       try {
+  //         const dataToSave = { ...updatedData };
+  //         // Remove File objects before saving to localStorage
+  //         Object.keys(dataToSave).forEach(k => {
+  //           if (dataToSave[k] instanceof File) {
+  //             delete dataToSave[k];
+  //           }
+  //         });
+  //         localStorage.setItem("formData", JSON.stringify(dataToSave));
+  //       } catch (error) {
+  //         console.error('[Page3] Error saving to localStorage:', error);
+  //       }
+  //       return updatedData;
+  //     });
+  //   }
+  // };
+const showImagePreview = (key) => {
+  const fileData = formData[`${key}Image`];
+
+  if (!fileData) {
+    alert("No file uploaded for this field");
+    return;
+  }
+
+  // 🟢 If newly uploaded file
+  if (fileData instanceof File || fileData instanceof Blob) {
+    const blobUrl = URL.createObjectURL(fileData);
+    window.open(blobUrl, "_blank");
+    return;
+  }
+
+  // 🟢 If URL from backend
+  if (typeof fileData === "string") {
+    window.open(fileData, "_blank");
+    return;
+  }
+
+  alert("Unsupported file format");
+};
+
+  // const showImagePreview = (key) => {
+  //   const fileUrl = formData[`${key}Image`];
+  //   if (!fileUrl) {
+  //     alert("No file uploaded for this field");
+  //     return;
+  //   }
     
-  };
+  //   // Handle File objects (newly uploaded files not yet submitted)
+  //   if (fileUrl instanceof File || fileUrl instanceof Blob) {
+  //     const blobUrl = URL.createObjectURL(fileUrl);
+  //     window.open(blobUrl, "_blank");
+  //     return;
+  //   }
+    
+  //   // Handle data URLs (base64 encoded files)
+  //   if(fileUrl.startsWith('data:')){
+    
+    
+  //   // Create a blob from the data URL
+  //   const byteString = atob(fileUrl.split(',')[1]);
+  //   const mimeString = fileUrl.split(',')[0].split(':')[1].split(';')[0];
+  //   const ab = new ArrayBuffer(byteString.length);
+  //   const ia = new Uint8Array(ab);
+    
+  //   for (let i = 0; i < byteString.length; i++) {
+  //     ia[i] = byteString.charCodeAt(i);
+  //   }
+    
+  //   const blob = new Blob([ab], { type: mimeString });
+  //   const blobUrl = URL.createObjectURL(blob);
+    
+  //   // Open in new tab using the blob URL
+  //   const newWindow = window.open();
+  //   if (newWindow) {
+  //     newWindow.document.write(`
+  //       <html>
+  //         <head>
+  //           <title>File Preview</title>
+  //           <style>
+  //             body {
+  //               margin: 0;
+  //               display: flex;
+  //               justify-content: center;
+  //               align-items: center;
+  //               min-height: 100vh;
+  //               background-color: #f0f0f0;
+  //             }
+  //             img, embed, iframe {
+  //               max-width: 100%;
+  //               max-height: 90vh;
+  //               box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  //             }
+  //             .container {
+  //               text-align: center;
+  //               padding: 20px;
+  //             }
+  //           </style>
+  //         </head>
+  //         <body>
+  //           <div class="container">
+  //     `);
+      
+  //     // Different handling based on file type
+  //     if (mimeString.startsWith('image/')) {
+  //       newWindow.document.write(`<img src="${blobUrl}" alt="Preview" />`);
+  //     } else if (mimeString === 'application/pdf') {
+  //       newWindow.document.write(`<embed src="${blobUrl}" type="application/pdf" width="800px" height="600px" />`);
+  //     } else if (mimeString.includes('word') || mimeString.includes('excel') || mimeString.includes('powerpoint')) {
+  //       // For office documents
+  //       newWindow.document.write(`
+  //         <div>
+  //           <h3>Office document preview</h3>
+  //           <p>This type of document cannot be previewed directly in the browser.</p>
+  //           <a href="${blobUrl}" download="document">Download File</a>
+  //         </div>
+  //       `);
+  //     } else {
+  //       // Generic file handling
+  //       newWindow.document.write(`
+  //         <div>
+  //           <h3>File preview</h3>
+  //           <p>This type of file (${mimeString}) may not display correctly in the browser.</p>
+  //           <a href="${blobUrl}" download="file">Download File</a>
+  //         </div>
+  //       `);
+  //     }
+      
+  //     newWindow.document.write(`
+  //           </div>
+  //         </body>
+  //       </html>
+  //     `);
+  //     newWindow.document.close();
+  //   } else {
+  //     alert("Pop-up blocked. Please allow pop-ups for this site to view the file.");
+  //   }
+  // } else {
+  //   // Handle Cloudinary URLs or other external URLs
+  //   if (!fileUrl) {
+  //     console.error("No file uploaded for this field");
+  //     return;
+  //   }
+
+  //   // Detect file type from URL
+  //   const urlLower = fileUrl.toLowerCase();
+  //   const isPDF = urlLower.includes('.pdf') || urlLower.includes('/raw/upload/');
+  //   const isImage = urlLower.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)/i);
+    
+  //   // Add cache-busting timestamp to prevent old file caching
+  //   const cacheBustedUrl = fileUrl.includes('?') ? `${fileUrl}&t=${Date.now()}` : `${fileUrl}?t=${Date.now()}`;
+    
+  //   // For PDFs from Cloudinary (raw uploads), open with proper handling
+  //   if (isPDF) {
+  //     const newWindow = window.open();
+  //     if (newWindow) {
+  //       newWindow.document.write(`
+  //         <html>
+  //           <head>
+  //             <title>PDF Preview</title>
+  //             <style>
+  //               body { margin: 0; padding: 0; overflow: hidden; }
+  //               iframe { border: none; width: 100vw; height: 100vh; }
+  //             </style>
+  //           </head>
+  //           <body>
+  //             <iframe src="${cacheBustedUrl}" type="application/pdf"></iframe>
+  //           </body>
+  //         </html>
+  //       `);
+  //       newWindow.document.close();
+  //     } else {
+  //       // Fallback: direct link
+  //       window.open(cacheBustedUrl, "_blank");
+  //     }
+  //   } else {
+  //     // For images and other files, open directly
+  //     window.open(cacheBustedUrl, "_blank");
+  //   }
+  // }
+    
+  // };
   
   // Validation removed - allow smooth navigation with optional fields
   // Backend will handle any required field validation on submission
