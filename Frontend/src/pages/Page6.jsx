@@ -116,7 +116,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
               delete dataToSave[k];
             }
           });
-          localStorage.setItem("formData", dataToSave);
+          localStorage.setItem("formData", JSON.stringify(dataToSave));
         } catch (error) {
           console.error('[Page6] Error saving to localStorage:', error);
         }
@@ -319,7 +319,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   )}
                   
-                  {formData.IOW511SelfImage && canViewColumn('self') && (
+                  {formData.IOW511SelfImage && (
                     <button
                       onClick={() => showImagePreview("IOW511Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -373,7 +373,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   )}
                   
-                  {formData.IOW512SelfImage && canViewColumn('self') && (
+                  {formData.IOW512SelfImage && (
                     <button
                       onClick={() => showImagePreview("IOW512Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -427,7 +427,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   )}
                   
-                  {formData.IOW513SelfImage && canViewColumn('self') && (
+                  {formData.IOW513SelfImage && (
                     <button
                       onClick={() => showImagePreview("IOW513Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -500,7 +500,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   )}
                   
-                  {formData.IOW521SelfImage && canViewColumn('self') && (
+                  {formData.IOW521SelfImage && (
                     <button
                       onClick={() => showImagePreview("IOW521Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -554,7 +554,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   )}
                   
-                  {formData.IOW522SelfImage && canViewColumn('self') && (
+                  {formData.IOW522SelfImage && (
                     <button
                       onClick={() => showImagePreview("IOW522Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -608,7 +608,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   )}
                   
-                  {formData.IOW523SelfImage && canViewColumn('self') && (
+                  {formData.IOW523SelfImage && (
                     <button
                       onClick={() => showImagePreview("IOW523Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -662,7 +662,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   )}
                   
-                  {formData.IOW524SelfImage && canViewColumn('self') && (
+                  {formData.IOW524SelfImage && (
                     <button
                       onClick={() => showImagePreview("IOW524Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -672,15 +672,17 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                   )}
                 </div>
             </td>
-            <td className="border border-gray-300 p-2">
-              <RoleBasedInput
-                fieldKey="IOW524HoD"
-                userRole={userRole}
-                formData={formData}
-                handleInputChange={handleInputChange}
-                className="border p-1 w-full"
-              />
-            </td>
+            {canViewColumn('hod') && (
+              <td className="border border-gray-300 p-2">
+                <RoleBasedInput
+                  fieldKey="IOW524HoD"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                  className="border p-1 w-full"
+                />
+              </td>
+            )}
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
                 fieldKey="IOW524External"
@@ -714,7 +716,7 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                     </div>
                   )}
                   
-                  {formData.IOW525SelfImage && canViewColumn('self') && (
+                  {formData.IOW525SelfImage && (
                     <button
                       onClick={() => showImagePreview("IOW525Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -724,15 +726,17 @@ const Page6 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                   )}
                 </div>
             </td>
-            <td className="border border-gray-300 p-2">
-              <RoleBasedInput
-                fieldKey="IOW525HoD"
-                userRole={userRole}
-                formData={formData}
-                handleInputChange={handleInputChange}
-                className="border p-1 w-full"
-              />
-            </td>
+            {canViewColumn('hod') && (
+              <td className="border border-gray-300 p-2">
+                <RoleBasedInput
+                  fieldKey="IOW525HoD"
+                  userRole={userRole}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                  className="border p-1 w-full"
+                />
+              </td>
+            )}
             <td className="border border-gray-300 p-2">
               <RoleBasedInput
                 fieldKey="IOW525External"

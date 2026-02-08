@@ -109,7 +109,7 @@ const Page4 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
               delete dataToSave[k];
             }
           });
-          localStorage.setItem("formData", dataToSave);
+          localStorage.setItem("formData", JSON.stringify(dataToSave));
         } catch (error) {
           console.error('[Page4] Error saving to localStorage:', error);
         }
@@ -207,7 +207,7 @@ const handleMultipleImageUpload = (e, key) => {
 
       // Save to localStorage
       try {
-        localStorage.setItem("formData", updatedData);
+        localStorage.setItem("formData", JSON.stringify(updatedData));
       } catch (error) {
         console.error('[Page4] Error saving to localStorage:', error);
       }
@@ -571,7 +571,7 @@ const handleMultipleImageUpload = (e, key) => {
                       </div>
                     )}
                     
-                    {formData.PDRC211SelfImage && canViewColumn('self') && (
+                    {formData.PDRC211SelfImage && (
                       <button
                         onClick={() => showImagePreview("PDRC211Self")}
                         className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -629,7 +629,7 @@ const handleMultipleImageUpload = (e, key) => {
                       </div>
                     )}
                     
-                    {formData.PDRC212SelfImage && canViewColumn('self') && (
+                    {formData.PDRC212SelfImage && (
                       <button
                         onClick={() => showImagePreview("PDRC212Self")}
                         className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -690,7 +690,7 @@ const handleMultipleImageUpload = (e, key) => {
                       </div>
                     )}
                     
-                    {formData.PDRC213SelfImage && canViewColumn('self') && (
+                    {formData.PDRC213SelfImage && (
                       <button
                         onClick={() => showImagePreview("PDRC213Self")}
                         className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -752,7 +752,7 @@ const handleMultipleImageUpload = (e, key) => {
                       </div>
                     )}
                     
-                    {formData.PDRC214SelfImage && canViewColumn('self') && (
+                    {formData.PDRC214SelfImage && (
                       <button
                         onClick={() => showImagePreview("PDRC214Self")}
                         className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -952,7 +952,7 @@ const handleMultipleImageUpload = (e, key) => {
                       </div>
                     )}
                     
-                    {formData.PDRC222SelfImage && canViewColumn('self') && (
+                    {formData.PDRC222SelfImage && (
                       <button
                         onClick={() => showImagePreview("PDRC222Self")}
                         className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -1024,7 +1024,7 @@ const handleMultipleImageUpload = (e, key) => {
                     </div>
                   )}
                   
-                  {formData.PDRC223SelfImage && canViewColumn('self') && (
+                  {formData.PDRC223SelfImage && (
                     <button
                       onClick={() => showImagePreview("PDRC223Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -1093,7 +1093,7 @@ const handleMultipleImageUpload = (e, key) => {
                     </div>
                   )}
                   
-                  {formData.PDRC224SelfImage && canViewColumn('self') && (
+                  {formData.PDRC224SelfImage && (
                     <button
                       onClick={() => showImagePreview("PDRC224Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -1169,7 +1169,7 @@ const handleMultipleImageUpload = (e, key) => {
                       )}
                     </div>
                   ) : (
-                    formData.PDRC225SelfImage && canViewColumn('self') && (
+                    formData.PDRC225SelfImage && (
                       <button
                         onClick={() => showImagePreview("PDRC225Self")}
                         className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -1236,7 +1236,7 @@ const handleMultipleImageUpload = (e, key) => {
                     </div>
                   )}
                   
-                  {formData.PDRC226SelfImage && canViewColumn('self') && (
+                  {formData.PDRC226SelfImage && (
                     <button
                       onClick={() => showImagePreview("PDRC226Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -1308,7 +1308,7 @@ const handleMultipleImageUpload = (e, key) => {
                     </div>
                   )}
                   
-                  {formData.PDRC227SelfImage && canViewColumn('self') && (
+                  {formData.PDRC227SelfImage && (
                     <button
                       onClick={() => showImagePreview("PDRC227Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -1416,7 +1416,7 @@ const handleMultipleImageUpload = (e, key) => {
                     </div>
                   )}
                   
-                  {formData.PDRC228SelfImage && canViewColumn('self') && (
+                  {formData.PDRC228SelfImage && (
                     <button
                       onClick={() => showImagePreview("PDRC228Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -1496,7 +1496,7 @@ const handleMultipleImageUpload = (e, key) => {
                     </div>
                   )}
                   
-                  {formData.PDRC229SelfImage && canViewColumn('self') && (
+                  {formData.PDRC229SelfImage && (
                     <button
                       onClick={() => showImagePreview("PDRC229Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"

@@ -93,7 +93,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
               delete dataToSave[k];
             }
           });
-          localStorage.setItem("formData", dataToSave);
+          localStorage.setItem("formData", JSON.stringify(dataToSave));
         } catch (error) {
           console.error('[Page3] Error saving to localStorage:', error);
         }
@@ -437,7 +437,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     </div>
                   )}
                   
-                  {formData.TLP111SelfImage && canViewColumn('self') && (
+                  {formData.TLP111SelfImage && (
                     <button
                       onClick={() => showImagePreview("TLP111Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -578,7 +578,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     </div>
                   )}
                   
-                  {formData.TLP112SelfImage && canViewColumn('self') && (
+                  {formData.TLP112SelfImage && (
                     <button
                       onClick={() => showImagePreview("TLP112Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -634,7 +634,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     </div>
                   )}
                   
-                  {formData.TLP113SelfImage && canViewColumn('self') && (
+                  {formData.TLP113SelfImage && (
                     <button
                       onClick={() => showImagePreview("TLP113Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -690,7 +690,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     </div>
                   )}
                   
-                  {formData.TLP114SelfImage && canViewColumn('self') && (
+                  {formData.TLP114SelfImage && (
                     <button
                       onClick={() => showImagePreview("TLP114Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -752,7 +752,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     </div>
                   )}
                   
-                  {formData.TLP115SelfImage && canViewColumn('self') && (
+                  {formData.TLP115SelfImage && (
                     <button
                       onClick={() => showImagePreview("TLP115Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -823,7 +823,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     </div>
                   )}
                   
-                  {formData.TLP116SelfImage && canViewColumn('self') && (
+                  {formData.TLP116SelfImage && (
                     <button
                       onClick={() => showImagePreview("TLP116Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -1035,7 +1035,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     </div>
                   )}
                   
-                  {formData.TLP121SelfImage && canViewColumn('self') && (
+                  {formData.TLP121SelfImage && (
                     <button
                       onClick={() => showImagePreview("TLP121Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -1212,7 +1212,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     </div>
                   )}
                   
-                  {formData.TLP122SelfImage && canViewColumn('self') && (
+                  {formData.TLP122SelfImage && (
                     <button
                       onClick={() => showImagePreview("TLP122Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -1392,7 +1392,7 @@ const Page3 = ({ formData, setFormData, onNext, onPrevious, isReadOnly, userRole
                     </div>
                   )}
                   
-                  {formData.TLP123SelfImage && canViewColumn('self') && (
+                  {formData.TLP123SelfImage && (
                     <button
                       onClick={() => showImagePreview("TLP123Self")}
                       className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"

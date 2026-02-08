@@ -87,7 +87,7 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
               delete dataToSave[k];
             }
           });
-          localStorage.setItem("formData", dataToSave);
+          localStorage.setItem("formData", JSON.stringify(dataToSave));
         } catch (error) {
           console.error('[Page5] Error saving to localStorage:', error);
         }
@@ -342,7 +342,7 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                 </div>
               )}
               
-              {formData[`CDL${row.no}SelfImage`] && canViewColumn('self') && (
+              {formData[`CDL${row.no}SelfImage`] && (
                 <button
                   onClick={() => showImagePreview(`CDL${row.no}Self`)}
                   className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
@@ -476,7 +476,7 @@ const Page5 = ({formData, setFormData, onNext, onPrevious,isReadOnly,userRole })
                                 </div>
                             )}
                             
-                            {formData.CIL4SelfImage && canViewColumn('self') && (
+                            {formData.CIL4SelfImage && (
                                 <button
                                     onClick={() => showImagePreview("CIL4Self")}
                                     className="bg-blue-500 text-white px-2 py-1 rounded text-xs mt-1"
