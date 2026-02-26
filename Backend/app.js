@@ -35,6 +35,25 @@ app.use(cors({
 // Serve uploaded documents (PDFs, docs, etc.)
 app.use('/uploads/documents', express.static('uploads/documents'));
 
+// Root endpoint - API info
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'AMS API Server',
+    version: '1.0',
+    status: 'running',
+    endpoints: {
+      api: '/app/*',
+      docs: '/uploads/documents/*'
+    }
+  });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ success: true, status: 'healthy', timestamp: new Date().toISOString() });
+});
+
 app.use("/app",router)
 
 
