@@ -12,11 +12,18 @@ export const generateOTP = () => {
 ========================= */
 const sendEmailViaResend = async (to, subject, html, text) => {
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  const FROM_EMAIL = process.env.EMAIL_FROM || process.env.FROM_EMAIL || 'onboarding@resend.dev';
+  // Updated to match your Render Environment Key
+  const FROM_EMAIL = process.env.EMAIL_FROM;
 
   if (!RESEND_API_KEY) {
     throw new Error('RESEND_API_KEY not configured');
   }
+
+  if (!FROM_EMAIL) {
+    throw new Error('EMAIL_FROM environment variable is missing in Render');
+  }
+
+  console.log(`📧 Sending email to: ${to}`);
 
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -25,9 +32,9 @@ const sendEmailViaResend = async (to, subject, html, text) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: FROM_EMAIL,
-      to: [to],
-      subject,
+      from: FROM_EMAIL, // Uses "AMS DSCE <no-reply@amsdsce.com>"
+      to: [to],        // Sends directly to the user's email
+      subject: subject,
       html,
       text,
     }),
@@ -48,11 +55,11 @@ export const sendOTPEmail = async (email, otp) => {
   try {
     const html = `
       <html>
-        <body style="font-family: Arial; background:#f4f4f4; padding:20px;">
-          <div style="max-width:600px; margin:auto; background:#fff; padding:30px; border-radius:10px;">
-            <h2>Email Verification</h2>
-            <p>Your OTP is:</p>
-            <div style="font-size:32px; font-weight:bold; letter-spacing:5px; color:#4F46E5;">
+        <body style="font-family: Arial, sans-serif; background:#f4f4f4; padding:20px;">
+          <div style="max-width:600px; margin:auto; background:#fff; padding:30px; border-radius:10px; border: 1px solid #ddd;">
+            <h2 style="color: #333;">Email Verification</h2>
+            <p>Your OTP for the Appraisal Management System is:</p>
+            <div style="font-size:32px; font-weight:bold; letter-spacing:5px; color:#4F46E5; padding: 10px 0;">
               ${otp}
             </div>
             <p><strong>Valid for 10 minutes.</strong></p>
@@ -62,12 +69,7 @@ export const sendOTPEmail = async (email, otp) => {
       </html>
     `;
 
-    const text = `
-Your OTP for account verification is: ${otp}
-
-Valid for 10 minutes.
-Do not share this code with anyone.
-    `;
+    const text = `Your OTP for account verification is: ${otp}. Valid for 10 minutes.`;
 
     const result = await sendEmailViaResend(
       email,
@@ -92,21 +94,17 @@ export const sendWelcomeEmail = async (email, role) => {
   try {
     const html = `
       <html>
-        <body style="font-family: Arial; background:#f4f4f4; padding:20px;">
-          <div style="max-width:600px; margin:auto; background:#fff; padding:30px; border-radius:10px;">
+        <body style="font-family: Arial, sans-serif; background:#f4f4f4; padding:20px;">
+          <div style="max-width:600px; margin:auto; background:#fff; padding:30px; border-radius:10px; border: 1px solid #ddd;">
             <h2>Welcome 🎉</h2>
-            <p>Your account has been created successfully.</p>
+            <p>Your account has been created successfully in the AMS DSCE system.</p>
             <p><strong>Role:</strong> ${role}</p>
           </div>
         </body>
       </html>
     `;
 
-    const text = `
-Welcome to Appraisal Management System!
-
-Your account has been successfully created with the role: ${role}.
-    `;
+    const text = `Welcome! Your account has been created with the role: ${role}.`;
 
     await sendEmailViaResend(
       email,
@@ -129,12 +127,12 @@ export const sendPasswordResetOTP = async (email, otp, role) => {
   try {
     const html = `
       <html>
-        <body style="font-family: Arial; background:#f4f4f4; padding:20px;">
-          <div style="max-width:600px; margin:auto; background:#fff; padding:30px; border-radius:10px;">
+        <body style="font-family: Arial, sans-serif; background:#f4f4f4; padding:20px;">
+          <div style="max-width:600px; margin:auto; background:#fff; padding:30px; border-radius:10px; border: 1px solid #ddd;">
             <h2>Password Reset Request 🔐</h2>
             <p>Account Role: <strong>${role}</strong></p>
             <p>Your OTP:</p>
-            <div style="font-size:32px; font-weight:bold; letter-spacing:5px; color:#DC2626;">
+            <div style="font-size:32px; font-weight:bold; letter-spacing:5px; color:#DC2626; padding: 10px 0;">
               ${otp}
             </div>
             <p><strong>Valid for 10 minutes.</strong></p>
@@ -146,14 +144,7 @@ export const sendPasswordResetOTP = async (email, otp, role) => {
       </html>
     `;
 
-    const text = `
-Password Reset OTP
-
-Your OTP: ${otp}
-Valid for 10 minutes.
-
-Do not share this code with anyone.
-    `;
+    const text = `Your Password Reset OTP: ${otp}. Valid for 10 minutes.`;
 
     const result = await sendEmailViaResend(
       email,
