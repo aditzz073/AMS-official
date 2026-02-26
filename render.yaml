@@ -39,7 +39,7 @@ services:
     staticPublishPath: ./Frontend/dist
     envVars:
       - key: VITE_API_URL
-        sync: false
+        value: https://api.amsdsce.com/app
     routes:
       - type: rewrite
         source: /*
