@@ -13,14 +13,14 @@ export const generateOTP = () => {
 const sendEmailViaResend = async (to, subject, html, text) => {
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   // Updated to match your Render Environment Key
-  const FROM_EMAIL = process.env.EMAIL_FROM;
+  const FROM_EMAIL = process.env.FROM_EMAIL;
 
   if (!RESEND_API_KEY) {
     throw new Error('RESEND_API_KEY not configured');
   }
 
   if (!FROM_EMAIL) {
-    throw new Error('EMAIL_FROM environment variable is missing in Render');
+    throw new Error('FROM_EMAIL environment variable is missing');
   }
 
   console.log(`📧 Sending email to: ${to}`);
@@ -82,8 +82,9 @@ export const sendOTPEmail = async (email, otp) => {
 
     return { success: true, messageId: result.id };
   } catch (error) {
+    console.error('❌ OTP email error (full):', error.message);
     logger.error('Email sending error', error);
-    throw new Error('Failed to send OTP email');
+    throw new Error(`Failed to send OTP email: ${error.message}`);
   }
 };
 
@@ -157,7 +158,8 @@ export const sendPasswordResetOTP = async (email, otp, role) => {
 
     return { success: true, messageId: result.id };
   } catch (error) {
+    console.error('❌ Password reset email error (full):', error.message);
     logger.error('Password reset email error', error);
-    throw new Error('Failed to send password reset email');
+    throw new Error(`Failed to send password reset email: ${error.message}`);
   }
 };
