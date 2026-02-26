@@ -12,19 +12,10 @@ export const generateOTP = () => {
 ========================= */
 const sendEmailViaResend = async (to, subject, html, text) => {
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev';
-  const VERIFIED_EMAIL = process.env.SMTP_EMAIL;
+  const FROM_EMAIL = process.env.EMAIL_FROM || process.env.FROM_EMAIL || 'onboarding@resend.dev';
 
   if (!RESEND_API_KEY) {
     throw new Error('RESEND_API_KEY not configured');
-  }
-
-  const actualRecipient = to;
-  const testRecipient = VERIFIED_EMAIL || to;
-
-  console.log(`📧 Email intended for: ${actualRecipient}`);
-  if (actualRecipient !== testRecipient) {
-    console.log(`📧 Redirected to verified email: ${testRecipient}`);
   }
 
   const response = await fetch('https://api.resend.com/emails', {
@@ -35,8 +26,8 @@ const sendEmailViaResend = async (to, subject, html, text) => {
     },
     body: JSON.stringify({
       from: FROM_EMAIL,
-      to: [testRecipient],
-      subject: `[For: ${actualRecipient}] ${subject}`,
+      to: [to],
+      subject,
       html,
       text,
     }),
