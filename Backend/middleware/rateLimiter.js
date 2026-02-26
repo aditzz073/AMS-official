@@ -1,6 +1,6 @@
 // Rate limiting middleware for authentication routes
 // Configured for 200+ concurrent users
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 // Strict rate limiter for login attempts (prevent brute force)
 // Allows failed attempts only - successful logins don't count
@@ -43,7 +43,7 @@ export const otpLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req) => {
     // Rate limit by email instead of IP to allow multiple users from same network
-    return req.body.email || req.ip;
+    return req.body.email || ipKeyGenerator(req);
   }
 });
 
@@ -59,7 +59,7 @@ export const passwordResetLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req) => {
     // Rate limit by email to allow multiple users from same network
-    return req.body.email || req.ip;
+    return req.body.email || ipKeyGenerator(req);
   }
 });
 
