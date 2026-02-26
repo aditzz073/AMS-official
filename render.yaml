@@ -17,7 +17,7 @@ services:
       - key: JWT_SECRET
         sync: false
       - key: CLIENT_URL
-        sync: false
+        value: https://amsdsce.com,https://www.amsdsce.com
       - key: CLOUDINARY_NAME
         sync: false
       - key: CLOUDINARY_KEY

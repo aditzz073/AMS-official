@@ -14,7 +14,7 @@ app.use(express.json({ limit: "50mb" }))
 app.use(cookieParser()) 
 app.use(express.urlencoded({ limit: "50mb", extended: true }))
 
-// CORS Configuration - supports multiple origins (comma-separated in CLIENT_URL)
+// CORS Configuration - supports multiple origins
 const allowedOrigins = process.env.CLIENT_URL ? 
   process.env.CLIENT_URL.split(',').map(origin => origin.trim()) : 
   ['http://localhost:5173'];
@@ -29,6 +29,7 @@ app.use(cors({
             callback(new Error('Not allowed by CORS'));
         }
     },
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 })) 
 
