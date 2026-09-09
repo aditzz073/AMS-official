@@ -41,7 +41,6 @@ services:
   - type: web
     name: ams-frontend
     env: static
-    plan: free
     buildCommand: cd Frontend && npm install && npm run build
     staticPublishPath: ./Frontend/dist
     envVars:
