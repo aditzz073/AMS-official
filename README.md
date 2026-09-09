@@ -94,6 +94,7 @@ CLOUDINARY_SECRET=your_cloudinary_secret
 ```
 
 **Generate Strong JWT_SECRET:**
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
@@ -119,6 +120,7 @@ VITE_API_URL=https://your-production-backend.com/app
 ### Development Mode
 
 **Backend (Terminal 1):**
+
 ```bash
 cd Backend
 npm start
@@ -126,6 +128,7 @@ npm start
 ```
 
 **Frontend (Terminal 2):**
+
 ```bash
 cd Frontend
 npm run dev
@@ -135,6 +138,7 @@ npm run dev
 ### Production Build
 
 **Frontend:**
+
 ```bash
 cd Frontend
 npm run build
@@ -142,6 +146,7 @@ npm run build
 ```
 
 **Backend:**
+
 ```bash
 cd Backend
 NODE_ENV=production node server.js
@@ -151,61 +156,61 @@ NODE_ENV=production node server.js
 
 ### Authentication Endpoints
 
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | `/app/signup` | Register new user | Public |
-| POST | `/app/login` | User login | Public |
-| POST | `/app/logout` | User logout | Protected |
+| Method | Endpoint      | Description       | Access    |
+| ------ | ------------- | ----------------- | --------- |
+| POST   | `/app/signup` | Register new user | Public    |
+| POST   | `/app/login`  | User login        | Public    |
+| POST   | `/app/logout` | User logout       | Protected |
 
 ### OTP Verification Endpoints
 
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | `/app/auth/request-otp` | Request email OTP | Public |
-| POST | `/app/auth/verify-otp` | Verify email OTP | Public |
-| POST | `/app/auth/resend-otp` | Resend OTP | Public |
+| Method | Endpoint                 | Description        | Access |
+| ------ | ------------------------ | ------------------- | ------ |
+| POST   | `/app/auth/request-otp`  | Request email OTP   | Public |
+| POST   | `/app/auth/verify-otp`   | Verify email OTP    | Public |
+| POST   | `/app/auth/resend-otp`   | Resend OTP          | Public |
 
 ### Password Reset Endpoints
 
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | `/app/auth/forgot-password` | Request password reset | Public |
-| POST | `/app/auth/verify-reset-otp` | Verify reset OTP | Public |
-| POST | `/app/auth/reset-password` | Reset password | Public |
-| POST | `/app/auth/resend-reset-otp` | Resend reset OTP | Public |
+| Method | Endpoint                      | Description             | Access |
+| ------ | ------------------------------ | ------------------------ | ------ |
+| POST   | `/app/auth/forgot-password`    | Request password reset   | Public |
+| POST   | `/app/auth/verify-reset-otp`   | Verify reset OTP         | Public |
+| POST   | `/app/auth/reset-password`     | Reset password           | Public |
+| POST   | `/app/auth/resend-reset-otp`   | Resend reset OTP         | Public |
 
 ### Evaluation Data Endpoints
 
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | `/app/addData` | Create/Update evaluation | Protected |
-| GET | `/app/getData/:id` | Get evaluation by email/code | Protected |
-| GET | `/app/getEmpCode` | Get all employee codes | Protected |
-| POST | `/app/total` | Calculate category totals | Protected |
+| Method | Endpoint            | Description                    | Access    |
+| ------ | ------------------- | ------------------------------- | --------- |
+| POST   | `/app/addData`      | Create/Update evaluation        | Protected |
+| GET    | `/app/getData/:id`  | Get evaluation by email/code    | Protected |
+| GET    | `/app/getEmpCode`   | Get all employee codes          | Protected |
+| POST   | `/app/total`        | Calculate category totals       | Protected |
 
 ### Basic Info Endpoints
 
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/app/basicInfo` | Get current user's info | Protected |
-| PUT | `/app/basicInfo` | Update basic info | Protected (Faculty only) |
-| GET | `/app/basicInfo/:identifier` | Get info by email/code | Protected (HOD/External/Admin) |
+| Method | Endpoint                      | Description               | Access                          |
+| ------ | ------------------------------ | -------------------------- | -------------------------------- |
+| GET    | `/app/basicInfo`               | Get current user's info    | Protected                        |
+| PUT    | `/app/basicInfo`               | Update basic info          | Protected (Faculty only)         |
+| GET    | `/app/basicInfo/:identifier`   | Get info by email/code     | Protected (HOD/External/Admin)   |
 
 ### Remarks Endpoints
 
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/app/remarks/:employeeCode` | Get section remarks | Protected |
-| PUT | `/app/remarks/:employeeCode` | Update single remark | Protected (HOD/External/Admin) |
-| PUT | `/app/remarks/:employeeCode/bulk` | Bulk update remarks | Protected (HOD/External/Admin) |
+| Method | Endpoint                            | Description            | Access                          |
+| ------ | ------------------------------------ | ------------------------ | -------------------------------- |
+| GET    | `/app/remarks/:employeeCode`         | Get section remarks      | Protected                        |
+| PUT    | `/app/remarks/:employeeCode`         | Update single remark     | Protected (HOD/External/Admin)   |
+| PUT    | `/app/remarks/:employeeCode/bulk`    | Bulk update remarks      | Protected (HOD/External/Admin)   |
 
 ### Admin Endpoints
 
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/app/admin/login-logs` | Get all login logs | Admin Only |
-| GET | `/app/admin/login-stats` | Get login statistics | Admin Only |
-| POST | `/app/admin/close-stale-sessions` | Close stale sessions | Admin Only |
+| Method | Endpoint                             | Description            | Access     |
+| ------ | -------------------------------------- | ------------------------ | ---------- |
+| GET    | `/app/admin/login-logs`                | Get all login logs       | Admin Only |
+| GET    | `/app/admin/login-stats`               | Get login statistics     | Admin Only |
+| POST   | `/app/admin/close-stale-sessions`      | Close stale sessions     | Admin Only |
 
 ## 🚀 Deployment
 
@@ -213,6 +218,7 @@ NODE_ENV=production node server.js
 
 1. **Set Environment Variables** in your hosting platform
 2. **Update `package.json` start script:**
+
    ```json
    {
      "scripts": {
@@ -220,15 +226,18 @@ NODE_ENV=production node server.js
      }
    }
    ```
+
 3. **Deploy** and note your backend URL
 
 ### Frontend Deployment (Example: Vercel/Netlify)
 
 1. **Update `.env.production`** with your backend URL
 2. **Build the project:**
+
    ```bash
    npm run build
    ```
+
 3. **Deploy** the `dist` folder
 4. **Update Backend `.env`** with your frontend URL in `CLIENT_URL`
 
@@ -252,41 +261,43 @@ mini_project_25/
 ├── Backend/
 │   ├── controller/         # Request handlers
 │   ├── middleware/         # Auth, rate limiting, multer
-│   ├── model/             # Mongoose schemas
-│   ├── routers/           # API routes
-│   ├── utils/             # Email, validation, security
-│   ├── config/            # Configuration files
-│   ├── uploads/           # Temporary file uploads
-│   ├── app.js             # Express app setup
-│   ├── server.js          # Server entry point
-│   └── dbConnect.js       # Database connection
+│   ├── model/              # Mongoose schemas
+│   ├── routers/            # API routes
+│   ├── utils/              # Email, validation, security
+│   ├── config/              # Configuration files
+│   ├── uploads/            # Temporary file uploads
+│   ├── app.js               # Express app setup
+│   ├── server.js            # Server entry point
+│   └── dbConnect.js         # Database connection
 │
 ├── Frontend/
 │   ├── src/
-│   │   ├── assets/        # Images, static files
-│   │   ├── components/    # Reusable React components
-│   │   ├── contexts/      # React contexts
-│   │   ├── helper/        # Axios instance
-│   │   ├── hooks/         # Custom React hooks
-│   │   ├── pages/         # Page components (Page0-Page7)
-│   │   ├── redux/         # Redux store & slices
-│   │   ├── utils/         # PDF generation, validators
-│   │   ├── App.jsx        # Main app component
-│   │   └── main.jsx       # React entry point
-│   └── public/            # Public assets
+│   │   ├── assets/          # Images, static files
+│   │   ├── components/      # Reusable React components
+│   │   ├── contexts/        # React contexts
+│   │   ├── helper/          # Axios instance
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── pages/           # Page components (Page0-Page7)
+│   │   ├── redux/           # Redux store & slices
+│   │   ├── utils/           # PDF generation, validators
+│   │   ├── App.jsx          # Main app component
+│   │   └── main.jsx         # React entry point
+│   └── public/               # Public assets
 │
-└── docs/                  # Documentation files
+└── docs/                     # Documentation files
 ```
 
 ## 🔒 Security Features
 
 ### Authentication & Authorization
+
 - JWT-based authentication with role-based expiration
 - Secure password hashing (bcrypt with 10 salt rounds)
 - Role-based access control (RBAC) with 5 distinct roles
 - Email domain restriction (@dayanandasagar.edu)
 
 ### Rate Limiting (200+ concurrent users supported)
+
 - Login: 10 attempts per 15 minutes
 - API: 500 requests per 15 minutes
 - OTP: 5 requests per hour (per email)
@@ -294,6 +305,7 @@ mini_project_25/
 - Admin: 200 requests per 15 minutes
 
 ### Data Protection
+
 - HTTPS-only cookies in production
 - Secure file upload with Cloudinary
 - PII masking in security logs
@@ -301,6 +313,7 @@ mini_project_25/
 - MongoDB injection prevention
 
 ### Monitoring & Logging
+
 - Login activity tracking with IP and user agent
 - Session duration monitoring
 - Security event logging
@@ -308,28 +321,31 @@ mini_project_25/
 
 ## 👥 User Roles
 
-| Role | Permissions |
-|------|-------------|
-| **Faculty** | Edit own evaluation data, view own results |
-| **HOD** | View all department faculty, add HOD scores and section remarks |
-| **External Auditor** | View assigned faculty, add external scores and remarks (cannot see HOD scores) |
-| **Principal** | View all evaluations, add final remarks |
-| **Admin** | Full system access, manage users, view login logs, read-only on evaluations |
+| Role                  | Permissions                                                                    |
+| --------------------- | -------------------------------------------------------------------------------|
+| **Faculty**           | Edit own evaluation data, view own results                                    |
+| **HOD**               | View all department faculty, add HOD scores and section remarks               |
+| **External Auditor**  | View assigned faculty, add external scores and remarks (cannot see HOD scores)|
+| **Principal**         | View all evaluations, add final remarks                                       |
+| **Admin**             | Full system access, manage users, view login logs, read-only on evaluations   |
 
 ## 🧪 Testing
 
 **Backend Syntax Check:**
+
 ```bash
 cd Backend
 node --check server.js
 ```
 
 **Run Security Audit:**
+
 ```bash
 npm audit
 ```
 
 **Frontend Build Test:**
+
 ```bash
 cd Frontend
 npm run build
@@ -338,6 +354,7 @@ npm run build
 ## 📞 Support
 
 For issues and questions:
+
 - **Repository**: [AMS-official](https://github.com/aditzz073/AMS-official)
 - **Documentation**: See `/docs` folder for detailed guides
 
@@ -353,5 +370,5 @@ This project is for academic use at Dayananda Sagar College of Engineering.
 
 ---
 
-**Version**: 1.0.0  
+**Version**: 1.0.0
 **Last Updated**: December 2025
