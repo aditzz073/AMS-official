@@ -138,6 +138,8 @@ const App = () => {
 
   useEffect(() => {
     // Save formData to localStorage, converting File objects to data URLs for persistence
+    let cancelled = false;
+
     const saveFormData = async () => {
       try {
         const dataForStorage = { ...formData };
@@ -166,6 +168,10 @@ const App = () => {
             }
           }
         }
+
+        // A newer formData snapshot may have started saving while files were
+        // being converted. Do not let this older snapshot overwrite it.
+        if (cancelled) return;
         
         localStorage.setItem("formData", JSON.stringify(dataForStorage));
         
@@ -181,6 +187,10 @@ const App = () => {
     };
     
     saveFormData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [formData]);
 
   // Save currentPage to localStorage whenever it changes

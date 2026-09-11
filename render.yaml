@@ -38,9 +38,8 @@ services:
         sync: false
 
   # Frontend Service (Static Site)
-  - type: web
+  - type: static
     name: ams-frontend
-    env: static
     buildCommand: cd Frontend && npm install && npm run build
     staticPublishPath: ./Frontend/dist
     envVars:
